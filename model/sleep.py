@@ -7,8 +7,8 @@ Two-process model (Borbely 1982). How sleepy you are comes from two processes:
         awake:   dS/dt = (1 - S) / tau_w      fills toward 1, tau_w = 18.2 h
         asleep:  dS/dt = -S / tau_s           drains toward 0, tau_s = 4.2 h
 
-    Process C, the body clock:
-        C(t) = A * cos(2*pi * (t - t_peak) / 24)      A = 0.15, t_peak = 5 PM
+    Body clock (Process C in Borbely's paper):
+        B(t) = A * cos(2*pi * (t - t_peak) / 24)      A = 0.15, t_peak = 5 PM
 
 S carries over from one day to the next, so a short night leaves you starting
 the next day higher. That is how sleep debt shows up.

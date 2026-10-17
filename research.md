@@ -15,10 +15,11 @@ The formula gives the caffeine level in your blood, C(t) in mg/L, at time t afte
 - V: volume of distribution, 0.6 L/kg times your weight
 - ke: how fast your body gets rid of caffeine, per hour
   - Derived from your half-life: ke = ln(2) / half-life, so 0.139 per hour for a 5 h half-life
-  - The half-life starts at 5 h and is adjusted for smoker and oral contraceptives
-  - Layer 5 changes the half-life based on your alertness ratings
+  - The half-life starts at 5 h and is adjusted for smoker and oral contraceptives in the short urn
+  - Layer 5 changes the half-life based on your alertness ratings in thee long run
 - ka: how fast caffeine gets from your stomach into your blood
   - Constant, 4 per hour (`KA_PER_H`)
+  - In reality ka varies with food, drink type and how fast someone drinks. We use one value for every drink as a simplification.
 
 Code: `model/pk.py`, constants in `model/params.py`. Equations: `equations/layer-1-pk.md`.
 

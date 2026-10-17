@@ -29,9 +29,9 @@ Implementation: both equations are the exact solutions of dS/dt = (1 - S)/tau_w 
 
 ## 3. Circadian alertness
 
-    C(t) = A * cos(2*pi * (t - t_peak) / 24)
+    B(t) = A * cos(2*pi * (t - t_peak) / 24)
 
-- C: body-clock alertness offset
+- B: body-clock alertness offset
 - A = 0.15: amplitude
 - t_peak = 17 (5 PM) by default: hour of peak alertness; chronotype shifts it by -2 / 0 / +2 h
 - 24: period in hours

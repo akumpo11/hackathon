@@ -38,9 +38,9 @@ Process S (homeostatic sleep pressure, normalized 0..1):
     awake:   S(t) = 1 - (1 - S0) * exp(-t / tau_w)     tau_w = 18.2 h
     asleep:  S(t) = S0 * exp(-t / tau_s)                tau_s = 4.2 h
 
-Process C (circadian alertness):
+Body clock (Process C in Borbely's paper; we call it B so it is not confused with the caffeine level C):
 
-    C_circ(t) = A * cos(2*pi * (t - t_peak) / 24)       A ~ 0.15, t_peak ~ 5 PM (shift by chronotype)
+    B(t) = A * cos(2*pi * (t - t_peak) / 24)       A ~ 0.15, t_peak ~ 5 PM (shift by chronotype)
 
 Integrate S across the whole sleep history you entered, so short sleep carries debt into the next day. This is the "sleep correlation" feature.
 
