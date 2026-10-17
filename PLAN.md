@@ -213,7 +213,6 @@ Owners (team of 3, details in TASKS.md):
 2. "Vicious cycle" view: late caffeine -> delayed sleep -> more pressure tomorrow -> more caffeine. Plot two days.
 3. Uncertainty band from the posterior (tiny code, looks rigorous).
 4. Calendar export (.ics) of the dose plan. Twenty lines, delightful.
-5. Room mode: visitors scan the QR, submit their plan, a shared chart overlays everyone's caffeine curves ("the room's collective caffeine level"). Needs a tiny backend (Supabase or Firebase). Only if ahead of schedule on Sunday morning.
-6. Sensitivity readout: "your plan is most sensitive to half-life; a 1 h error shifts the peak by 12 min". Numerical derivative of the objective.
-7. Chronotype quiz (3 questions) that shifts the circadian phase.
-8. Safety checks: over 400 mg/day warning, anxiety threshold note, "not medical advice" footer.
+5. Sensitivity readout: "your plan is most sensitive to half-life; a 1 h error shifts the peak by 12 min". Numerical derivative of the objective.
+6. Chronotype quiz (3 questions) that shifts the circadian phase.
+7. Safety checks: over 400 mg/day warning, anxiety threshold note, "not medical advice" footer.

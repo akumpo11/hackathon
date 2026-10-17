@@ -12,10 +12,10 @@ Why Python for the model: judges weight understanding at 30%, and the math is th
 
 ## Update, Saturday afternoon: who is actually doing what
 
-Reality: one teammate is prototyping a frontend (not Streamlit), one is setting up Supabase, and Andrew is unassigned. Mapping onto the roles below:
+Reality: one teammate is prototyping a frontend (not Streamlit), one is on the calculations, and Andrew is unassigned. Mapping onto the roles below:
 
 - Frontend teammate = Person C, minus Streamlit. They build whatever they are prototyping, against the JSON contract below.
-- Supabase teammate = Person A: `pk.py`, `optimizer.py`, later `learn.py`, after a 30-minute Supabase table setup. See "About Supabase".
+- Calculations teammate = Person A: `pk.py`, `optimizer.py`, later `learn.py`.
 - Andrew = Person B (`sleep.py`, `alertness.py`, `tolerance.py`) plus the glue: `types.py`, `params.py`, the FastAPI layer in `api.py`, and the sample JSON the frontend builds against. Being the glue is the right job for the person who has read the whole plan.
 
 ### The one change to the workflow: an API boundary
@@ -68,56 +68,11 @@ Response:
 
 The frontend should not wait for the model. Andrew writes `sample/plan_response.json` by hand right now, matching the response above with a plausible curve (50 points is enough), and commits it. The frontend renders that file until the real endpoint exists, then swaps the URL. Same for `sample/reset_response.json` tonight.
 
-### About Supabase
+### Storage: none
 
-Supabase is hosted Postgres plus a JavaScript client, auth, and realtime subscriptions. It is a place to store and share data, not a place to run Python. Its only compute option is Edge Functions, which are TypeScript, so putting the calculations there would move the math out of Python and undo the reason we chose Python. Do not do that.
+The model is stateless. Every request carries everything it needs and every answer is recomputed from formulas, so Tier 1 and Tier 2 store nothing. No database, no hosted backend service.
 
-The split that works:
-
-- Python FastAPI (`api.py` + `model/`) is the compute layer. Stateless. Every request carries everything it needs.
-- Supabase is the persistence and realtime layer. The frontend talks to it directly with the JS client. The Python side never needs to talk to Supabase at all, because the frontend passes any stored data (ratings, profile) along in the request.
-
-Data flow:
-
-    frontend --POST /api/plan--> FastAPI --> response --> frontend draws it, then inserts it into Supabase `plans`
-    frontend --insert--> Supabase `ratings`
-    frontend --select ratings--> POST /api/learn --> FastAPI --> posterior --> frontend draws the heatmap
-    room dashboard --realtime subscribe on `plans`--> overlays everyone's curves as they arrive
-
-Three tables, created in the Supabase dashboard in 30 minutes. For the hackathon, use the anon key with permissive row-level-security policies (or RLS off) and no auth; say so in the README.
-
-```sql
-create table profiles (
-  id uuid primary key default gen_random_uuid(),
-  name text,
-  weight_kg float, half_life_h float, kd_mg_l float,
-  habitual_mg_per_day float, habit_weeks float,
-  created_at timestamptz default now()
-);
-create table ratings (
-  id bigint generated always as identity primary key,
-  profile_id uuid references profiles(id),
-  t_h float not null,          -- decimal hours, same convention as the model
-  score int not null check (score between 1 and 5),
-  created_at timestamptz default now()
-);
-create table plans (
-  id bigint generated always as identity primary key,
-  profile_id uuid references profiles(id),
-  request jsonb not null,      -- the /api/plan request body
-  response jsonb not null,     -- the /api/plan response, including the curve
-  created_at timestamptz default now()
-);
-```
-
-What Supabase buys, by tier:
-- Tier 1 and 2: nothing. The plan is computed and drawn without it. Saving the plan to `plans` is a nice-to-have.
-- Tier 3: `ratings` persists across days so the posterior can keep learning. Real value, small effort.
-- Room mode (the "everyone in the room will try it" pitch): `plans` plus a realtime subscription gives a live dashboard of every visitor's caffeine curve. This is the one feature Supabase makes cheap, and it is a strong demo closer. Sunday morning, only if Tier 1 and 2 are solid.
-
-Time budget for the Supabase teammate: 30 minutes to create the tables and paste the anon key into the frontend, then straight to `pk.py` and the optimizer. The math modules are the Application of Mathematics points and they are not written yet. Room-mode realtime is Sunday morning.
-
-Judge question to expect: "why Supabase?" Answer: persistence for the learning loop and realtime for the room dashboard; all the math runs in Python and you can see it in `model/`.
+Tier 3 ratings need to persist between visits. Keep them in the browser's local storage on the frontend and send them along with each `/api/learn` request. If a shared store is ever needed, Python's built-in `sqlite3` with one table `ratings(user_id, t_h, score)` is enough and takes ten lines. Decide that on Sunday, not now.
 
 ### Deployment with a separate frontend
 
