@@ -5,7 +5,7 @@
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { initSleepCalendar } from "./sleepcal.js";
-import { publish } from "./shared.js";
+import { publish, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -45,7 +45,7 @@ function draw(blocks) {
 export async function startLayer2() {
   const cal = initSleepCalendar($("sleepCal"), draw);
   $("layer2Inputs").addEventListener("change", () => draw(cal.getBlocks()));
-  window.addEventListener("resize", () => draw(cal.getBlocks()));
+  onWidthChange(() => draw(cal.getBlocks()));
 
   const pyodide = await loadPython();
   compute = pyodide.pyimport("layer2_bridge").compute;

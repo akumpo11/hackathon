@@ -5,7 +5,7 @@ import { clockToHours, hoursToClock } from "./api.js";
 import { areaChart } from "./charts.js";
 import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
-import { publish } from "./shared.js";
+import { publish, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -107,7 +107,7 @@ export async function startLayer1() {
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
   });
-  form.addEventListener("input", update);
-  window.addEventListener("resize", update);
+  form.addEventListener("input", perFrame(update));
+  onWidthChange(update);
   update();
 }
