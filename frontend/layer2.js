@@ -2,6 +2,7 @@
 // sleep pressure (S) and the circadian wave (C) over the five days.
 // The math runs in model/sleep.py (in the browser via Pyodide); this file only draws.
 
+import { clockToHours } from "./time.js";
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { initSleepCalendar } from "./sleepcal.js";
@@ -43,15 +44,28 @@ function draw(blocks) {
   });
 }
 
+// Your usual night from personal settings, in model hours.
+const usualSleep = (s) => ({ bedtimeH: clockToHours(s.bedtime), wakeH: clockToHours(s.wakeTime) });
+
 export async function startLayer2() {
-  const cal = initSleepCalendar($("sleepCal"), draw);
+  const cal = initSleepCalendar($("sleepCal"), draw, usualSleep(shared.settings));
   onWidthChange(() => draw(cal.getBlocks()));
   // Redraw when personal settings change. Only then: draw() publishes too, and
   // reacting to its own publish would loop forever.
-  let seenSettings = shared.settings;
+  let seenSettings = shared.settings, seenLayer5 = shared.layer5;
   onShared(() => {
+    // Layer 5's event: shade it on the calendar so you can see your sleep around it.
+    if (shared.layer5 !== seenLayer5) {
+      seenLayer5 = shared.layer5;
+      cal.setEvent(shared.layer5.event.startH, shared.layer5.event.endH);
+    }
     if (shared.settings === seenSettings) return;
+    const before = seenSettings;
     seenSettings = shared.settings;
+    // A new usual bedtime or wake time refills the calendar. Other settings keep your painted nights.
+    if (shared.settings.bedtime !== before.bedtime || shared.settings.wakeTime !== before.wakeTime) {
+      cal.setUsual(usualSleep(shared.settings));
+    }
     draw(cal.getBlocks());
   });
 

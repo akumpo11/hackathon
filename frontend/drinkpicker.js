@@ -3,7 +3,7 @@
 // (drink0, drink1, ...), so layer1.js reads it exactly like a form field.
 // No math here: the drink list and caffeine amounts come from model/params.py.
 
-import { clockToHours, hoursToClock } from "./api.js";
+import { clockToHours, hoursToClock } from "./time.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -79,7 +79,7 @@ export function initDrinkPicker(form, drinks, onChange) {
     openSlot = Number(button.dataset.slot);
     opener = button;
     const time = hoursToClock(clockToHours(form.elements[`time${openSlot}`].value));
-    $("drinkSheetNote").textContent = `For your ${time} drink. The number on each drink is its caffeine.`;
+    $("drinkSheetNote").textContent = `For your ${time} drink.`;
     grid.innerHTML = ["", ...Object.keys(drinks)].map(tile).join("");
     sheet.hidden = false;
     scrim.hidden = false;

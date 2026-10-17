@@ -172,11 +172,12 @@ export function heatmap(svg, { prob, xs, ys, mark }) {
     const my = s.bottom - ((mark.y - ys[0]) / (ys[ys.length - 1] - ys[0])) * (s.bottom - s.top - ch) - ch / 2;
     el("circle", { cx: mx, cy: my, r: 6, fill: "none", stroke: css("--ink"), "stroke-width": 2.5 }, svg);
   }
-  for (let v = 3; v <= 8; v++) {
+  // Labels on whole numbers inside the grid's range: every 2 h up the side, every 1 mg/L along the bottom.
+  for (let v = Math.ceil(ys[0]); v <= ys[ys.length - 1]; v += 2) {
     const yy = s.bottom - ((v - ys[0]) / (ys[ys.length - 1] - ys[0])) * (s.bottom - s.top - ch) - ch / 2;
     el("text", { x: 18, y: yy + 3.5, "text-anchor": "end" }, svg).textContent = `${v}h`;
   }
-  for (let v = 1; v <= 6; v++) {
+  for (let v = Math.ceil(xs[0]); v <= xs[xs.length - 1]; v++) {
     const xx = s.left + ((v - xs[0]) / (xs[xs.length - 1] - xs[0])) * (s.right - s.left - cw) + cw / 2;
     el("text", { x: xx, y: s.H - 4, "text-anchor": "middle" }, svg).textContent = v;
   }

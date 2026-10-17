@@ -164,8 +164,9 @@ One page for the values that describe you, so you don't re-enter them on every l
 | Weight, half-life, smoker, oral contraceptives | Layer 1, "Your body" | `weightKg`, `halfLifeH` (after `adjustedHalfLifeH`) |
 | Body clock: morning person, in between, night owl | Layer 2, "Body clock" | `circadianPeakH` = 17 - 2, 17 or 17 + 2 |
 | Usual caffeine a day, for how long | Layer 3, "Your habit" | `habitualMgPerDay`, `habitWeeks` |
+| Usual bedtime and wake time | New (CLAUDE.md's "sleep schedule" input) | not in `Profile`: layer 1's bedtime and layer 2's sleep calendar start from them |
 
-Stays on the layer pages, because it is about the day, not the person: drinks and their times, bedtime and the sleep calendar, and the exam date (which belongs with the event inputs). Kd stays at the `Profile` default until layer 5 learns it. The layer pages keep showing these values as read-only rows tagged "Settings", the same way layer 4 shows what it took from layers 1 to 3.
+Stays on the layer pages, because it is about the day, not the person: drinks and their times, tonight's bedtime and the sleep calendar (both prefilled from your usual sleep), and the exam date (which belongs with the event inputs). Kd stays at the `Profile` default until layer 5 learns it. The layer pages keep showing these values as read-only rows tagged "Settings", the same way layer 4 shows what it took from layers 1 to 3.
 
 Signing up on a new device asks for these same values, so the sign-up form is the settings form in a first-run mode (TASKS.md N11).
 

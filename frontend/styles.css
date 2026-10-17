@@ -56,7 +56,7 @@ body { background: var(--canvas); -webkit-font-smoothing: antialiased; overscrol
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; }
 :focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
-.tab svg path, .icon-btn svg path, .avatar svg path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab svg path, .icon-btn svg path, .info-btn svg path, .avatar svg path, .field-name svg path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Device: full screen on a phone, a phone frame on a laptop ---------- */
 .device { position: relative; height: 100dvh; overflow: clip; background: var(--canvas); }
@@ -129,6 +129,22 @@ button { cursor: pointer; border: 0; background: none; }
 .card { background: var(--card); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 12px; }
 .card h2 { font-size: 16px; font-weight: 700; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+
+/* (i) buttons: short captions stay on screen, the long explanation opens on tap (info.js). */
+.info-btn {
+  display: inline-grid; place-items: center; vertical-align: middle;
+  width: 30px; height: 30px; margin: -6px 0 -6px -2px; border-radius: 50%;   /* a big tap target that doesn't push the heading around */
+  color: var(--muted);
+}
+.card h2:has(.info-btn) { display: flex; align-items: center; }   /* if a long title wraps, the (i) stays beside it */
+.info-btn svg { width: 17px; height: 17px; }
+.info-btn[aria-expanded="true"] { color: var(--accent-ink); }
+.info-pop {
+  margin: 8px 0 10px; padding: 10px 12px; border-radius: 14px;
+  background: var(--canvas); font-size: 13px; line-height: 1.5; color: var(--ink);
+}
+.page > .info-pop { background: var(--card); margin-top: 0; }   /* on the page background, not inside a card */
+.info-pop[hidden] { display: none; }
 
 .toggle { display: flex; background: var(--canvas); border-radius: 999px; padding: 3px; }
 .toggle button { padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
@@ -275,9 +291,44 @@ button { cursor: pointer; border: 0; background: none; }
 @keyframes slide-in { from { transform: translateX(100%); } }
 .settings-top { display: flex; margin-bottom: 14px; }
 .settings-frame.first-run .settings-top { display: none; }        /* no back arrow: the first-run survey can't be skipped */
-.settings-frame.first-run { animation: none; }
-#settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */                    /* it's already there when the app opens */
+.settings-frame.first-run { animation: none; }                     /* it's already there when the app opens */
+#settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */
 .settings-frame .page-title.first { margin-top: 0; }
+.settings-frame .layer-no + .page-title { margin-top: 2px; }
+
+/* Survey: a progress bar with one segment per question, filled as you go. */
+.survey-top { padding-top: 6px; margin-bottom: 4px; }
+.survey-top[hidden] { display: none; }
+.survey-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+.survey-progress span { height: 6px; border-radius: 999px; background: var(--line); transition: background .25s; }
+.survey-progress span.on { background: var(--accent); }
+.first-run [data-step]:not([hidden]) { animation: step-in .28s ease-out; }
+@keyframes step-in { from { opacity: 0; transform: translateY(10px); } }
+.first-run .hero { margin-bottom: 12px; }
+
+/* Back and Next/Done. In the survey they stay at the bottom of the screen. */
+.settings-actions { display: flex; gap: 8px; margin-top: 16px; }
+.settings-actions .btn { padding: 15px; }
+.settings-actions .btn.wide { flex: 1; margin-top: 0; }
+.settings-actions .btn.ghost { flex: none; width: 96px; background: var(--card); }
+.settings-actions [hidden] { display: none; }
+.settings-frame.first-run:not([hidden]) { display: flex; flex-direction: column; }
+.first-run .settings-actions {
+  position: sticky; bottom: 0;
+  margin: auto -16px calc(-1 * max(28px, env(safe-area-inset-bottom)));   /* auto top: sits at the bottom even on a short step */
+  padding: 20px 16px max(28px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--canvas) 18px);
+}
+
+/* Your sleep: a noon-to-noon bar with the night shaded, like the night on the charts. */
+.sleep-bar { position: relative; height: 26px; margin-top: 14px; border-radius: 10px; background: var(--canvas); overflow: hidden; }
+.sleep-span { position: absolute; top: 0; bottom: 0; border-radius: 10px; background: var(--night); transition: left .2s, width .2s; }
+.sleep-ticks { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.sleep-ticks span { width: 0; display: flex; justify-content: center; }   /* each label centred on its tick */
+.sleep-ticks span:first-child { justify-content: flex-start; }
+.sleep-ticks span:last-child { justify-content: flex-end; }
+.field-name { display: flex; align-items: center; gap: 6px; }
+.field-name svg { width: 16px; height: 16px; color: var(--night-ink); }
 
 /* Theme picker: each swatch previews that theme's background and accent. */
 .theme-picker { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
@@ -371,3 +422,9 @@ button { cursor: pointer; border: 0; background: none; }
 .drink-row { margin-bottom: 10px; }
 .inputs .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 10px; }
 .inputs .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* ---------- Layer 5: plan and learning ---------- */
+.swatch.event-soft { background: var(--coral-soft); box-shadow: inset 0 0 0 1.5px var(--coral); }
+.nap-slot { margin: 12px 0 6px; }
+.card > .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 14px; }
+.card > .check input { width: 20px; height: 20px; accent-color: var(--accent); }

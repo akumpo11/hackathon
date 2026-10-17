@@ -10,6 +10,18 @@ Why Python for the model: judges weight understanding at 30%, and the math is th
 
 ---
 
+## Update, Saturday evening: layer 5 is built
+
+`model/optimizer.py`, `model/learn.py`, their tests, `frontend/py/layer5_bridge.py`, `frontend/layer5.js` and the layer 5 page are in. Equations: `equations/layer-5-optimizer.md` and `equations/layer-5-learning.md`. The owner (Evan, per the table below) should read both files and both equation docs before judging; every line has to be explainable.
+
+Decisions made while building it, which change parts of E2, E3 and the API sections below:
+
+- **No `api.py`.** Layer 5 runs in the browser with Pyodide like layers 1 to 4, so the app is a static site. The JSON contract, `frontend/api.js` and `frontend/mock/` are gone; the time helpers moved to `frontend/time.js`. Deploy is one static host (GitHub Pages, Netlify or Vercel) serving the repo root, with no server and no cold starts.
+- **Caffeine has a price.** The 1% tie-break in E2 step 10 wasn't enough: more caffeine never lowers the score, so plans always filled up to the bedtime limit (350 mg for a 9 AM exam). The optimizer now maximizes `score - 0.0005 * mg`: each 50 mg must add 0.25 out of 10. A side effect worth showing: more tolerance gets a bigger dose (100 / 150 / 200 mg at 0 / 200 / 400 mg a day).
+- **Doses at least 1 h apart.** Otherwise "200 mg at 8:30 + 150 mg at 8:45" sneaks past the 200 mg single-dose limit.
+- **Naps only after a short night (< 7 h).** The model says a 20-minute nap always helps a little, rested or not, so a score threshold alone can't decide "needed". CLAUDE.md says last night's sleep decides; that's now the rule. The coffee nap is allowed but doesn't reliably emerge; don't promise it in the demo.
+- **Learning is slow, and that's the honest result.** The E3 test "recovers 3.5 h within 0.7 h" can't pass with 1-to-5 ratings: one rating step (0.25) is bigger than the effect of half-life on alertness (0.03 to 0.15), and half-life trades off against Kd (a diagonal ridge in the heatmap). A week of ratings narrows ±1.5 h to about ±1.1 h. The tests check what the math does guarantee instead (see `tests/test_learn.py`). The grid is 2 to 10 h, not 3 to 8, so smokers and pill users fit, and the prior is centered on your settings.
+
 ## Update, Saturday afternoon: who is actually doing what
 
 Owners by layer (see PLAN.md section 1 for the layers):
@@ -382,7 +394,7 @@ Fields, with the same ranges and defaults the layer pages use today:
 
 Also in settings: a color theme (Mint, Ocean, Coffee, Berry, Night). Each theme in `styles.css` only redefines the color tokens (`--accent`, `--canvas`, `--ink`, ...), and the charts read those tokens when they draw, so one setting recolors the whole app.
 
-Not moved: the exam date on layer 3 is about the event, not the person, so it stays with the event inputs. Drinks, bedtime and the sleep calendar stay on layers 1 and 2. Kd stays at the `Profile` default until layer 5 learns it.
+Not moved: the exam date on layer 3 is about the event, not the person, so it stays with the event inputs. Drinks, tonight's bedtime and the sleep calendar stay on layers 1 and 2, prefilled from the usual bedtime and wake time in settings. Kd stays at the `Profile` default until layer 5 learns it.
 
 Steps:
 1. Add the frame to `index.html` as a full-screen panel over the layers, with a gear button in the top right to open it and a back arrow, Done and Escape to close it. It is not a sixth page in the swipe, so the bottom slider stays at five layers.
@@ -400,7 +412,7 @@ Decide before building, because it changes the stack rule in CLAUDE.md ("No logi
 - **Option A, device only (no server).** The first open on a device shows a welcome screen that is the settings form; finishing it saves to local storage and the app opens. Every later open skips it. Fits CLAUDE.md and takes about an hour, since N10 already has the form. Limitation to say out loud: a second device starts fresh, because nothing leaves the browser.
 - **Option B, real accounts.** Settings follow you across devices. Needs `api.py` deployed (see the static-site open question above) with a small `sqlite3` table `users(email, passwordHash, settingsJson)`, routes `POST /api/signup` and `POST /api/login`, and passwords stored only as salted hashes (`hashlib.scrypt`), never as plain text. Expect 3 to 4 hours including the deploy, and update CLAUDE.md and PLAN.md if the team picks it.
 
-Done: the first-run survey (option A without the login screen). The first open on a device shows the settings frame as a survey with no way back; Start saves the answers and a flag (`caffeineSurveyDone`) in local storage. Open the app with `?reset` to forget the answers and show it again for a demo.
+Done: the first-run survey (option A without the login screen). The first open on a device shows the settings frame as a survey with no way back; Start saves the answers and a flag (`caffeineSurveyDone`) in local storage. Open the app with `?reset` to forget the answers and show it again for a demo. The survey is now one step per screen (welcome, then sleep, habit, body, body clock and theme) with a progress bar and Back/Next, and it asks for your usual bedtime and wake time (`bedtime`, `wakeTime` in settings). Those prefill layer 1's "Bedtime tonight" and fill layer 2's sleep calendar; changing them in settings resets both.
 
 Recommendation: build A now, since it is the settings form with a first-run flag, and only do B on Sunday morning if `api.py` is being deployed anyway. Either way the login screen must not block the demo: keep a "skip, use defaults" button on it.
 

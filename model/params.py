@@ -30,6 +30,27 @@ DAILY_LIMIT_MG = 400
 SINGLE_LIMIT_MG = 200
 BEDTIME_LIMIT_MG = 50   # caffeine left in the body at bedtime; roughly the "no coffee 6 hours before bed" rule
 
+# Layer 5a: the optimizer's search grid
+DOSE_STEP_H = 0.25                  # dose times are tried every 15 minutes
+DOSE_SIZES_MG = (50, 100, 150, 200)  # dose sizes tried; 200 is the single-dose limit
+DOSE_MIN_GAP_H = 1.0                # doses at least an hour apart, so two can't add up to one oversized dose
+EVENT_SAMPLE_H = 0.25               # alertness is scored every 15 minutes across the event
+MG_COST = 0.0005                    # each 50 mg must raise mean alertness by 0.025 (0.25 out of 10) to be worth it
+NAP_LENGTH_H = 20 / 60              # naps tried are 20 minutes: short enough to wake before deep sleep
+NAP_STEP_H = 0.5                    # nap start times are tried every 30 minutes
+NAP_EARLIEST_AFTER_WAKE_H = 2       # no nap in the first 2 h after waking up
+NAP_LATEST_BEFORE_EVENT_H = 1       # and none in the last hour before the event (too groggy)
+NAP_IF_SLEPT_UNDER_H = 7            # a nap is only considered after a night shorter than this
+NAP_COST = 0.01                     # a nap must raise mean alertness by 0.01 (0.1 out of 10) to be worth it
+
+# Layer 5b: learning your half-life and sensitivity from 1-to-5 ratings
+LEARN_HALF_LIVES_H = (2.0, 10.0)    # half-lives the grid covers (smokers can be near 2.5 h, the pill near 10 h)
+LEARN_KDS_MG_L = (1.0, 6.0)         # sensitivities (Kd) the grid covers
+LEARN_GRID_POINTS = 20              # 20 x 20 = 400 guesses
+PRIOR_SD_HALF_LIFE_H = 1.5          # how far from your settings we think your real half-life could be
+PRIOR_SD_KD_MG_L = 1.5
+RATING_SD = 0.15                    # how noisy one rating is, on the 0..1 alertness scale
+
 # Caffeine per drink in mg
 DRINKS = {
     "espresso": 63,
