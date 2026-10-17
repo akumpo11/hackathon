@@ -4,7 +4,7 @@
 
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
-import { publish, shared, onShared } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -116,8 +116,9 @@ export async function startLayer3() {
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
   });
-  form.addEventListener("input", update);
-  window.addEventListener("resize", update);
+  const redo = perFrame(update);
+  form.addEventListener("input", redo);
+  onWidthChange(update);
   // Redo it when layer 1's body or drinks change, or your settings (your habit).
   // Only then: this page publishes too, and reacting to its own publish would loop forever.
   let seenLayer1 = shared.layer1, seenSettings = shared.settings;
@@ -125,7 +126,7 @@ export async function startLayer3() {
     if (shared.layer1 === seenLayer1 && shared.settings === seenSettings) return;
     seenLayer1 = shared.layer1;
     seenSettings = shared.settings;
-    update();
+    redo();
   });
   update();
 }

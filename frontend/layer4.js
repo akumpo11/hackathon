@@ -6,7 +6,7 @@
 import { hoursToClock } from "./api.js";
 import { areaChart, lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
-import { shared, onShared } from "./shared.js";
+import { shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -92,7 +92,8 @@ export async function startLayer4() {
   const pyodide = await loadPython();
   compute = pyodide.pyimport("layer4_bridge").compute;
 
-  window.addEventListener("resize", update);
-  onShared(update);          // redo it whenever layer 1, 2 or 3 changes
+  const redo = perFrame(update);
+  onWidthChange(update);
+  onShared(redo);            // redo it whenever layer 1, 2 or 3 changes, once per frame
   update();
 }

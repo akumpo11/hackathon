@@ -9,10 +9,12 @@ One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the botto
 From the **repo root** (the page loads Python files from `model/`):
 
 ```bash
-python -m http.server 5500
+python3 serve.py
 ```
 
-Then open http://localhost:5500/frontend/. A phone on the same Wi-Fi can open `http://<laptop IP>:5500/frontend/`.
+It prints two addresses: http://localhost:5500/frontend/ for the laptop, and `http://<laptop IP>:5500/frontend/` for a phone on the same Wi-Fi. `serve.py` is `python3 -m http.server 5500` plus a header that stops the browser from running stale copies of the JavaScript after an edit.
+
+To use it like an app, open that address on the phone and pick **Share → Add to Home Screen** (iPhone Safari) or **⋮ → Add to Home screen** (Android Chrome). The home screen icon opens it full screen, with no browser bars.
 
 The first load takes about 10 to 15 seconds while the browser downloads Pyodide and numpy. Later loads are cached.
 
@@ -39,4 +41,5 @@ Layer 4 builds on the pages before it. Layers 1, 2 and 3 publish what they decid
 - `layer3.js`, `py/layer3_bridge.py`: layer 3 habit and exam inputs, the call into `model/tolerance.py`, coffee strength, the reset plan and its day-by-day chart. Publishes your tolerance for layer 4.
 - `layer4.js`, `py/layer4_bridge.py`: layer 4 reads layers 1, 2 and 3, calls `model/alertness.py`, and draws the alertness curve and its breakdown.
 - `charts.js`: hand-written SVG charts.
+- `manifest.json`, `icons/`: what lets "Add to Home Screen" open the page full screen with its own icon. `icons/make_icons.py` draws the icons.
 - `api.js` and `mock/`: not used right now. The JSON contract client and sample responses for when `api.py` exists.

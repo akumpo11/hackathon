@@ -88,9 +88,32 @@ export function areaChart(svg, opts) {
     xs.forEach((v, i) => { if (Math.abs(v - t) < Math.abs(xs[best] - t)) best = i; });
     return best;
   };
-  svg.onpointermove = (e) => moveTo(nearest(e.clientX));
-  svg.onpointerdown = (e) => moveTo(nearest(e.clientX));
+  // Mouse: the dot follows the pointer. Fingers are handled in addTouchScrub below.
+  svg.onpointermove = (e) => { if (e.pointerType !== "touch") moveTo(nearest(e.clientX)); };
+  svg.onpointerdown = (e) => { if (e.pointerType !== "touch") moveTo(nearest(e.clientX)); };
+  // This chart gets redrawn on every input change, so the touch listeners are added only
+  // once and always call the latest drawing's scrub function.
+  svg.scrubTo = (clientX) => moveTo(nearest(clientX));
+  if (!svg.hasTouchScrub) addTouchScrub(svg);
   moveTo(nearest(svg.getBoundingClientRect().left + s.x(opts.startX ?? xMin)));
+}
+
+// Fingers: a sideways drag scrubs the curve, an up-and-down drag scrolls the page as usual.
+// The first move decides which one it is. For a scrub, preventDefault stops the phone from
+// scrolling (or swiping to the next page), so the dot follows your finger until you lift it.
+function addTouchScrub(svg) {
+  svg.hasTouchScrub = true;
+  let startX = 0, startY = 0, mode = null;     // mode: null until the first move, then "scrub" or "scroll"
+  svg.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY; mode = null;
+    svg.scrubTo(t.clientX);
+  }, { passive: true });
+  svg.addEventListener("touchmove", (e) => {
+    const t = e.touches[0];
+    mode ??= Math.abs(t.clientX - startX) >= Math.abs(t.clientY - startY) ? "scrub" : "scroll";
+    if (mode === "scrub") { e.preventDefault(); svg.scrubTo(t.clientX); }
+  }, { passive: false });                        // passive: false is what allows preventDefault
 }
 
 /**

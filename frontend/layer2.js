@@ -5,7 +5,7 @@
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { initSleepCalendar } from "./sleepcal.js";
-import { publish, shared, onShared } from "./shared.js";
+import { publish, shared, onShared, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -45,7 +45,7 @@ function draw(blocks) {
 
 export async function startLayer2() {
   const cal = initSleepCalendar($("sleepCal"), draw);
-  window.addEventListener("resize", () => draw(cal.getBlocks()));
+  onWidthChange(() => draw(cal.getBlocks()));
   // Redraw when personal settings change. Only then: draw() publishes too, and
   // reacting to its own publish would loop forever.
   let seenSettings = shared.settings;

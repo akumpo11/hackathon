@@ -5,7 +5,7 @@ import { clockToHours, hoursToClock } from "./api.js";
 import { areaChart } from "./charts.js";
 import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
-import { publish, shared, onShared } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -102,15 +102,16 @@ export async function startLayer1() {
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
   });
-  form.addEventListener("input", update);
-  window.addEventListener("resize", update);
+  const redo = perFrame(update);
+  form.addEventListener("input", redo);
+  onWidthChange(update);
   // Redo it when personal settings change. Only then: this page publishes too, and
   // reacting to its own publish would loop forever.
   let seenSettings = shared.settings;
   onShared(() => {
     if (shared.settings === seenSettings) return;
     seenSettings = shared.settings;
-    update();
+    redo();
   });
   update();
 }
