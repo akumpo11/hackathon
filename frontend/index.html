@@ -54,19 +54,19 @@
       <form id="layer1Inputs">
         <article class="card">
           <h2>Your drinks today</h2>
-          <p class="muted small">Pick "None" to skip a row.</p>
+          <p class="muted small">Tap a drink to change it. Pick "No drink" to skip a row.</p>
           <div class="inputs">
             <div class="row drink-row">
               <label class="field">Time<input type="time" name="time0" value="08:00"></label>
-              <label class="field">Drink<select name="drink0" data-default="drip coffee (8 oz)"></select></label>
+              <div class="field"><span id="drinkLabel0">Drink</span><input type="hidden" name="drink0" value="drip coffee (8 oz)"><button type="button" class="drink-pick" data-slot="0" aria-haspopup="dialog" aria-labelledby="drinkLabel0 drinkPick0" id="drinkPick0"><span class="pick-text"><small>Loading drinks…</small></span></button></div>
             </div>
             <div class="row drink-row">
               <label class="field">Time<input type="time" name="time1" value="13:00"></label>
-              <label class="field">Drink<select name="drink1" data-default="drip coffee (8 oz)"></select></label>
+              <div class="field"><span id="drinkLabel1">Drink</span><input type="hidden" name="drink1" value="drip coffee (8 oz)"><button type="button" class="drink-pick" data-slot="1" aria-haspopup="dialog" aria-labelledby="drinkLabel1 drinkPick1" id="drinkPick1"><span class="pick-text"><small>Loading drinks…</small></span></button></div>
             </div>
             <div class="row drink-row">
               <label class="field">Time<input type="time" name="time2" value="16:00"></label>
-              <label class="field">Drink<select name="drink2" data-default=""></select></label>
+              <div class="field"><span id="drinkLabel2">Drink</span><input type="hidden" name="drink2" value=""><button type="button" class="drink-pick" data-slot="2" aria-haspopup="dialog" aria-labelledby="drinkLabel2 drinkPick2" id="drinkPick2"><span class="pick-text"><small>Loading drinks…</small></span></button></div>
             </div>
             <div class="row drink-row">
               <label class="field">Bedtime<input type="time" name="bedtime" value="23:00"></label>
@@ -319,6 +319,19 @@
       <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg>
     </button>
   </nav>
+  <!-- Drink picker for layer 1: a grid of drinks, like an ordering kiosk. -->
+  <div class="scrim" id="drinkScrim" hidden></div>
+  <section class="sheet drink-sheet" id="drinkSheet" role="dialog" aria-modal="true" aria-labelledby="drinkSheetTitle" hidden>
+    <div class="grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="drinkSheetTitle">Pick a drink</h2>
+      <button type="button" class="icon-btn" id="drinkClose" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <p class="muted small" id="drinkSheetNote"></p>
+    <div class="drink-grid" id="drinkGrid"></div>
+  </section>
 </div>
 
 <script type="module" src="app.js"></script>
