@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="coffee">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#EEF1F0">
+  <meta name="theme-color" content="#F1EEEB">
   <title>Caffeine Optimizer</title>
   <!-- "Add to Home Screen" opens the app full screen, with no browser bars, like a native app.
        manifest.json covers Android/Chrome; the apple-* tags cover iPhone Safari. -->
@@ -325,8 +325,8 @@
         <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" /></svg>
       </button>
     </div>
-    <h1 class="page-title first" id="settingsTitle">Personal settings</h1>
-    <p class="body">These describe you, not your day, so you set them once and every layer uses them. They're saved on this device.</p>
+    <h1 class="page-title first" id="settingsTitle" tabindex="-1">Personal settings</h1>
+    <p class="body" id="settingsIntro">These describe you, not your day, so you set them once and every layer uses them. They're saved on this device.</p>
 
     <form id="settingsForm">
       <article class="card">
@@ -377,9 +377,9 @@
         <h2>Theme</h2>
         <p class="muted small">Colors for the whole app, charts included.</p>
         <div class="theme-picker" role="radiogroup" aria-label="Theme">
-          <label><input type="radio" name="theme" value="mint" checked><span class="theme-swatch" data-swatch="mint"></span><span>Mint</span></label>
+          <label><input type="radio" name="theme" value="coffee" checked><span class="theme-swatch" data-swatch="coffee"></span><span>Coffee</span></label>
+          <label><input type="radio" name="theme" value="mint"><span class="theme-swatch" data-swatch="mint"></span><span>Mint</span></label>
           <label><input type="radio" name="theme" value="ocean"><span class="theme-swatch" data-swatch="ocean"></span><span>Ocean</span></label>
-          <label><input type="radio" name="theme" value="coffee"><span class="theme-swatch" data-swatch="coffee"></span><span>Coffee</span></label>
           <label><input type="radio" name="theme" value="berry"><span class="theme-swatch" data-swatch="berry"></span><span>Berry</span></label>
           <label><input type="radio" name="theme" value="night"><span class="theme-swatch" data-swatch="night"></span><span>Night</span></label>
         </div>

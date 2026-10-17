@@ -274,6 +274,9 @@ button { cursor: pointer; border: 0; background: none; }
 .settings-frame[hidden] { display: none; }
 @keyframes slide-in { from { transform: translateX(100%); } }
 .settings-top { display: flex; margin-bottom: 14px; }
+.settings-frame.first-run .settings-top { display: none; }        /* no back arrow: the first-run survey can't be skipped */
+.settings-frame.first-run { animation: none; }
+#settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */                    /* it's already there when the app opens */
 .settings-frame .page-title.first { margin-top: 0; }
 
 /* Theme picker: each swatch previews that theme's background and accent. */
