@@ -42,6 +42,12 @@ Tier 3 (stretch):
 
 - **Personalized model**: fitted half-life and sensitivity, learned from alertness ratings.
 
+### Stack
+
+- **Backend and calculations: Python.** All backend code and all math (caffeine curve, tolerance, reset, planner, sleep check, naps, curve fitting) are written in Python. Don't put calculation logic in the frontend.
+- **Frontend**: plain HTML, CSS, and JavaScript, with Chart.js for the caffeine curve graph.
+- **Login and database**: Supabase (built-in auth plus Postgres, with Row Level Security so each user only sees their own rows). Tables: `drinks`, `ratings`, `sleep`.
+
 ## Idea generation
 
 Before brainstorming, evaluating, or refining project ideas, read `judging.md`. It has the official judging criteria, demo format, and submission rules. Score every idea against its four weighted criteria:
