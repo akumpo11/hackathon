@@ -1,5 +1,6 @@
 // Page navigation for the five layer pages, then each page's own code.
 
+import { initSettings } from "./settings.js";
 import { startLayer1 } from "./layer1.js";
 import { startLayer2 } from "./layer2.js";
 import { startLayer3 } from "./layer3.js";
@@ -26,6 +27,9 @@ const fromHash = Number(location.hash.replace("#layer", "")) - 1;
 const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 0;
 pager.scrollLeft = startPage * pager.clientWidth;
 pager.dispatchEvent(new Event("scroll"));
+
+// Personal settings first: layers 1 to 3 read them as soon as they start.
+initSettings();
 
 startLayer1().catch((err) => {
   console.error(err);

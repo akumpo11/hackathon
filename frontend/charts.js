@@ -47,13 +47,13 @@ export function areaChart(svg, opts) {
   }
 
   const grad = el("linearGradient", { id: `${svg.id}-fill`, x1: 0, x2: 0, y1: 0, y2: 1 }, el("defs", {}, svg));
-  el("stop", { offset: "0%", "stop-color": css("--mint"), "stop-opacity": 0.45 }, grad);
-  el("stop", { offset: "100%", "stop-color": css("--mint"), "stop-opacity": 0.02 }, grad);
+  el("stop", { offset: "0%", "stop-color": css("--accent"), "stop-opacity": 0.45 }, grad);
+  el("stop", { offset: "100%", "stop-color": css("--accent"), "stop-opacity": 0.02 }, grad);
 
   const pts = xs.map((t, i) => `${s.x(t).toFixed(1)},${s.y(ys[i]).toFixed(1)}`);
   el("path", { d: `M${s.x(xMin)},${s.bottom} L${pts.join(" L")} L${s.x(xMax)},${s.bottom} Z`,
                fill: `url(#${svg.id}-fill)`, stroke: "none" }, svg);
-  el("path", { d: `M${pts.join(" L")}`, stroke: css("--mint"), "stroke-width": 2.5, fill: "none" }, svg);
+  el("path", { d: `M${pts.join(" L")}`, stroke: css("--accent"), "stroke-width": 2.5, fill: "none" }, svg);
 
   // Drinks: a dot on the curve and a label above it.
   const valueAt = (t) => {
@@ -65,7 +65,7 @@ export function areaChart(svg, opts) {
     const mx = s.x(m.x);
     row = mx - lastLabelX < 48 ? 1 - row : 0;     // drop a label one row if it would overlap the last one
     lastLabelX = mx;
-    el("circle", { cx: mx, cy: s.y(valueAt(m.x)), r: 4.5, fill: css("--ink"), stroke: "#fff", "stroke-width": 2 }, svg);
+    el("circle", { cx: mx, cy: s.y(valueAt(m.x)), r: 4.5, fill: css("--ink"), stroke: css("--card"), "stroke-width": 2 }, svg);
     el("text", { x: mx, y: row ? 23 : 11, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg)
       .textContent = m.label;
   }
@@ -74,7 +74,7 @@ export function areaChart(svg, opts) {
 
   // Readout: vertical line + dot that follows your finger or mouse.
   const guide = el("line", { y1: s.top, y2: s.bottom, stroke: css("--coral"), "stroke-width": 1.5, "stroke-dasharray": "3 3" }, svg);
-  const dot = el("circle", { r: 6.5, fill: css("--coral"), stroke: "#fff", "stroke-width": 3 }, svg);
+  const dot = el("circle", { r: 6.5, fill: css("--coral"), stroke: css("--card"), "stroke-width": 3 }, svg);
   const moveTo = (i) => {
     const cx = s.x(xs[i]), cy = s.y(ys[i]);
     guide.setAttribute("x1", cx); guide.setAttribute("x2", cx);
@@ -119,7 +119,7 @@ export function lineChart(svg, opts) {
   for (const p of opts.points ?? []) {
     const px = s.x(p.x), py = s.y(p.y);
     el("line", { x1: px, x2: px, y1: py, y2: s.bottom, stroke: css("--coral"), "stroke-width": 1.5, "stroke-dasharray": "3 3" }, svg);
-    el("circle", { cx: px, cy: py, r: 6.5, fill: css("--coral"), stroke: "#fff", "stroke-width": 3 }, svg);
+    el("circle", { cx: px, cy: py, r: 6.5, fill: css("--coral"), stroke: css("--card"), "stroke-width": 3 }, svg);
     el("text", { x: px, y: py - 12, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg)
       .textContent = p.label;
   }
@@ -137,7 +137,7 @@ export function heatmap(svg, { prob, xs, ys, mark }) {
   const cw = (s.right - s.left) / xs.length, ch = (s.bottom - s.top) / ys.length;
 
   // Each cell's color is a blend from white to mint, by its probability relative to the most likely cell.
-  const mint = css("--mint").match(/\w\w/g).map((h) => parseInt(h, 16));
+  const mint = css("--accent").match(/\w\w/g).map((h) => parseInt(h, 16));
   const blend = (f) => `rgb(${mint.map((c) => Math.round(255 + (c - 255) * f)).join(",")})`;
   prob.forEach((row, i) => row.forEach((p, j) => {
     el("rect", { x: s.left + j * cw, y: s.bottom - (i + 1) * ch, width: cw + 0.5, height: ch + 0.5,

@@ -1,5 +1,6 @@
-// Layer 4 page: take the drinks from layer 1 and the sleep from layer 2, run
-// model/alertness.py (in the browser via Pyodide), and show how alert you are.
+// Layer 4 page: take the drinks from layer 1, the sleep from layer 2 and the
+// tolerance from layer 3, run model/alertness.py (in the browser via Pyodide),
+// and show how alert you are.
 // The math itself is only in the Python files.
 
 import { hoursToClock } from "./api.js";
@@ -9,7 +10,6 @@ import { shared, onShared } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const form = $("layer4Inputs");
 
 // The chart runs from 5 AM today to 5 AM tomorrow, every 0.1 h (the model's STEP_H).
 const T0 = 5, STEP_H = 0.1, STEPS = 240;
@@ -22,17 +22,7 @@ let momentH = 9;           // the moment you picked by dragging the chart (9 AM 
 const pct = (v) => `${Math.round(v * 100)}%`;
 const signed = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
 
-function readInputs() {
-  return { kd: Number(form.elements.kd.value), R: Number(form.elements.R.value) };
-}
-
-function showSliderValues(x) {
-  const out = (name, text) => { form.querySelector(`output[data-for="${name}"]`).textContent = text; };
-  out("kd", `${x.kd.toFixed(1)} mg/L`);
-  out("R", `${x.R.toFixed(2)}x`);
-}
-
-// Everything for one moment: the three inputs, the four outputs, and the equation.
+// Everything for one moment: the inputs, the four outputs, and the equation.
 function showMoment(i) {
   const { r } = last;
   const S = r.pressure[i], circ = r.circadian[i], asleep = r.asleep[i];
@@ -47,6 +37,8 @@ function showMoment(i) {
   $("inConc").textContent = `${conc.toFixed(2)} mg/L`;
   $("inS").textContent = S.toFixed(2);
   $("inCirc").textContent = signed(circ);
+  $("inR").textContent = `${last.R.toFixed(2)}x`;
+  $("inKd").textContent = `${r.kd.toFixed(1)} mg/L`;
 
   $("outOcc").textContent = pct(r.occupancy[i]);
   $("outFelt").textContent = `${felt.toFixed(2)} of ${S.toFixed(2)}`;
@@ -61,7 +53,7 @@ function showMoment(i) {
       (raw > 1 || raw < 0 ? `, capped at ${Math.round(alert)}` : "");
 
   lineChart($("occChart"), {
-    series: [{ xs: r.chartConc, ys: r.chartOcc, color: cssVar("--mint") }],
+    series: [{ xs: r.chartConc, ys: r.chartOcc, color: cssVar("--accent") }],
     yMin: 0, yMax: 1, tickStep: 2,
     formatTick: (c) => `${c}`,
     points: [{ x: Math.min(conc, 10), y: r.occupancy[i], label: pct(r.occupancy[i]) }],
@@ -84,15 +76,14 @@ function drawChart() {
 }
 
 function update() {
-  const { layer1, layer2 } = shared;
-  if (!compute || !layer1 || !layer2) return;
+  const { layer1, layer2, layer3 } = shared;
+  if (!compute || !layer1 || !layer2 || !layer3) return;
 
-  const x = readInputs();
-  showSliderValues(x);
-
-  last = { r: toObject(compute(
+  // Tolerance today: the receptors layer 3 says you have now, from your usual habit.
+  const R = layer3.R;
+  last = { R, r: toObject(compute(
     JSON.stringify(layer1.doses), JSON.stringify(layer2.blocks), JSON.stringify(ts), layer2.circadianPeakH,
-    layer1.weightKg, layer1.halfLifeH, layer1.smoker, layer1.oralContraceptives, x.kd, x.R,
+    layer1.weightKg, layer1.halfLifeH, layer1.smoker, layer1.oralContraceptives, R,
   )) };
   drawChart();
 }
@@ -101,8 +92,7 @@ export async function startLayer4() {
   const pyodide = await loadPython();
   compute = pyodide.pyimport("layer4_bridge").compute;
 
-  form.addEventListener("input", update);
   window.addEventListener("resize", update);
-  onShared(update);          // redo it whenever layer 1 or layer 2 changes
+  onShared(update);          // redo it whenever layer 1, 2 or 3 changes
   update();
 }

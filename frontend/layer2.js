@@ -5,7 +5,7 @@
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { initSleepCalendar } from "./sleepcal.js";
-import { publish } from "./shared.js";
+import { publish, shared, onShared } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -16,7 +16,8 @@ function draw(blocks) {
   const hours = blocks.reduce((sum, b) => sum + (b.endH - b.startH), 0);
   $("sleepSummary").textContent = `${blocks.length} block${blocks.length === 1 ? "" : "s"}, ${hours.toFixed(1)} h`;
   // Tell later pages (layer 4) what your sleep and body clock are.
-  const shiftH = Number($("layer2Inputs").elements.chronotype.value);
+  // The body clock comes from personal settings (settings.js), not this page.
+  const shiftH = shared.settings.chronotypeShiftH;
   publish("layer2", { blocks, circadianPeakH: 17 + shiftH });
 
   if (!compute) return;   // the calendar works right away; the chart waits for Python
@@ -30,7 +31,7 @@ function draw(blocks) {
     series: [
       // C swings ±0.15; drawn around 0.5 so it shares the 0..1 axis with S.
       { xs: r.t, ys: r.circadian.map((c) => 0.5 + c), color: cssVar("--muted"), dash: "5 4" },
-      { xs: r.t, ys: r.pressure, color: cssVar("--mint") },
+      { xs: r.t, ys: r.pressure, color: cssVar("--accent") },
     ],
     yMin: 0, yMax: 1,
     vline: { x: nowH, label: "Now" },
@@ -44,8 +45,15 @@ function draw(blocks) {
 
 export async function startLayer2() {
   const cal = initSleepCalendar($("sleepCal"), draw);
-  $("layer2Inputs").addEventListener("change", () => draw(cal.getBlocks()));
   window.addEventListener("resize", () => draw(cal.getBlocks()));
+  // Redraw when personal settings change. Only then: draw() publishes too, and
+  // reacting to its own publish would loop forever.
+  let seenSettings = shared.settings;
+  onShared(() => {
+    if (shared.settings === seenSettings) return;
+    seenSettings = shared.settings;
+    draw(cal.getBlocks());
+  });
 
   const pyodide = await loadPython();
   compute = pyodide.pyimport("layer2_bridge").compute;
