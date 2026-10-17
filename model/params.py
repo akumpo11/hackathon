@@ -20,6 +20,7 @@ BURN_IN_H = 48          # sleepPressure starts this long before the first time a
 TAU_TOLERANCE_DAYS = 4.0        # receptors relax toward their target with this time constant
 TOLERANCE_GAIN_PER_MG_L = 0.23  # R_target = 1 + gain * average caffeine; 300 mg/day -> R ~ 1.5
 RESET_TARGET_R = 1.1            # a reset counts as done when receptors are within 10% of baseline
+TAPER_OPTIONS_DAYS = (0, 3, 5)  # reset plans the planner compares: cold turkey, or cut down over 3 or 5 days
 
 # Shared time grid for every curve
 STEP_H = 0.1

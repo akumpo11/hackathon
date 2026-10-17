@@ -11,8 +11,10 @@ const FILES = {
   "model/pk.py": "../model/pk.py",
   "model/sleep.py": "../model/sleep.py",
   "model/alertness.py": "../model/alertness.py",
+  "model/tolerance.py": "../model/tolerance.py",
   "layer1_bridge.py": "py/layer1_bridge.py",
   "layer2_bridge.py": "py/layer2_bridge.py",
+  "layer3_bridge.py": "py/layer3_bridge.py",
   "layer4_bridge.py": "py/layer4_bridge.py",
 };
 

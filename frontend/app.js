@@ -2,6 +2,7 @@
 
 import { startLayer1 } from "./layer1.js";
 import { startLayer2 } from "./layer2.js";
+import { startLayer3 } from "./layer3.js";
 import { startLayer4 } from "./layer4.js";
 
 const pager = document.getElementById("pager");
@@ -34,6 +35,11 @@ startLayer1().catch((err) => {
 startLayer2().catch((err) => {
   console.error(err);
   document.getElementById("pressureNow").textContent = "Python didn't load";
+});
+
+startLayer3().catch((err) => {
+  console.error(err);
+  document.getElementById("tolEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
 });
 
 startLayer4().catch((err) => {
