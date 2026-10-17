@@ -11,6 +11,7 @@ import { startLayer5 } from "./layer5.js";
 const pager = document.getElementById("pager");
 const pill = document.getElementById("tabPill");
 const tabs = [...document.querySelectorAll(".tab")];
+const pages = [...pager.querySelectorAll(".page")];
 let shownPage = null;      // the page you're on, so arriving on a new one is noticed once
 
 // While you swipe, the pill follows: scroll position / page width = how many pages across.
@@ -19,6 +20,9 @@ pager.addEventListener("scroll", () => {
   pill.style.transform = `translateX(${pagesAcross * 100}%)`;
   const current = Math.round(pagesAcross);
   tabs.forEach((t, i) => t.classList.toggle("on", i === current));
+  // A page fully out of view goes back to its top, so every page you switch to starts there.
+  // Waiting until it's out of view means you never see it jump.
+  pages.forEach((p, i) => { if (Math.abs(pagesAcross - i) >= 1 && p.scrollTop) p.scrollTop = 0; });
   // Tell the pages when you arrive on a new one (layer 4 jumps back to right now).
   if (current !== shownPage) {
     shownPage = current;
