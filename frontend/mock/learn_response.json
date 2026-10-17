@@ -1,5 +1,5 @@
 {
- "half_lives": [
+ "halfLives": [
   3.0,
   3.263,
   3.526,
@@ -485,6 +485,6 @@
    0.0
   ]
  ],
- "mean_half_life": 4.6,
- "mean_kd": 2.9
+ "meanHalfLife": 4.6,
+ "meanKd": 2.9
 }

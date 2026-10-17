@@ -1,84 +1,84 @@
 {
- "quit_in_days": 2,
- "taper_days": 3,
+ "quitInDays": 2,
+ "taperDays": 3,
  "reason": "Start tapering in 2 days and stop over 3 days. Your receptors are back to 1.06x by the exam, and the worst day is Oct 21.",
- "cold_turkey": [
+ "coldTurkey": [
   {
    "day": 0,
    "R": 1.454,
-   "intake_mg": 190,
+   "intakeMg": 190,
    "withdrawal": 0.313
   },
   {
    "day": 1,
    "R": 1.42,
-   "intake_mg": 190,
+   "intakeMg": 190,
    "withdrawal": 0.289
   },
   {
    "day": 2,
    "R": 1.315,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.315
   },
   {
    "day": 3,
    "R": 1.236,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.236
   },
   {
    "day": 4,
    "R": 1.177,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.177
   },
   {
    "day": 5,
    "R": 1.133,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.133
   },
   {
    "day": 6,
    "R": 1.1,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.1
   },
   {
    "day": 7,
    "R": 1.075,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.075
   },
   {
    "day": 8,
    "R": 1.056,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.056
   },
   {
    "day": 9,
    "R": 1.042,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.042
   },
   {
    "day": 10,
    "R": 1.032,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.032
   },
   {
    "day": 11,
    "R": 1.024,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.024
   },
   {
    "day": 12,
    "R": 1.018,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.018
   }
  ],
@@ -86,79 +86,79 @@
   {
    "day": 0,
    "R": 1.454,
-   "intake_mg": 190,
+   "intakeMg": 190,
    "withdrawal": 0.313
   },
   {
    "day": 1,
    "R": 1.42,
-   "intake_mg": 190,
+   "intakeMg": 190,
    "withdrawal": 0.289
   },
   {
    "day": 2,
    "R": 1.374,
-   "intake_mg": 142,
+   "intakeMg": 142,
    "withdrawal": 0.279
   },
   {
    "day": 3,
    "R": 1.32,
-   "intake_mg": 95,
+   "intakeMg": 95,
    "withdrawal": 0.261
   },
   {
    "day": 4,
    "R": 1.26,
-   "intake_mg": 48,
+   "intakeMg": 48,
    "withdrawal": 0.234
   },
   {
    "day": 5,
    "R": 1.195,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.195
   },
   {
    "day": 6,
    "R": 1.146,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.146
   },
   {
    "day": 7,
    "R": 1.11,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.11
   },
   {
    "day": 8,
    "R": 1.082,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.082
   },
   {
    "day": 9,
    "R": 1.062,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.062
   },
   {
    "day": 10,
    "R": 1.046,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.046
   },
   {
    "day": 11,
    "R": 1.035,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.035
   },
   {
    "day": 12,
    "R": 1.026,
-   "intake_mg": 0,
+   "intakeMg": 0,
    "withdrawal": 0.026
   }
  ]

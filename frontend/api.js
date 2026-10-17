@@ -65,18 +65,18 @@ export function buildPlanRequest(form) {
   if (nextBed <= end) nextBed += 24;
 
   return {
-    event: { start_h: start, end_h: end },
+    event: { startH: start, endH: end },
     sleep: [
-      { start_h: lastBed, end_h: lastWake, is_nap: false },
-      { start_h: nextBed, end_h: nextBed + nightLength, is_nap: false },
+      { startH: lastBed, endH: lastWake, isNap: false },
+      { startH: nextBed, endH: nextBed + nightLength, isNap: false },
     ],
-    free_slots: [],
-    fixed_doses: [],
+    freeSlots: [],
+    fixedDoses: [],
     profile: {
-      weight_kg: Number(form.weight), half_life_h: form.halfLife ?? 5, ka_per_h: 4, vd_l_per_kg: 0.6,
-      kd_mg_l: 3, circadian_peak_h: 17, circadian_amp: 0.15,
-      habitual_mg_per_day: Number(form.habitualMg), habit_weeks: 8,
+      weightKg: Number(form.weight), halfLifeH: form.halfLife ?? 5, kaPerH: 4, vdLPerKg: 0.6,
+      kdMgL: 3, circadianPeakH: 17, circadianAmp: 0.15,
+      habitualMgPerDay: Number(form.habitualMg), habitWeeks: 8,
     },
-    allow_nap: form.allowNap,
+    allowNap: form.allowNap,
   };
 }

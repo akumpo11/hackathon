@@ -1,5 +1,5 @@
 // Small hand-made SVG charts. No chart library: each chart is a linear map
-// from data units to pixels, x_px = left + (x - xMin) / (xMax - xMin) * width,
+// from data units to pixels, xPx = left + (x - xMin) / (xMax - xMin) * width,
 // and the same for y (flipped, because SVG's y axis points down).
 
 const NS = "http://www.w3.org/2000/svg";

@@ -143,9 +143,9 @@ Decision: all Python. Team of 3, everyone is comfortable in Python, and judges w
 If someone later wants a slicker frontend, wrap the same `model/` functions in FastAPI and point a React page at it. The math does not change, so this can be decided Sunday morning and is not required.
 
     model/params.py       parameter table above, drink table
-    model/types.py        dataclasses: Dose, SleepBlock, EventWindow, Profile, Plan
-    model/pk.py           concentration(t, doses, profile); peak_time()
-    model/sleep.py        sleep_pressure(t, sleep_blocks); circadian(t)
+    model/schema.py        dataclasses: Dose, SleepBlock, EventWindow, Profile, Plan
+    model/pk.py           concentration(t, doses, profile); peakTime()
+    model/sleep.py        sleepPressure(t, sleepBlocks); circadian(t)
     model/alertness.py    occupancy, inertia, alertness curve
     model/tolerance.py    receptor model, reset and taper planner
     model/optimizer.py    grid search over dose schedules
@@ -181,7 +181,7 @@ Cut order if behind: uncertainty band -> Bayesian learning (replace with manual 
 
 Owners (details in TASKS.md):
 - Evan: layer 1 pk.py, optimizer.py, then learn.py on Sunday (kinetics, search, Bayes)
-- Andrew: layer 2 sleep.py, layer 4 tolerance.py, plus types, params, api.py, sample JSON (two-process model, receptors, the contract)
+- Andrew: layer 2 sleep.py, layer 4 tolerance.py, plus schema, params, api.py (two-process model, receptors, the contract)
 - Nolan: layer 3 alertness.py, the frontend, deploy, README, demo (the join formula and the product)
 
 ---

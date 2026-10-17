@@ -1,24 +1,24 @@
 {
  "doses": [
   {
-   "time_h": 32.25,
+   "timeH": 32.25,
    "mg": 150,
    "label": "recommended"
   },
   {
-   "time_h": 33.75,
+   "timeH": 33.75,
    "mg": 95,
    "label": "recommended"
   }
  ],
  "nap": {
-  "start_h": 31.5,
-  "end_h": 31.83,
-  "is_nap": true
+  "startH": 31.5,
+  "endH": 31.83,
+  "isNap": true
  },
  "score": 0.789,
- "bedtime_caffeine_mg": 35.8,
- "strength_percent": 64.0,
+ "bedtimeCaffeineMg": 35.8,
+ "strengthPercent": 64.0,
  "curve": {
   "t": [
    31.0,
