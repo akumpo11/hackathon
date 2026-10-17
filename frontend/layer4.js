@@ -3,7 +3,7 @@
 // and show how alert you are.
 // The math itself is only in the Python files.
 
-import { hoursToClock } from "./time.js";
+import { hoursToClock, nowHours } from "./time.js";
 import { areaChart, lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { shared, onShared, perFrame, onWidthChange } from "./shared.js";
@@ -17,21 +17,17 @@ const ts = Array.from({ length: STEPS + 1 }, (_, i) => T0 + i * STEP_H);
 
 let compute = null;        // the Python function, once Pyodide has loaded
 let last = null;           // the latest results, for redrawing and scrubbing
-let momentH = 9;           // the moment you picked by dragging the chart (9 AM to start)
 
 const pct = (v) => `${Math.round(v * 100)}%`;
 const signed = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
 
-// Everything for one moment: the inputs, the four outputs, and the equation.
-function showMoment(i) {
+// Everything for one moment: the readout, the inputs and the four outputs.
+function showMoment(i, atNow) {
   const { r } = last;
   const S = r.pressure[i], circ = r.circadian[i], asleep = r.asleep[i];
   const conc = r.conc[i], felt = r.felt[i], groggy = r.inertia[i], alert = r.alertness[i];
 
-  $("alertWhen").textContent = `at ${hoursToClock(ts[i])}`;
-  $("alertReadoutTime").textContent = `at ${hoursToClock(ts[i])}`;
-  $("alertScore").textContent = asleep ? "Zz" : (alert * 10).toFixed(1);
-  $("alertSub").textContent = asleep ? "asleep" : "out of 10";
+  $("alertReadoutTime").textContent = atNow ? "right now" : `at ${hoursToClock(ts[i])}`;
   $("alertReadout").textContent = asleep ? "Asleep" : `${(alert * 10).toFixed(1)} / 10`;
 
   $("inConc").textContent = `${conc.toFixed(2)} mg/L`;
@@ -44,13 +40,6 @@ function showMoment(i) {
   $("outFelt").textContent = `${felt.toFixed(2)} of ${S.toFixed(2)}`;
   $("outInertia").textContent = groggy > 0.005 ? `−${groggy.toFixed(2)}` : "none";
   $("outAlert").textContent = alert.toFixed(2);
-
-  // The formula with this moment's numbers plugged in. The model clips the result to 0..1.
-  const raw = 1 - felt + circ - groggy;
-  $("equation").textContent = asleep
-    ? "You're asleep, so alertness isn't scored."
-    : `1 − ${felt.toFixed(2)} ${circ >= 0 ? "+" : "−"} ${Math.abs(circ).toFixed(2)} − ${groggy.toFixed(2)} = ${raw.toFixed(2)}` +
-      (raw > 1 || raw < 0 ? `, capped at ${Math.round(alert)}` : "");
 
   lineChart($("occChart"), {
     series: [{ xs: r.chartConc, ys: r.chartOcc, color: cssVar("--accent") }],
@@ -70,8 +59,8 @@ function drawChart() {
     bands: layer2.blocks.map((b) => ({ from: b.startH, to: b.endH, color: cssVar("--night") })),
     markers: layer1.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
-    startX: momentH,
-    onScrub: (i) => { momentH = ts[i]; showMoment(i); },
+    nowX: nowHours,
+    onScrub: showMoment,
   });
 }
 
@@ -95,5 +84,7 @@ export async function startLayer4() {
   const redo = perFrame(update);
   onWidthChange(update);
   onShared(redo);            // redo it whenever layer 1, 2 or 3 changes, once per frame
+  // Each time you arrive on this page (the 4th), redraw so the dot is at the latest now.
+  document.addEventListener("pageshown", (e) => { if (e.detail === 3 && last) drawChart(); });
   update();
 }

@@ -13,6 +13,7 @@
   --coral: #F0645F;      /* event marker, warnings */
   --coral-soft: #FDE4E2;
   --coral-ink: #B83A35;
+  --peak: #E9A23B;       /* where each drink tops out (kept apart from the coral readout dot) */
   --night: #DCE3EF;      /* sleep shading */
   --night-ink: #3E4E6B;
   --backdrop: #D7DDDA;   /* behind the phone frame on a laptop */
@@ -47,6 +48,7 @@
   --on-ink: #101614;
   --coral: #FF7A73; --coral-soft: #3D2221; --coral-ink: #FFB1AC;
   --night: #253246; --night-ink: #B9C6DE;
+  --peak: #F5B94F;
   --backdrop: #070A09; --frame: #000000; --scrim: rgba(0, 0, 0, .55);
 }
 
@@ -145,6 +147,8 @@ button { cursor: pointer; border: 0; background: none; }
 }
 .page > .info-pop { background: var(--card); margin-top: 0; }   /* on the page background, not inside a card */
 .info-pop[hidden] { display: none; }
+.info-pop .breakdown { margin-top: 0; }   /* a list of numbers inside the pop, tighter than in a card */
+.info-pop .breakdown li { padding: 7px 0; font-size: 13px; }
 
 .toggle { display: flex; background: var(--canvas); border-radius: 999px; padding: 3px; }
 .toggle button { padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
@@ -163,6 +167,7 @@ button { cursor: pointer; border: 0; background: none; }
 .swatch.event { background: var(--coral); }
 .swatch.sleep { background: var(--night); }
 .swatch.dose { background: var(--ink); border-radius: 50%; }
+.swatch.peak { background: var(--peak); border-radius: 50%; }
 .swatch.taper { background: var(--accent); }
 .swatch.cold { background: var(--muted); }
 
@@ -184,6 +189,8 @@ button { cursor: pointer; border: 0; background: none; }
 .chip { font-size: 12.5px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
 .chip.ok { background: var(--accent-soft); color: var(--accent-ink); }
 .chip.bad { background: var(--coral-soft); color: var(--coral-ink); }
+.chip.plain { background: var(--canvas); color: var(--ink); }   /* a fact, not good or bad news */
+.legend .chip { margin-left: auto; white-space: nowrap; }   /* pushed to the right end of the legend row */
 .stat { font-size: 14px; color: var(--muted); }
 .stat strong { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; margin-right: 2px; }
 .meter { position: relative; height: 12px; border-radius: 999px; background: var(--canvas); margin: 12px 0 10px; }
@@ -386,7 +393,8 @@ button { cursor: pointer; border: 0; background: none; }
 .tile-size { font-size: 11.5px; color: var(--muted); font-weight: 600; padding: 2px 4px 0; }
 
 .breakdown { list-style: none; padding: 0; margin-top: 8px; }
-.breakdown li { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.breakdown li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.breakdown strong { white-space: nowrap; }   /* values stay on one line; the label wraps instead */
 .breakdown li:first-child { border-top: 0; }
 .src { font-style: normal; font-size: 11.5px; font-weight: 700; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); }
 .breakdown li:last-child strong { color: var(--accent); }
@@ -403,12 +411,13 @@ button { cursor: pointer; border: 0; background: none; }
 .cal-cell.on-hour { border-top-color: var(--line); }
 .cal-cell.event { background: var(--coral-soft); }
 .cal-cell.sleep { background: var(--night); }
-.cal-cell.sleep.event { background: linear-gradient(135deg, var(--night) 50%, var(--coral-soft) 50%); }
+.cal-cell.sleep.event { background: var(--night); box-shadow: inset 4px 0 0 var(--coral); }   /* asleep during the event: a coral bar down the edge, continuous across cells */
 .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
 .segmented label { cursor: pointer; }
 .segmented input { position: absolute; opacity: 0; pointer-events: none; }
 .segmented span {
-  display: block; text-align: center; padding: 11px 4px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; height: 100%;
+  text-align: center; padding: 11px 4px; border-radius: 14px;
   background: var(--canvas); color: var(--ink); font-size: 12.5px; font-weight: 700;
 }
 .segmented input:checked + span { background: var(--ink); color: var(--on-ink); }

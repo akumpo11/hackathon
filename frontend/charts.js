@@ -33,7 +33,9 @@ function xTicks(svg, s, xMin, xMax, step, format) {
 /**
  * Area chart with a draggable readout dot (the main caffeine curve).
  * opts: xs, ys, yMax, bands [{from, to, color}], markers [{x, label}],
- *       formatTick(x), onScrub(index), startX (where the dot starts)
+ *       peaks [x] (optional amber dots), formatTick(x), onScrub(index, atNow),
+ *       nowX() (the time now; the dot rests there when you aren't touching the chart),
+ *       startX (where the dot rests instead if now is off the chart)
  */
 export function areaChart(svg, opts) {
   const { xs, ys } = opts;
@@ -70,32 +72,51 @@ export function areaChart(svg, opts) {
       .textContent = m.label;
   }
 
+  // Peaks: an amber dot on the curve where each drink tops out.
+  for (const px of opts.peaks ?? []) {
+    if (px > xMax) continue;
+    el("circle", { cx: s.x(px), cy: s.y(valueAt(px)), r: 4.5, fill: css("--peak"), stroke: css("--card"), "stroke-width": 2 }, svg);
+  }
+
   xTicks(svg, s, xMin, xMax, 3, opts.formatTick);
 
   // Readout: vertical line + dot that follows your finger or mouse.
   const guide = el("line", { y1: s.top, y2: s.bottom, stroke: css("--coral"), "stroke-width": 1.5, "stroke-dasharray": "3 3" }, svg);
   const dot = el("circle", { r: 6.5, fill: css("--coral"), stroke: css("--card"), "stroke-width": 3 }, svg);
-  const moveTo = (i) => {
+  const moveTo = (i, atNow = false) => {
     const cx = s.x(xs[i]), cy = s.y(ys[i]);
     guide.setAttribute("x1", cx); guide.setAttribute("x2", cx);
     dot.setAttribute("cx", cx); dot.setAttribute("cy", cy);
-    opts.onScrub(i);
+    opts.onScrub(i, atNow);
   };
-  const nearest = (clientX) => {
-    const r = svg.getBoundingClientRect();
-    const t = xMin + ((clientX - r.left - s.left) / (s.right - s.left)) * (xMax - xMin);
+  const nearestTo = (t) => {
     let best = 0;
     xs.forEach((v, i) => { if (Math.abs(v - t) < Math.abs(xs[best] - t)) best = i; });
     return best;
   };
-  // Mouse: the dot follows the pointer. Fingers are handled in addTouchScrub below.
+  const nearest = (clientX) => {
+    const r = svg.getBoundingClientRect();
+    return nearestTo(xMin + ((clientX - r.left - s.left) / (s.right - s.left)) * (xMax - xMin));
+  };
+  // Where the dot rests: now, if it's on the chart. Charts that run past midnight count
+  // 1 AM tomorrow as 25, so try that too. Otherwise startX.
+  const rest = () => {
+    const now = opts.nowX?.();
+    const onChart = [now, now + 24].find((t) => t >= xMin && t <= xMax);
+    if (onChart !== undefined) moveTo(nearestTo(onChart), true);
+    else moveTo(nearestTo(opts.startX ?? xMin));
+  };
+  // Mouse: the dot follows the pointer and goes back to rest when it leaves.
+  // Fingers are handled in addTouchScrub below.
   svg.onpointermove = (e) => { if (e.pointerType !== "touch") moveTo(nearest(e.clientX)); };
   svg.onpointerdown = (e) => { if (e.pointerType !== "touch") moveTo(nearest(e.clientX)); };
+  svg.onpointerleave = (e) => { if (e.pointerType !== "touch") rest(); };
   // This chart gets redrawn on every input change, so the touch listeners are added only
-  // once and always call the latest drawing's scrub function.
+  // once and always call the latest drawing's functions.
   svg.scrubTo = (clientX) => moveTo(nearest(clientX));
+  svg.rest = rest;
   if (!svg.hasTouchScrub) addTouchScrub(svg);
-  moveTo(nearest(svg.getBoundingClientRect().left + s.x(opts.startX ?? xMin)));
+  rest();
 }
 
 // Fingers: a sideways drag scrubs the curve, an up-and-down drag scrolls the page as usual.
@@ -114,6 +135,9 @@ function addTouchScrub(svg) {
     mode ??= Math.abs(t.clientX - startX) >= Math.abs(t.clientY - startY) ? "scrub" : "scroll";
     if (mode === "scrub") { e.preventDefault(); svg.scrubTo(t.clientX); }
   }, { passive: false });                        // passive: false is what allows preventDefault
+  // Finger lifted: back to rest.
+  svg.addEventListener("touchend", () => svg.rest(), { passive: true });
+  svg.addEventListener("touchcancel", () => svg.rest(), { passive: true });
 }
 
 /**

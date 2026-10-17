@@ -135,7 +135,7 @@ def recommendQuitDay(p, examInDays):
     if nowR <= RESET_TARGET_R:
         return {**base, "reset": False, "quitInDays": None, "taperDays": 0, "examR": nowR, "worstDay": None,
                 "peakWithdrawal": 0.0,
-                "reason": f"No reset needed. Your receptors are only at {nowR:.2f}x, so caffeine already works almost fully."}
+                "reason": "Caffeine already works almost fully."}
 
     best = None
     for taperDays in TAPER_OPTIONS_DAYS:
@@ -153,16 +153,14 @@ def recommendQuitDay(p, examInDays):
     if best is None:
         return {**base, "reset": False, "quitInDays": None, "taperDays": 0, "examR": nowR, "worstDay": None,
                 "peakWithdrawal": 0.0,
-                "reason": (f"Not enough time for a reset: it takes about {needed} days without caffeine and the exam is in "
-                           f"{examInDays}. Quitting now would put the withdrawal fog on your study days, so keep your usual intake.")}
+                "reason": f"Not enough time: a reset takes about {needed} days. Quitting now would leave you foggy while you study."}
 
     _, quitInDays, taperDays, examR, peak, worstDay = best
     start = "today" if quitInDays == 0 else f"in {quitInDays} day{'s' if quitInDays > 1 else ''}"
     how = "stop cold turkey" if taperDays == 0 else f"cut down over {taperDays} days, then stop"
     return {**base, "reset": True, "quitInDays": quitInDays, "taperDays": taperDays, "examR": examR,
             "worstDay": worstDay, "peakWithdrawal": peak,
-            "reason": (f"Start {start} and {how}. Your receptors are back to {examR:.2f}x by the exam, "
-                       f"and the worst day feels {round(peak * 100)}% sleepier than normal.")}
+            "reason": f"Start {start} and {how}. Worst day: {round(peak * 100)}% sleepier than normal."}
 
 
 def feelsLikeMg(doseMg, p, R):

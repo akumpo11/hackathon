@@ -144,11 +144,12 @@ function drawPlanChart(x, r) {
     ],
     markers: drinks.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
+    nowX: nowH,
     startX: x.event.startH,
-    onScrub: (i) => {
+    onScrub: (i, atNow) => {
       const t = r.t[i];
       $("planReadout").textContent = asleep(t) ? "Asleep" : `${(r.alertness[i] * 10).toFixed(1)} / 10`;
-      $("planReadoutTime").textContent = `at ${hoursToClock(t)}`;
+      $("planReadoutTime").textContent = atNow ? "right now" : `at ${hoursToClock(t)}`;
     },
   });
 }

@@ -43,17 +43,15 @@ function showOutputs(x, r) {
   const plan = r.plan;
   $("strengthNow").textContent = `${Math.round(r.strengthNow)}%`;
   $("feelsLike").textContent = `Your ${r.doseMg} mg feels like ${Math.round(r.feelsLikeMg)} mg`;
-  $("tolEquation").textContent =
-    `You have ${r.nowR.toFixed(2)}x a non-drinker's receptors, so you feel ${r.nowR.toFixed(2)} × the sleep pressure ` +
-    `caffeine doesn't block.`;
+  $("tolEquation").textContent = `${r.nowR.toFixed(2)}x a non-drinker's receptors`;
 
   $("resetChip").textContent = plan.reset ? (plan.taperDays ? `${plan.taperDays}-day taper` : "Cold turkey") : "Keep your habit";
   $("resetChip").className = `chip ${plan.reset || plan.nowR <= 1.1 ? "ok" : "bad"}`;
+  // The chip already says how (taper or cold turkey), so the line only adds when.
   $("resetReason").textContent = plan.reset
-    ? `${plan.reason} First change: ${dayToDate(plan.quitInDays)}. Worst day: ${dayToDate(plan.worstDay)}.`
+    ? `Start ${dayToDate(plan.quitInDays)}. Worst day: ${dayToDate(plan.worstDay)}.`
     : plan.reason;
 
-  $("outNowR").textContent = `${r.nowR.toFixed(2)}x`;
   $("outDaysNeeded").textContent = plan.daysNeeded ? `${plan.daysNeeded} days` : "none";
   $("outExamR").textContent = `${plan.examR.toFixed(2)}x`;
   $("outStrengthExam").textContent = `${Math.round(r.strengthAtExam)}%`;

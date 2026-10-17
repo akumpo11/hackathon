@@ -1,7 +1,7 @@
 // Layer 1 page: read the drinks and body inputs, run model/pk.py (in the browser
 // via Pyodide), and show the caffeine curve. The math itself is only in Python.
 
-import { clockToHours, hoursToClock } from "./time.js";
+import { clockToHours, hoursToClock, nowHours } from "./time.js";
 import { areaChart } from "./charts.js";
 import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
@@ -35,15 +35,11 @@ function readInputs(drinks) {
 }
 
 function showOutputs(x, r) {
-  $("peakMin").textContent = Math.round(r.peakMin);
-  $("pkEquation").textContent =
-    `ke = ln 2 / ${r.halfLifeH.toFixed(1)} h = ${r.ke.toFixed(3)} per hour. ` +
-    `Peak at ln(ka/ke) / (ka − ke) = ${Math.round(r.peakMin)} min, with ka = ${r.ka} per hour.`;
-
+  // Every drink takes the same time to peak, so one tag covers them all.
+  $("pkPeakMin").textContent = Math.round(r.peakMin);
   $("outHalfLife").textContent = `${r.halfLifeH.toFixed(1)} h`;
   $("outCleared").textContent = `${Math.round(r.clearedPerHour * 100)}% of what's left`;
   $("outPeak").textContent = `${r.firstPeakConc.toFixed(1)} mg/L from ${r.firstMg} mg`;
-  $("outBedtime").textContent = `${Math.round(r.bedtimeMg)} mg`;
 
   // Sleep check: the meter runs to twice the limit, so the limit mark sits in the middle.
   const ok = r.bedtimeMg <= r.limitMg;
@@ -69,11 +65,13 @@ function drawChart(x, r) {
     xs: r.t, ys, yMax,
     bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night") }],
     markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
+    peaks: x.doses.map((d) => d.timeH + r.peakMin / 60),     // every drink peaks the same time after it
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
+    nowX: nowHours,
     startX: x.doses.length ? x.doses[0].timeH + r.peakMin / 60 : r.t[0],
-    onScrub: (i) => {
+    onScrub: (i, atNow) => {
       $("pkReadout").textContent = series === "bodyMg" ? `${Math.round(ys[i])} mg` : `${ys[i].toFixed(2)} ${unit}`;
-      $("pkReadoutTime").textContent = `at ${hoursToClock(r.t[i])}`;
+      $("pkReadoutTime").textContent = atNow ? "right now" : `at ${hoursToClock(r.t[i])}`;
     },
   });
 }

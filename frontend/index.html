@@ -32,17 +32,6 @@
       <h1 class="page-title first">Caffeine in your blood</h1>
       <p class="body">Your caffeine level through the day.</p>
 
-      <div class="hero">
-        <div class="ring ring-dark">
-          <strong id="peakMin">…</strong>
-          <span>min to peak</span>
-        </div>
-        <div class="hero-side">
-          <p class="hero-lead">Each drink peaks after</p>
-          <p class="equation" id="pkEquation">Loading the Python model…</p>
-        </div>
-      </div>
-
       <article class="card">
         <div class="card-head">
           <h2>Caffeine over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPk" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
@@ -57,6 +46,7 @@
         <ul class="legend">
           <li><span class="swatch dose"></span>Drink</li>
           <li><span class="swatch sleep"></span>Bedtime</li>
+          <li class="chip plain"><span class="swatch peak"></span><span><span id="pkPeakMin">–</span> min to peak</span></li>
         </ul>
       </article>
 
@@ -86,19 +76,16 @@
       </form>
 
       <article class="card">
-        <h2>What comes out</h2>
-        <ul class="breakdown">
-          <li><span>Half-life used</span><strong id="outHalfLife">–</strong></li>
-          <li><span>Cleared each hour</span><strong id="outCleared">–</strong></li>
-          <li><span>Peak from your first drink</span><strong id="outPeak">–</strong></li>
-          <li><span>Left in you at bedtime</span><strong id="outBedtime">–</strong></li>
-        </ul>
-      </article>
-
-      <article class="card">
         <div class="card-head">
-          <h2>Sleep check</h2>
+          <h2>Sleep check <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkNumbers" aria-label="The numbers behind it"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="pkSleepChip">–</span>
+        </div>
+        <div class="info-pop" id="infoPkNumbers" hidden>
+          <ul class="breakdown">
+            <li><span>Half-life used</span><strong id="outHalfLife">–</strong></li>
+            <li><span>Cleared each hour</span><strong id="outCleared">–</strong></li>
+            <li><span>Peak from your first drink</span><strong id="outPeak">–</strong></li>
+          </ul>
         </div>
         <div class="meter"><div class="meter-fill" id="pkMeter"></div><div class="meter-limit" id="pkLimit"></div></div>
         <p class="muted small" id="pkSleepNote"></p>
@@ -125,9 +112,9 @@
           <button type="button" class="link-btn" data-open-settings>Change</button>
         </div>
         <ul class="breakdown given">
-          <li><span>Usual bedtime <em class="src">Settings</em></span><strong data-setting="bedtime">–</strong></li>
-          <li><span>Usual wake-up <em class="src">Settings</em></span><strong data-setting="wakeTime">–</strong></li>
-          <li><span>When you're most alert <em class="src">Settings</em></span><strong data-setting="chronotypeShiftH">–</strong></li>
+          <li><span>Usual bedtime</span><strong data-setting="bedtime">–</strong></li>
+          <li><span>Usual wake-up</span><strong data-setting="wakeTime">–</strong></li>
+          <li><span>Body clock</span><strong data-setting="chronotypeShiftH">–</strong></li>
         </ul>
       </article>
 
@@ -150,7 +137,7 @@
       <p class="layer-no">Layer 3</p>
       <h1 class="page-title first">Tolerance and reset</h1>
       <p class="body">How much your habit weakens each cup. <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoTolerance" aria-label="About tolerance"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></p>
-      <p class="info-pop" id="infoTolerance" hidden>Daily caffeine makes your brain grow extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal.</p>
+      <p class="info-pop" id="infoTolerance" hidden>Daily caffeine makes your brain grow extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal. With R times the receptors, you feel R × the sleep pressure caffeine doesn't block.</p>
 
       <div class="hero">
         <div class="ring ring-dark">
@@ -170,7 +157,6 @@
             <label class="slider">
               <span class="slider-top"><span>Exam in</span><output data-for="examInDays"></output></span>
               <input type="range" name="examInDays" min="0" max="21" step="1" value="14">
-              <span class="hint">A full reset takes about a week without caffeine.</span>
             </label>
           </div>
         </article>
@@ -183,10 +169,9 @@
         </div>
         <p class="body" id="resetReason"></p>
         <ul class="breakdown">
-          <li><span>Receptors now</span><strong id="outNowR">–</strong></li>
-          <li><span>Days off caffeine to reset</span><strong id="outDaysNeeded">–</strong></li>
+          <li><span>Days to reset</span><strong id="outDaysNeeded">–</strong></li>
           <li><span>Receptors on exam day</span><strong id="outExamR">–</strong></li>
-          <li><span>Coffee strength on exam day</span><strong id="outStrengthExam">–</strong></li>
+          <li><span>Strength on exam day</span><strong id="outStrengthExam">–</strong></li>
         </ul>
       </article>
 
@@ -202,7 +187,7 @@
         <svg class="chart" id="resetChart" role="img" aria-label="Receptor level and withdrawal over the days before the exam"></svg>
         <ul class="legend">
           <li><span class="swatch taper"></span>The plan</li>
-          <li><span class="swatch cold"></span>Quit today, cold turkey</li>
+          <li><span class="swatch cold"></span>Quit today</li>
           <li><span class="swatch event"></span>Exam</li>
         </ul>
       </article>
@@ -214,21 +199,9 @@
       <h1 class="page-title first">Alertness</h1>
       <p class="body">How awake you feel, from layers 1 to 3.</p>
 
-      <div class="hero">
-        <div class="ring" id="alertRing">
-          <strong id="alertScore">…</strong>
-          <span id="alertSub">out of 10</span>
-        </div>
-        <div class="hero-side">
-          <p class="hero-lead">How alert you are</p>
-          <p class="muted" id="alertWhen"></p>
-          <p class="equation" id="equation">Loading the Python model…</p>
-        </div>
-      </div>
-
       <article class="card">
         <h2>Alertness over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoAlert" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoAlert" hidden>It combines the drinks from layer 1, the sleep from layer 2 and the tolerance from layer 3. Drag along the curve to pick a moment; everything below is for that moment.</p>
+        <p class="info-pop" id="infoAlert" hidden>It combines the drinks from layer 1, the sleep from layer 2 and the tolerance from layer 3. It opens on right now. Drag along the curve to pick another moment; everything below is for that moment.</p>
         <div class="readout"><span class="readout-value" id="alertReadout">–</span><span class="muted" id="alertReadoutTime"></span></div>
         <svg class="chart" id="alertChart" role="img" aria-label="Alertness over the day, with drinks marked and sleep shaded"></svg>
         <ul class="legend">
@@ -498,7 +471,7 @@
         <h2>Body clock</h2>
         <p class="muted small">When are you most alert?</p>
         <div class="segmented" role="radiogroup" aria-label="Chronotype">
-          <label><input type="radio" name="chronotype" value="-2"><span>Morning person</span></label>
+          <label><input type="radio" name="chronotype" value="-2"><span>Early bird</span></label>
           <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
           <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
         </div>

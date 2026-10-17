@@ -11,6 +11,7 @@ import { startLayer5 } from "./layer5.js";
 const pager = document.getElementById("pager");
 const pill = document.getElementById("tabPill");
 const tabs = [...document.querySelectorAll(".tab")];
+let shownPage = null;      // the page you're on, so arriving on a new one is noticed once
 
 // While you swipe, the pill follows: scroll position / page width = how many pages across.
 pager.addEventListener("scroll", () => {
@@ -18,6 +19,11 @@ pager.addEventListener("scroll", () => {
   pill.style.transform = `translateX(${pagesAcross * 100}%)`;
   const current = Math.round(pagesAcross);
   tabs.forEach((t, i) => t.classList.toggle("on", i === current));
+  // Tell the pages when you arrive on a new one (layer 4 jumps back to right now).
+  if (current !== shownPage) {
+    shownPage = current;
+    document.dispatchEvent(new CustomEvent("pageshown", { detail: current }));
+  }
 }, { passive: true });
 
 tabs.forEach((tab, i) => tab.addEventListener("click", () => {
@@ -38,7 +44,7 @@ initSettings();
 
 startLayer1().catch((err) => {
   console.error(err);
-  document.getElementById("pkEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
+  document.getElementById("pkReadout").textContent = "Python didn't load";
 });
 
 startLayer2().catch((err) => {
@@ -53,7 +59,7 @@ startLayer3().catch((err) => {
 
 startLayer4().catch((err) => {
   console.error(err);
-  document.getElementById("equation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
+  document.getElementById("alertReadout").textContent = "Python didn't load";
 });
 
 startLayer5().catch((err) => {

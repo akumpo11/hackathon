@@ -7,6 +7,12 @@ export function clockToHours(hhmm, dayOffset = 0) {
   return dayOffset * 24 + h + m / 60;
 }
 
+// The time now, in the same hours (2:30 PM = 14.5).
+export function nowHours() {
+  const d = new Date();
+  return d.getHours() + d.getMinutes() / 60;
+}
+
 export function hoursToClock(hours, withDay = false) {
   const day = Math.floor(hours / 24);
   let minutes = Math.round((hours - day * 24) * 60);
