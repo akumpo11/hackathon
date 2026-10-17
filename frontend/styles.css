@@ -224,6 +224,28 @@ button svg path, .avatar svg path { fill: none; stroke: currentColor; stroke-wid
 .breakdown li:first-child { border-top: 0; }
 .breakdown li:last-child strong { color: var(--mint); }
 
+/* ---------- Layer 2: sleep calendar and body clock ---------- */
+.cal-wrap { margin-top: 12px; }
+.cal { display: grid; grid-template-columns: 34px repeat(var(--days), 1fr); gap: 0 2px; user-select: none; -webkit-user-select: none; }
+.cal-head { display: flex; flex-direction: column; align-items: center; padding: 2px 0 6px; font-size: 11px; color: var(--muted); }
+.cal-head strong { font-size: 15px; color: var(--ink); width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; }
+.cal-head.today strong { background: var(--ink); color: #fff; }
+.cal-hour { height: 14px; font-size: 10px; font-weight: 700; color: var(--muted); transform: translateY(-6px); touch-action: pan-y; }
+.cal-cell { height: 14px; touch-action: none; background: var(--canvas); border-top: 1px solid transparent; }
+.cal-cell.on-hour { border-top-color: var(--line); }
+.cal-cell.event { background: var(--coral-soft); }
+.cal-cell.sleep { background: var(--night); }
+.cal-cell.sleep.event { background: linear-gradient(135deg, var(--night) 50%, var(--coral-soft) 50%); }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.segmented label { cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented span {
+  display: block; text-align: center; padding: 11px 4px; border-radius: 14px;
+  background: var(--canvas); color: var(--ink); font-size: 12.5px; font-weight: 700;
+}
+.segmented input:checked + span { background: var(--ink); color: #fff; }
+.segmented input:focus-visible + span { outline: 2px solid var(--mint); outline-offset: 2px; }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

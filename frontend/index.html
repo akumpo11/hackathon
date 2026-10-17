@@ -27,7 +27,41 @@
     <section class="page" aria-label="Layer 2">
       <p class="layer-no">Layer 2</p>
       <h1 class="page-title first">Sleep pressure</h1>
-      <p class="muted">Andrew is building this in model/sleep.py.</p>
+      <p class="body">How sleepy you'd be with no caffeine. Pressure builds while you're awake and drains while you sleep.</p>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>When you sleep</h2>
+          <span class="chip ok" id="sleepSummary">–</span>
+        </div>
+        <p class="muted small">Press and drag over a day to mark sleep. Drag over marked time to erase it. Short blocks count as naps. Scroll with the hour labels.</p>
+        <div id="sleepCal" class="cal-wrap"></div>
+      </article>
+
+      <form id="layer2Inputs">
+        <article class="card">
+          <h2>Body clock</h2>
+          <p class="muted small">When are you most alert?</p>
+          <div class="segmented" role="radiogroup" aria-label="Chronotype">
+            <label><input type="radio" name="chronotype" value="-2"><span>Morning person</span></label>
+            <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
+            <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
+          </div>
+        </article>
+      </form>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Sleep pressure over the week</h2>
+          <span class="chip ok" id="pressureNow">–</span>
+        </div>
+        <p class="muted small">0 is fully rested, 1 is up all night. Short nights leave you starting the next day higher.</p>
+        <svg class="chart" id="pressureChart" role="img" aria-label="Sleep pressure and body clock over five days"></svg>
+        <ul class="legend">
+          <li><span class="swatch taper"></span>Sleep pressure</li>
+          <li><span class="swatch cold"></span>Body clock</li>
+        </ul>
+      </article>
     </section>
 
     <!-- ============ Layer 3: alertness (inputs, processing, outputs) ============ -->
