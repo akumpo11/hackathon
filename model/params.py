@@ -14,6 +14,7 @@ CONTRACEPTIVE_HALF_LIFE_FACTOR = 2.0   # estrogen slows CYP1A2, roughly doubling
 TAU_WAKE_H = 18.2       # S rises toward 1 with this time constant while awake
 TAU_SLEEP_H = 4.2       # S falls toward 0 with this time constant while asleep
 CIRCADIAN_AMP = 0.15    # circadian swing: +0.15 at the peak, -0.15 twelve hours later
+BURN_IN_H = 48          # sleepPressure starts this long before the first time asked for, so its starting guess washes out
 
 # Layer 4: tolerance (adenosine receptor upregulation)
 TAU_TOLERANCE_DAYS = 4.0        # receptors relax toward their target with this time constant

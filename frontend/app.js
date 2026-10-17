@@ -31,7 +31,10 @@ startLayer1().catch((err) => {
   document.getElementById("pkEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
 });
 
-startLayer2();
+startLayer2().catch((err) => {
+  console.error(err);
+  document.getElementById("pressureNow").textContent = "Python didn't load";
+});
 
 startLayer3().catch((err) => {
   console.error(err);

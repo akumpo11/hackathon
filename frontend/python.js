@@ -9,8 +9,10 @@ const FILES = {
   "model/schema.py": "../model/schema.py",
   "model/params.py": "../model/params.py",
   "model/pk.py": "../model/pk.py",
+  "model/sleep.py": "../model/sleep.py",
   "model/alertness.py": "../model/alertness.py",
   "layer1_bridge.py": "py/layer1_bridge.py",
+  "layer2_bridge.py": "py/layer2_bridge.py",
   "layer3_bridge.py": "py/layer3_bridge.py",
 };
 
