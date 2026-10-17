@@ -9,22 +9,22 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from model.alertness import alertness_from, felt_pressure, inertia, occupancy
+from model.alertness import alertnessFrom, feltPressure, inertia, occupancy
 
 
-def compute(S, conc, kd, R, circ, sleep_len_h, minutes_since):
-    p = SimpleNamespace(kd_mg_l=kd)
+def compute(S, conc, kd, R, circ, sleepLenH, minutesSince):
+    p = SimpleNamespace(kdMgL=kd)
 
-    # Pretend you woke up at time 0 after sleeping for sleep_len_h hours.
-    sleep = [SimpleNamespace(start_h=-sleep_len_h, end_h=0.0)] if sleep_len_h > 0 else []
-    groggy = float(inertia([minutes_since / 60], sleep)[0])
+    # Pretend you woke up at time 0 after sleeping for sleepLenH hours.
+    sleep = [SimpleNamespace(startH=-sleepLenH, endH=0.0)] if sleepLenH > 0 else []
+    groggy = float(inertia([minutesSince / 60], sleep)[0])
 
-    chart_conc = np.linspace(0, 10, 101)
+    chartConc = np.linspace(0, 10, 101)
     return {
         "occupancy": float(occupancy(conc, kd)),
-        "felt": float(felt_pressure(S, conc, R, p)),
+        "felt": float(feltPressure(S, conc, R, p)),
         "inertia": groggy,
-        "alertness": float(alertness_from(S, circ, conc, R, groggy, kd)),
-        "chart_conc": chart_conc.tolist(),
-        "chart_occ": occupancy(chart_conc, kd).tolist(),
+        "alertness": float(alertnessFrom(S, circ, conc, R, groggy, kd)),
+        "chartConc": chartConc.tolist(),
+        "chartOcc": occupancy(chartConc, kd).tolist(),
     }

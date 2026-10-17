@@ -21,7 +21,7 @@ The first load takes about 10 to 15 seconds while the browser downloads Pyodide 
 The math lives only in `model/alertness.py`, the same file the optimizer imports. The browser runs it with [Pyodide](https://pyodide.org) (Python compiled to WebAssembly):
 
 1. `layer3.js` loads Pyodide and numpy, then copies `model/alertness.py` and `py/layer3_bridge.py` into Pyodide's virtual disk.
-2. On every slider move, it calls `compute()` in `layer3_bridge.py`, which calls `occupancy`, `felt_pressure`, `inertia` and `alertness_from`.
+2. On every slider move, it calls `compute()` in `layer3_bridge.py`, which calls `occupancy`, `feltPressure`, `inertia` and `alertnessFrom`.
 3. It writes the numbers back into the page and redraws the chart.
 
 The sliders stand in for the outputs of layers 1, 2 and 4 until those exist.

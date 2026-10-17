@@ -61,7 +61,7 @@ function showOutputs(x, r) {
     (raw > 1 || raw < 0 ? `, capped at ${r.alertness.toFixed(0)}` : "");
 
   lineChart($("occChart"), {
-    series: [{ xs: r.chart_conc, ys: r.chart_occ, color: getComputedStyle(document.documentElement).getPropertyValue("--mint").trim() }],
+    series: [{ xs: r.chartConc, ys: r.chartOcc, color: getComputedStyle(document.documentElement).getPropertyValue("--mint").trim() }],
     yMin: 0, yMax: 1, tickStep: 2,
     formatTick: (c) => `${c}`,
     points: [{ x: x.conc, y: r.occupancy, label: pct(r.occupancy) }],

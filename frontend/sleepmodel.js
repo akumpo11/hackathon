@@ -13,7 +13,7 @@ export function sleepPressure(ts, blocks) {
   const fineT = [], fineS = [];
   let S = 0.5;
   for (let t = t0; t <= t1 + STEP_H; t += STEP_H) {
-    const asleep = blocks.some((b) => t >= b.start_h && t < b.end_h);
+    const asleep = blocks.some((b) => t >= b.startH && t < b.endH);
     S = asleep ? S * Math.exp(-STEP_H / TAU_SLEEP_H) : 1 - (1 - S) * Math.exp(-STEP_H / TAU_WAKE_H);
     fineT.push(t); fineS.push(S);
   }

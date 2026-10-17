@@ -9,63 +9,63 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from model.alertness import alertness_from, felt_pressure, inertia, occupancy
+from model.alertness import alertnessFrom, feltPressure, inertia, occupancy
 
-P = SimpleNamespace(kd_mg_l=3.0)
-
-
-def block(start_h, end_h):
-    return SimpleNamespace(start_h=start_h, end_h=end_h)
+P = SimpleNamespace(kdMgL=3.0)
 
 
-def test_half_block_at_kd():
+def block(startH, endH):
+    return SimpleNamespace(startH=startH, endH=endH)
+
+
+def testHalfBlockAtKd():
     assert occupancy(3, 3) == 0.5
 
 
-def test_effect_saturates():
+def testEffectSaturates():
     # Four times the caffeine blocks far less than four times as many receptors.
     assert occupancy(8, 3) < 4 * occupancy(2, 3)
     assert occupancy(1000, 3) < 1
 
 
-def test_works_on_arrays():
+def testWorksOnArrays():
     out = occupancy(np.array([0.0, 3.0, 6.0]), 3)
     assert out.shape == (3,)
     assert out[0] == 0
 
 
-def test_tolerance_makes_pressure_feel_stronger():
-    assert felt_pressure(0.5, 2.0, 1.5, P) > felt_pressure(0.5, 2.0, 1.0, P)
+def testToleranceMakesPressureFeelStronger():
+    assert feltPressure(0.5, 2.0, 1.5, P) > feltPressure(0.5, 2.0, 1.0, P)
 
 
-def test_no_caffeine_no_tolerance_feels_like_raw_pressure():
-    assert felt_pressure(0.6, 0.0, 1.0, P) == 0.6
+def testNoCaffeineNoToleranceFeelsLikeRawPressure():
+    assert feltPressure(0.6, 0.0, 1.0, P) == 0.6
 
 
-def test_short_nap_less_groggy_than_deep_nap():
+def testShortNapLessGroggyThanDeepNap():
     wake = 15.0
-    after_20_min = inertia([wake + 0.1], [block(wake - 20 / 60, wake)])[0]
-    after_60_min = inertia([wake + 0.1], [block(wake - 1.0, wake)])[0]
-    assert after_20_min < after_60_min
+    after20Min = inertia([wake + 0.1], [block(wake - 20 / 60, wake)])[0]
+    after60Min = inertia([wake + 0.1], [block(wake - 1.0, wake)])[0]
+    assert after20Min < after60Min
 
 
-def test_inertia_fades_and_is_zero_before_waking():
+def testInertiaFadesAndIsZeroBeforeWaking():
     sleep = [block(23.0, 31.0)]
     early, later = inertia([31.05, 33.0], sleep)
     assert early > later
     assert inertia([30.0], sleep)[0] == 0
 
 
-def test_only_latest_sleep_counts():
+def testOnlyLatestSleepCounts():
     sleep = [block(23.0, 31.0), block(38.0, 38 + 20 / 60)]   # night, then a 20-min nap
-    just_after_nap = inertia([38 + 20 / 60], sleep)[0]
-    assert abs(just_after_nap - 0.10) < 1e-9
+    justAfterNap = inertia([38 + 20 / 60], sleep)[0]
+    assert abs(justAfterNap - 0.10) < 1e-9
 
 
-def test_alertness_is_clipped_to_0_1():
-    assert alertness_from(0.0, 0.15, 0.0, 1.0, 0.0) == 1.0
-    assert alertness_from(1.0, -0.15, 0.0, 1.8, 0.3) == 0.0
+def testAlertnessIsClippedTo01():
+    assert alertnessFrom(0.0, 0.15, 0.0, 1.0, 0.0) == 1.0
+    assert alertnessFrom(1.0, -0.15, 0.0, 1.8, 0.3) == 0.0
 
 
-def test_caffeine_raises_alertness():
-    assert alertness_from(0.7, 0.0, 3.0, 1.0, 0.0) > alertness_from(0.7, 0.0, 0.0, 1.0, 0.0)
+def testCaffeineRaisesAlertness():
+    assert alertnessFrom(0.7, 0.0, 3.0, 1.0, 0.0) > alertnessFrom(0.7, 0.0, 0.0, 1.0, 0.0)

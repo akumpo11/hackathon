@@ -99,16 +99,16 @@ export function initSleepCalendar(root, onChange = () => {}) {
       else blocks.push({ startSlot: s, endSlot: s + 1 });
     }
     return blocks.map((b) => {
-      const start_h = hoursOf(b.startSlot), end_h = hoursOf(b.endSlot);
-      return { start_h, end_h, is_nap: end_h - start_h <= NAP_MAX_H };
+      const startH = hoursOf(b.startSlot), endH = hoursOf(b.endSlot);
+      return { startH, endH, isNap: endH - startH <= NAP_MAX_H };
     });
   }
 
   // Shade the event so you can see where sleep sits relative to it.
-  function setEvent(start_h, end_h) {
+  function setEvent(startH, endH) {
     cells.forEach((c, i) => {
       const t = hoursOf(i);
-      c.classList.toggle("event", t >= start_h && t < end_h);
+      c.classList.toggle("event", t >= startH && t < endH);
     });
   }
 

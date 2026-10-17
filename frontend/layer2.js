@@ -13,7 +13,7 @@ const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyV
 const ts = Array.from({ length: 5 * 24 * 4 + 1 }, (_, i) => -48 + i / 4);
 
 function draw(blocks) {
-  const hours = blocks.reduce((sum, b) => sum + (b.end_h - b.start_h), 0);
+  const hours = blocks.reduce((sum, b) => sum + (b.endH - b.startH), 0);
   $("sleepSummary").textContent = `${blocks.length} block${blocks.length === 1 ? "" : "s"}, ${hours.toFixed(1)} h`;
 
   const peak = 17 + Number($("layer2Inputs").elements.chronotype.value);
