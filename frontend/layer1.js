@@ -5,7 +5,7 @@ import { clockToHours, hoursToClock } from "./api.js";
 import { areaChart } from "./charts.js";
 import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
-import { publish } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -23,19 +23,15 @@ function readInputs(drinks) {
     if (label) doses.push({ timeH: clockToHours(el[`time${i}`].value), mg: drinks[label], label });
   }
   doses.sort((a, b) => a.timeH - b.timeH);
+  // Your body comes from personal settings (settings.js), not this page.
+  const s = shared.settings;
   return {
     doses, bedtimeH,
-    weightKg: Number(el.weight.value),
-    halfLifeH: Number(el.halfLife.value),
-    smoker: el.smoker.checked,
-    oralContraceptives: el.oralContraceptives.checked,
+    weightKg: s.weightKg,
+    halfLifeH: s.halfLifeH,
+    smoker: s.smoker,
+    oralContraceptives: s.oralContraceptives,
   };
-}
-
-function showSliderValues(x) {
-  const out = (name, text) => { form.querySelector(`output[data-for="${name}"]`).textContent = text; };
-  out("weight", `${x.weightKg} kg`);
-  out("halfLife", `${x.halfLifeH.toFixed(1)} h`);
 }
 
 function showOutputs(x, r) {
@@ -92,7 +88,6 @@ export async function startLayer1() {
     const x = readInputs(drinks);
     publish("layer1", { doses: x.doses, weightKg: x.weightKg, halfLifeH: x.halfLifeH,
                         smoker: x.smoker, oralContraceptives: x.oralContraceptives });
-    showSliderValues(x);
     const r = toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
                                       x.smoker, x.oralContraceptives, x.bedtimeH));
     last = { x, r };
@@ -107,7 +102,16 @@ export async function startLayer1() {
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
   });
-  form.addEventListener("input", update);
-  window.addEventListener("resize", update);
+  const redo = perFrame(update);
+  form.addEventListener("input", redo);
+  onWidthChange(update);
+  // Redo it when personal settings change. Only then: this page publishes too, and
+  // reacting to its own publish would loop forever.
+  let seenSettings = shared.settings;
+  onShared(() => {
+    if (shared.settings === seenSettings) return;
+    seenSettings = shared.settings;
+    redo();
+  });
   update();
 }

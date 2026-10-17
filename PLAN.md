@@ -137,7 +137,8 @@ Decision: all Python. Team of 3, everyone is comfortable in Python, and judges w
 - Math: a plain Python package `model/` using numpy. No framework code in it. One file per layer, one owner per file.
 - App: plain HTML, CSS and JavaScript in `frontend/`, mobile-first, with hand-written SVG charts (`frontend/charts.js`). No build step. (This replaced the original Streamlit plan.)
 - Running the model: the layer pages run the `model/` Python files in the browser with Pyodide. `api.py` (FastAPI) is the alternative for the full plan; see the open question in TASKS.md.
-- Storage: none. The model is stateless; Tier 3 ratings live in browser local storage.
+- Frames: six. Frames 1 to 5 are the five layers above, swiped through with the bottom slider. Frame 6 is **Personal settings**, opened from the gear in the top right of every layer: everything that describes you rather than your day, entered once and read by every layer (see "Frame 6" below and TASKS.md N10).
+- Storage: none for the model; it is stateless. Personal settings and Tier 3 ratings live in browser local storage. A login so settings follow you to a new device needs storage outside the browser, which is an open team decision (TASKS.md N11).
 - Tests: pytest.
 - Setup: `brew install uv`, then `uv venv --python 3.12 && source .venv/bin/activate && uv pip install -r requirements.txt`. The system Python is 3.9 with no packages; do not use it.
 
@@ -153,6 +154,20 @@ Decision: all Python. Team of 3, everyone is comfortable in Python, and judges w
     frontend/             HTML, CSS, JavaScript, Pyodide bridge
     equations/            one page of equations per layer
     README.md
+
+### Frame 6: Personal settings
+
+One page for the values that describe you, so you don't re-enter them on every layer. It replaces three cards on the layer pages:
+
+| Moves to settings | From | Becomes in `Profile` |
+|---|---|---|
+| Weight, half-life, smoker, oral contraceptives | Layer 1, "Your body" | `weightKg`, `halfLifeH` (after `adjustedHalfLifeH`) |
+| Body clock: morning person, in between, night owl | Layer 2, "Body clock" | `circadianPeakH` = 17 - 2, 17 or 17 + 2 |
+| Usual caffeine a day, for how long | Layer 3, "Your habit" | `habitualMgPerDay`, `habitWeeks` |
+
+Stays on the layer pages, because it is about the day, not the person: drinks and their times, bedtime and the sleep calendar, and the exam date (which belongs with the event inputs). Kd stays at the `Profile` default until layer 5 learns it. The layer pages keep showing these values as read-only rows tagged "Settings", the same way layer 4 shows what it took from layers 1 to 3.
+
+Signing up on a new device asks for these same values, so the sign-up form is the settings form in a first-run mode (TASKS.md N11).
 
 Unit tests that double as demo talking points:
 - After t_half the level halves (pk).

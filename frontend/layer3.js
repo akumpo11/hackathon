@@ -4,7 +4,7 @@
 
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
-import { publish, shared, onShared } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -22,19 +22,20 @@ function dayToDate(day) {
 }
 
 function readInputs() {
-  const v = (name) => Number(form.elements[name].value);
-  // Body and drink come from layer 1 if it has loaded; otherwise the same defaults it starts with.
-  const body = shared.layer1 ?? { weightKg: 70, halfLifeH: 5, smoker: false, oralContraceptives: false, doses: [] };
+  // Your habit comes from personal settings (settings.js). The exam date is about
+  // the event, not you, so it stays on this page.
+  const s = shared.settings;
+  // Body and drink come from layer 1 if it has loaded; otherwise your settings and no drinks yet.
+  const body = shared.layer1 ?? { ...s, doses: [] };
   return {
-    habitualMg: v("habitualMg"), habitWeeks: v("habitWeeks"), examInDays: v("examInDays"),
+    habitualMg: s.habitualMgPerDay, habitWeeks: s.habitWeeks,
+    examInDays: Number(form.elements.examInDays.value),
     body, doseMg: body.doses[0]?.mg ?? 95,
   };
 }
 
 function showSliderValues(x) {
   const out = (name, text) => { form.querySelector(`output[data-for="${name}"]`).textContent = text; };
-  out("habitualMg", `${x.habitualMg} mg (${(x.habitualMg / 95).toFixed(1)} coffees)`);
-  out("habitWeeks", `${x.habitWeeks} week${x.habitWeeks === 1 ? "" : "s"}`);
   out("examInDays", x.examInDays === 0 ? "today" : `${x.examInDays} day${x.examInDays === 1 ? "" : "s"}`);
 }
 
@@ -81,7 +82,7 @@ function drawChart(x, r) {
   lineChart($("resetChart"), {
     series: [
       { xs: cold.day, ys: ys(cold), color: cssVar("--muted"), dash: "5 4" },
-      { xs: rec.day, ys: ys(rec), color: cssVar("--mint") },
+      { xs: rec.day, ys: ys(rec), color: cssVar("--accent") },
     ],
     yMin, yMax,
     vline: { x: examDay, label: "Exam" },
@@ -115,15 +116,17 @@ export async function startLayer3() {
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
   });
-  form.addEventListener("input", update);
-  window.addEventListener("resize", update);
-  // Redo it when layer 1's body or drinks change. Only then: this page publishes too, and
-  // reacting to its own publish would loop forever.
-  let seenLayer1 = shared.layer1;
+  const redo = perFrame(update);
+  form.addEventListener("input", redo);
+  onWidthChange(update);
+  // Redo it when layer 1's body or drinks change, or your settings (your habit).
+  // Only then: this page publishes too, and reacting to its own publish would loop forever.
+  let seenLayer1 = shared.layer1, seenSettings = shared.settings;
   onShared(() => {
-    if (shared.layer1 === seenLayer1) return;
+    if (shared.layer1 === seenLayer1 && shared.settings === seenSettings) return;
     seenLayer1 = shared.layer1;
-    update();
+    seenSettings = shared.settings;
+    redo();
   });
   update();
 }

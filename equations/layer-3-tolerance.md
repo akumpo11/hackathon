@@ -24,7 +24,7 @@ Code: `steadyStateConc(mgPerDay, p)`.
     R_target = 1 + g * C_avg                  g = 0.23 per mg/L
 
 - R: adenosine receptors relative to a non-drinker (1.0 = non-drinker)
-- g: tuned so 300 mg a day gives R_target ~ 1.5, in line with the 20 to 50% receptor upregulation reported for chronic caffeine
+- g: tuned so 300 mg a day gives R_target ~ 1.5. Rat studies show chronic caffeine raises A1 adenosine receptors, but there is no established human figure, so this value is our choice, not a measurement (see `research.md`)
 
 Where it comes from: the brain adds receptors to make up for the ones caffeine keeps blocking. We model that as first-order relaxation toward a target, the same shape as the ODEs in layers 1 and 2.
 
@@ -95,6 +95,7 @@ Code: `feelsLikeMg(doseMg, p, R)`, `strengthPercent(doseMg, p, R)`.
 
 ## Limitations
 
-- g and tau_R are set to match reported ranges, not fitted to data.
+- g is tuned, not measured: receptor upregulation is shown in rats, with no established human figure. tau_R is checked against the human withdrawal timeline (symptoms last 2 to 9 days; our reset takes about a week), not fitted to data. Sources in `research.md`.
+- Receptor growth is probably not the only cause of tolerance; the model treats it as the whole story.
 - Withdrawal uses the day's average level, so it is a daily summary, not an hourly curve.
 - Strength is compared at the dose's peak and ignores caffeine already in you from earlier drinks.

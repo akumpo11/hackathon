@@ -9,10 +9,12 @@ One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the botto
 From the **repo root** (the page loads Python files from `model/`):
 
 ```bash
-python -m http.server 5500
+python3 serve.py
 ```
 
-Then open http://localhost:5500/frontend/. A phone on the same Wi-Fi can open `http://<laptop IP>:5500/frontend/`.
+It prints two addresses: http://localhost:5500/frontend/ for the laptop, and `http://<laptop IP>:5500/frontend/` for a phone on the same Wi-Fi. `serve.py` is `python3 -m http.server 5500` plus a header that stops the browser from running stale copies of the JavaScript after an edit.
+
+To use it like an app, open that address on the phone and pick **Share → Add to Home Screen** (iPhone Safari) or **⋮ → Add to Home screen** (Android Chrome). The home screen icon opens it full screen, with no browser bars.
 
 The first load takes about 10 to 15 seconds while the browser downloads Pyodide and numpy. Later loads are cached.
 
@@ -24,18 +26,20 @@ The math lives only in `model/`, the same files the optimizer imports. The brows
 2. On every input change, a page calls `compute()` in its bridge: `layer1_bridge.py` calls `model/pk.py`, `layer2_bridge.py` calls `model/sleep.py`, `layer3_bridge.py` calls `model/tolerance.py`, `layer4_bridge.py` calls `model/alertness.py`.
 3. The page writes the numbers back and redraws its chart.
 
-Layer 4 builds on the pages before it. Layers 1 and 2 publish their inputs through `shared.js` (your drinks and body, your sleep calendar and body clock), and layer 4 reads them, so changing a drink or a night of sleep changes the alertness curve. Its only inputs of its own are Kd and tolerance; the tolerance slider stands in for layer 3 until that page exists.
+Layer 4 builds on the pages before it. Layers 1, 2 and 3 publish what they decided through `shared.js` (your drinks and body, your sleep calendar and body clock, your tolerance), and layer 4 reads them, so changing a drink, a night of sleep or your caffeine habit changes the alertness curve. It has no inputs of its own: Kd is the population average from `Profile` until layer 5 learns yours.
 
 ## Files
 
 - `index.html`: the five layer pages and the bottom slider.
-- `styles.css`: colors and layout. Colors are variables at the top.
+- `styles.css`: colors and layout. Colors are variables at the top; each theme (`:root[data-theme="..."]`) only changes those variables.
 - `app.js`: page switching, then starts each page.
 - `python.js`: loads Pyodide once and puts the model files on its disk.
 - `layer1.js`, `py/layer1_bridge.py`: layer 1 drinks and body inputs, the call into `model/pk.py`, the caffeine curve and the sleep check.
 - `layer2.js`, `sleepcal.js`, `py/layer2_bridge.py`: layer 2 sleep calendar, the call into `model/sleep.py`, and the sleep pressure chart.
-- `shared.js`: what layers 1 and 2 publish for later pages to read.
+- `settings.js`: personal settings (frame 6), opened from the gear in the top right. Saves your body, body clock, habit and color theme on this device and publishes them for layers 1 to 3.
+- `shared.js`: what personal settings and layers 1, 2 and 3 publish for later pages to read.
 - `layer3.js`, `py/layer3_bridge.py`: layer 3 habit and exam inputs, the call into `model/tolerance.py`, coffee strength, the reset plan and its day-by-day chart. Publishes your tolerance for layer 4.
-- `layer4.js`, `py/layer4_bridge.py`: layer 4 reads layers 1 and 2, calls `model/alertness.py`, and draws the alertness curve and its breakdown.
+- `layer4.js`, `py/layer4_bridge.py`: layer 4 reads layers 1, 2 and 3, calls `model/alertness.py`, and draws the alertness curve and its breakdown.
 - `charts.js`: hand-written SVG charts.
+- `manifest.json`, `icons/`: what lets "Add to Home Screen" open the page full screen with its own icon. `icons/make_icons.py` draws the icons.
 - `api.js` and `mock/`: not used right now. The JSON contract client and sample responses for when `api.py` exists.
