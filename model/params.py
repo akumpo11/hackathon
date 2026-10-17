@@ -7,6 +7,8 @@ FDA and EFSA guidance for the caffeine limits, the FDA caffeine page for the dri
 # Layer 1: pharmacokinetics (population values; half-life and weight are per person, in Profile)
 KA_PER_H = 4.0          # absorption rate from the gut; absorption half-life ~10 min, peak ~50 min after a drink
 VD_L_PER_KG = 0.6       # volume of distribution: caffeine spreads through ~0.6 L per kg of body weight
+SMOKER_HALF_LIFE_FACTOR = 0.5          # smoking speeds up the liver enzyme CYP1A2, roughly halving the half-life
+CONTRACEPTIVE_HALF_LIFE_FACTOR = 2.0   # estrogen slows CYP1A2, roughly doubling the half-life
 
 # Layer 2: two-process sleep model (normalized sleep pressure S in 0..1)
 TAU_WAKE_H = 18.2       # S rises toward 1 with this time constant while awake
