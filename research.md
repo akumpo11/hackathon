@@ -2,6 +2,30 @@
 
 The science behind the model's choices, with sources, so anyone on the team can answer "where does that number come from?". Grouped by layer (PLAN.md section 1).
 
+## Layer 1: caffeine in your blood
+
+### What each term in the Bateman formula means
+
+The formula gives the caffeine level in your blood, C(t) in mg/L, at time t after a drink:
+
+- t: hours since you took the drink
+- D: the dose in mg (for example, 95 for a coffee)
+- V: volume of distribution, 0.6 L/kg times your weight
+- ke: how fast your body gets rid of caffeine, per hour
+  - Derived from your half-life: ke = ln(2) / half-life, so 0.139 per hour for a 5 h half-life
+  - The half-life starts at 5 h and is adjusted for smoker and oral contraceptives
+  - Layer 5 changes the half-life based on your alertness ratings
+- ka: how fast caffeine gets from your stomach into your blood
+  - Constant, 4 per hour (`KA_PER_H`)
+
+Code: `model/pk.py`, constants in `model/params.py`. Equations: `equations/layer-1-pk.md`.
+
+### What we added to the Bateman formula
+
+The single-drink curve is the standard Bateman function. What we add is the superposition principle, so the plan can have several drinks: each drink gets its own curve, and the total level is the sum.
+
+Where this could break: if your liver got overloaded and cleared caffeine more slowly at high levels, the drinks would no longer be independent and simple addition would be wrong. Caffeine does start to saturate at very high doses, but at normal amounts, within the 400 mg daily limit, the addition is a good approximation.
+
 ## Layer 3: tolerance, withdrawal and the reset
 
 ### What R means
