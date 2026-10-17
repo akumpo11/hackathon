@@ -4,16 +4,43 @@ Our team's project for MathHacks (submission deadline: 1:00 PM, Sunday, October 
 
 ## Project idea: Caffeine optimizer
 
-A pharmacokinetic model of caffeine that accounts for half-life and tolerance. You enter an event (e.g. an exam time), your caffeine dose, and your sleep schedule, and it tells you when to drink coffee and how much. Everyone in the room will try it.
+A pharmacokinetic model of caffeine that accounts for half-life and tolerance. It plans when to drink coffee and how much so you're alert for an event like an exam, without wrecking your sleep. Everyone in the room will try it.
 
-Planned features:
+### Inputs
 
-- **Half-life calculation**: model how caffeine levels in the body decay over time.
-- **Dose timing**: recommend when and how much caffeine to take so you peak at the event.
-- **Sleep correlation**: relate sleep patterns to caffeine intake.
-- **Nap scheduling**: suggest when to nap (open question: the team noted naps may be bad for you).
-- **Alertness feedback loop**: users rate their alertness, and the app learns and optimizes its recommendations over time.
-- **Tolerance and caffeine reset**: the more caffeine you use, the more your body gets used to it, so the app schedules a caffeine reset.
+Required:
+
+- **Event time**: when you need to be alert, e.g. an exam at 9:00 AM Sunday.
+- **Event length**: how long you need to stay alert, e.g. 2 hours.
+- **Sleep schedule**: usual bedtime and wake time.
+- **Usual daily caffeine**: e.g. 2 coffees a day (~190 mg). Drives the tolerance model.
+
+Optional:
+
+- **Last night's sleep**: decides whether a nap is worth suggesting.
+- **Free time slots**: when a nap could fit before the event.
+- **Drinks already taken or planned**: added to the caffeine curve.
+- **Body weight**: turns mg into a concentration.
+- **Half-life adjustments**: smoking speeds up clearance, oral contraceptives slow it down (stretch).
+- **Alertness ratings (1 to 5)**: entered after drinks, for the learning loop (Tier 3).
+
+### Outputs
+
+Tier 1 (core demo):
+
+- **Caffeine plan**: when to drink and how much, e.g. "190 mg at 8:15 AM, 95 mg at 9:45 AM."
+- **Caffeine curve graph**: caffeine level over time (half-life decay), with the event window and bedtime shaded and planned drinks marked.
+- **Sleep check**: caffeine left at bedtime, with a warning if it's over the cutoff.
+
+Tier 2:
+
+- **Tolerance estimate**: how much usual intake weakens each dose, e.g. "your coffee feels like 60% strength."
+- **Reset plan**: whether to take a break or taper before the event, and for how many days.
+- **Nap plan**: whether to nap, when, and for how long, or a coffee nap, e.g. "coffee at 1:30 PM, nap 1:30 to 1:50 PM." No nap if it would be too late or isn't needed.
+
+Tier 3 (stretch):
+
+- **Personalized model**: fitted half-life and sensitivity, learned from alertness ratings.
 
 ## Idea generation
 
