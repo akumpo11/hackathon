@@ -179,10 +179,10 @@ Milestones are ordered so that at any cutoff you have something demoable.
 
 Cut order if behind: uncertainty band -> Bayesian learning (replace with manual half-life slider) -> taper planner -> nap. Never cut: curve, optimizer, bedtime constraint.
 
-Owners (team of 3, details in TASKS.md):
-- A: pk.py, optimizer.py, then learn.py on Sunday (kinetics, search, Bayes)
-- B: sleep.py, alertness.py, tolerance.py (two-process model, receptors, reset)
-- C: app.py, charts, deploy, README, demo (the product and the data flow)
+Owners (details in TASKS.md):
+- Evan: layer 1 pk.py, optimizer.py, then learn.py on Sunday (kinetics, search, Bayes)
+- Andrew: layer 2 sleep.py, layer 4 tolerance.py, plus types, params, api.py, sample JSON (two-process model, receptors, the contract)
+- Nolan: layer 3 alertness.py, the frontend, deploy, README, demo (the join formula and the product)
 
 ---
 
