@@ -82,24 +82,20 @@
           </div>
         </article>
 
-        <article class="card">
-          <h2>Your body</h2>
-          <div class="inputs">
-            <label class="slider">
-              <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
-              <input type="range" name="weight" min="40" max="130" step="1" value="70">
-              <span class="hint">Caffeine spreads through about 0.6 L of body water per kg, so lighter people get a higher level.</span>
-            </label>
-            <label class="slider">
-              <span class="slider-top"><span>Half-life</span><output data-for="halfLife"></output></span>
-              <input type="range" name="halfLife" min="2" max="10" step="0.5" value="5">
-              <span class="hint">Hours for your liver to clear half of it. About 5 h on average, 2.5 to 10 h across people.</span>
-            </label>
-            <label class="check"><input type="checkbox" name="smoker"> I smoke (about halves the half-life)</label>
-            <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill (about doubles it)</label>
-          </div>
-        </article>
       </form>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Your body</h2>
+          <button type="button" class="link-btn" data-open-settings>Change</button>
+        </div>
+        <ul class="breakdown given">
+          <li><span>Weight <em class="src">Settings</em></span><strong data-setting="weightKg">–</strong></li>
+          <li><span>Half-life <em class="src">Settings</em></span><strong data-setting="halfLifeH">–</strong></li>
+          <li><span>Smoker <em class="src">Settings</em></span><strong data-setting="smoker">–</strong></li>
+          <li><span>On the pill <em class="src">Settings</em></span><strong data-setting="oralContraceptives">–</strong></li>
+        </ul>
+      </article>
 
       <article class="card">
         <h2>What comes out</h2>
@@ -135,17 +131,15 @@
         <div id="sleepCal" class="cal-wrap"></div>
       </article>
 
-      <form id="layer2Inputs">
-        <article class="card">
+      <article class="card">
+        <div class="card-head">
           <h2>Body clock</h2>
-          <p class="muted small">When are you most alert?</p>
-          <div class="segmented" role="radiogroup" aria-label="Chronotype">
-            <label><input type="radio" name="chronotype" value="-2"><span>Morning person</span></label>
-            <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
-            <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
-          </div>
-        </article>
-      </form>
+          <button type="button" class="link-btn" data-open-settings>Change</button>
+        </div>
+        <ul class="breakdown given">
+          <li><span>When you're most alert <em class="src">Settings</em></span><strong data-setting="chronotypeShiftH">–</strong></li>
+        </ul>
+      </article>
 
       <article class="card">
         <div class="card-head">
@@ -178,20 +172,21 @@
         </div>
       </div>
 
+      <article class="card">
+        <div class="card-head">
+          <h2>Your habit</h2>
+          <button type="button" class="link-btn" data-open-settings>Change</button>
+        </div>
+        <ul class="breakdown given">
+          <li><span>Usual caffeine a day <em class="src">Settings</em></span><strong data-setting="habitualMgPerDay">–</strong></li>
+          <li><span>For how long <em class="src">Settings</em></span><strong data-setting="habitWeeks">–</strong></li>
+        </ul>
+      </article>
+
       <form id="layer3Inputs">
         <article class="card">
-          <h2>Your habit</h2>
+          <h2>Your exam</h2>
           <div class="inputs">
-            <label class="slider">
-              <span class="slider-top"><span>Usual caffeine a day</span><output data-for="habitualMg"></output></span>
-              <input type="range" name="habitualMg" min="0" max="500" step="10" value="300">
-              <span class="hint">A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg.</span>
-            </label>
-            <label class="slider">
-              <span class="slider-top"><span>For how long</span><output data-for="habitWeeks"></output></span>
-              <input type="range" name="habitWeeks" min="1" max="52" step="1" value="8">
-              <span class="hint">Receptors take a few weeks to fully adjust, then stay put.</span>
-            </label>
             <label class="slider">
               <span class="slider-top"><span>Exam in</span><output data-for="examInDays"></output></span>
               <input type="range" name="examInDays" min="0" max="21" step="1" value="14">
@@ -237,7 +232,7 @@
     <section class="page" aria-label="Layer 4">
       <p class="layer-no">Layer 4</p>
       <h1 class="page-title first">Alertness</h1>
-      <p class="body">How awake you feel. It combines the drinks from layer 1 with the sleep from layer 2.</p>
+      <p class="body">How awake you feel. It combines the drinks from layer 1, the sleep from layer 2 and the tolerance from layer 3.</p>
 
       <div class="hero">
         <div class="ring" id="alertRing">
@@ -264,23 +259,14 @@
 
       <article class="card">
         <h2>What goes in</h2>
-        <ul class="breakdown">
+        <ul class="breakdown given">
           <li><span>Caffeine in your blood <em class="src">Layer 1</em></span><strong id="inConc">–</strong></li>
           <li><span>Sleep pressure <em class="src">Layer 2</em></span><strong id="inS">–</strong></li>
           <li><span>Body clock <em class="src">Layer 2</em></span><strong id="inCirc">–</strong></li>
+          <li><span>Tolerance <em class="src">Layer 3</em></span><strong id="inR">–</strong></li>
+          <li><span>Caffeine sensitivity <em class="src">Average</em></span><strong id="inKd">–</strong></li>
         </ul>
-        <form class="inputs" id="layer4Inputs">
-          <label class="slider">
-            <span class="slider-top"><span>Caffeine sensitivity</span><output data-for="kd"></output></span>
-            <input type="range" name="kd" min="1" max="6" step="0.1" value="3">
-            <span class="hint">The level that blocks half your receptors (Kd). Lower means more sensitive.</span>
-          </label>
-          <label class="slider">
-            <span class="slider-top"><span>Tolerance</span><output data-for="R"></output></span>
-            <input type="range" name="R" min="1" max="1.8" step="0.05" value="1">
-            <span class="hint">Extra adenosine receptors. 1.0 for a non-drinker, about 1.5 at 300 mg a day. Will come from layer 3.</span>
-          </label>
-        </form>
+        <p class="muted small">Tolerance is your extra adenosine receptors from layer 3: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; this uses the population average until layer 5 learns yours.</p>
       </article>
 
       <article class="card">
@@ -327,6 +313,81 @@
       <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg>
     </button>
   </nav>
+  <!-- Top right on every layer: opens personal settings. -->
+  <button type="button" class="icon-btn settings-btn" id="settingsOpen" aria-label="Personal settings" title="Personal settings">
+    <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6Z" /></svg>
+  </button>
+
+  <!-- Personal settings (frame 6): what describes you, not your day. Every layer reads these. -->
+  <section class="settings-frame" id="settingsFrame" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+    <div class="settings-top">
+      <button type="button" class="icon-btn" id="settingsBack" aria-label="Back to the layers">
+        <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" /></svg>
+      </button>
+    </div>
+    <h1 class="page-title first" id="settingsTitle">Personal settings</h1>
+    <p class="body">These describe you, not your day, so you set them once and every layer uses them. They're saved on this device.</p>
+
+    <form id="settingsForm">
+      <article class="card">
+        <h2>Your body</h2>
+        <div class="inputs">
+          <label class="slider">
+            <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
+            <input type="range" name="weight" min="40" max="130" step="1" value="70">
+            <span class="hint">Caffeine spreads through about 0.6 L of body water per kg, so lighter people get a higher level.</span>
+          </label>
+          <label class="slider">
+            <span class="slider-top"><span>Half-life</span><output data-for="halfLife"></output></span>
+            <input type="range" name="halfLife" min="2" max="10" step="0.5" value="5">
+            <span class="hint">Hours for your liver to clear half of it. About 5 h on average, 2.5 to 10 h across people.</span>
+          </label>
+          <label class="check"><input type="checkbox" name="smoker"> I smoke (about halves the half-life)</label>
+          <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill (about doubles it)</label>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Body clock</h2>
+        <p class="muted small">When are you most alert?</p>
+        <div class="segmented" role="radiogroup" aria-label="Chronotype">
+          <label><input type="radio" name="chronotype" value="-2"><span>Morning person</span></label>
+          <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
+          <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Your habit</h2>
+        <div class="inputs">
+          <label class="slider">
+            <span class="slider-top"><span>Usual caffeine a day</span><output data-for="habitualMg"></output></span>
+            <input type="range" name="habitualMg" min="0" max="500" step="10" value="300">
+            <span class="hint">A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg.</span>
+          </label>
+          <label class="slider">
+            <span class="slider-top"><span>For how long</span><output data-for="habitWeeks"></output></span>
+            <input type="range" name="habitWeeks" min="1" max="52" step="1" value="8">
+            <span class="hint">Receptors take a few weeks to fully adjust, then stay put.</span>
+          </label>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Theme</h2>
+        <p class="muted small">Colors for the whole app, charts included.</p>
+        <div class="theme-picker" role="radiogroup" aria-label="Theme">
+          <label><input type="radio" name="theme" value="mint" checked><span class="theme-swatch" data-swatch="mint"></span><span>Mint</span></label>
+          <label><input type="radio" name="theme" value="ocean"><span class="theme-swatch" data-swatch="ocean"></span><span>Ocean</span></label>
+          <label><input type="radio" name="theme" value="coffee"><span class="theme-swatch" data-swatch="coffee"></span><span>Coffee</span></label>
+          <label><input type="radio" name="theme" value="berry"><span class="theme-swatch" data-swatch="berry"></span><span>Berry</span></label>
+          <label><input type="radio" name="theme" value="night"><span class="theme-swatch" data-swatch="night"></span><span>Night</span></label>
+        </div>
+      </article>
+    </form>
+    <button type="button" class="btn wide" id="settingsDone">Done</button>
+  </section>
+
   <!-- Drink picker for layer 1: a grid of drinks, like an ordering kiosk. -->
   <div class="scrim" id="drinkScrim" hidden></div>
   <section class="sheet drink-sheet" id="drinkSheet" role="dialog" aria-modal="true" aria-labelledby="drinkSheetTitle" hidden>

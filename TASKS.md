@@ -83,6 +83,8 @@ The model is stateless. Every request carries everything it needs and every answ
 
 Tier 3 ratings need to persist between visits. Keep them in the browser's local storage on the frontend and send them along with each `/api/learn` request. If a shared store is ever needed, Python's built-in `sqlite3` with one table `ratings(userId, tH, score)` is enough and takes ten lines. Decide that on Sunday, not now.
 
+Personal settings (frame 6, N10) also live in local storage, under one key. The login and sign-up task (N11) is the one feature that would need storage outside the browser, because recognizing you on a new device means a server has to remember you. That contradicts "No login or database" in CLAUDE.md, so it needs a team decision before anyone builds it; see N11.
+
 ### Deployment with a separate frontend
 
 Two deploys instead of one: the frontend on Vercel or Netlify, the API on Render or Railway (free tiers, deploy from the GitHub repo with a start command of `uvicorn api:app --host 0.0.0.0 --port $PORT`). Do the API deploy Saturday evening so the Sunday morning is not spent on it. Fallback that always works: run both on the demo laptop and show it there; the phone QR link becomes a stretch goal instead of a given.
@@ -369,6 +371,37 @@ Under the chart, one `st.slider` per recommended dose for its time, defaulting t
 ### N9. Sunday 10:00 to 11:30
 README: problem, the five formulas (one sentence each, in PLAN.md order), how to run, who did what, sources, "model for learning, not medical advice". Verify the deployed URL loads on a phone. Make a QR code (any QR site, or `uv pip install qrcode` and 3 lines). Run the demo script twice with a timer. Add `st.caption("Not medical advice")` to the footer.
 
+### N10. Frame 6: Personal settings (Saturday evening, after layer 4 works)
+
+Done (Saturday evening). A sixth frame, opened from a gear in the top right of every layer, for the values that describe the person (PLAN.md section 3, "Frame 6"). It replaces three cards on the layer pages: "Your body" on layer 1, "Body clock" on layer 2, and "Your habit" on layer 3.
+
+Fields, with the same ranges and defaults the layer pages use today:
+- From layer 1: weight (40 to 130 kg, 70), base half-life (2 to 10 h, 5), smoker, oral contraceptives.
+- From layer 2: body clock (morning person / in between / night owl, a -2 / 0 / +2 h shift).
+- From layer 3: usual caffeine a day (0 to 500 mg, 300), for how long (1 to 52 weeks, 8).
+
+Also in settings: a color theme (Mint, Ocean, Coffee, Berry, Night). Each theme in `styles.css` only redefines the color tokens (`--accent`, `--canvas`, `--ink`, ...), and the charts read those tokens when they draw, so one setting recolors the whole app.
+
+Not moved: the exam date on layer 3 is about the event, not the person, so it stays with the event inputs. Drinks, bedtime and the sleep calendar stay on layers 1 and 2. Kd stays at the `Profile` default until layer 5 learns it.
+
+Steps:
+1. Add the frame to `index.html` as a full-screen panel over the layers, with a gear button in the top right to open it and a back arrow, Done and Escape to close it. It is not a sixth page in the swipe, so the bottom slider stays at five layers.
+2. `settings.js`: read the form, save it to local storage under one key (`caffeineSettings`), and `publish("settings", {...})` through `shared.js`. On load, restore saved values before publishing, so a refresh keeps them. No math in this file.
+3. Layers 1, 2 and 3 read `shared.settings` instead of their own cards and redraw on `onShared`. Replace each removed card with read-only rows tagged "Settings" (like layer 4's "What goes in" list), plus a link that jumps to frame 6.
+4. Layer 4 needs no change: it already reads layers 1 to 3, which now take their values from settings.
+5. Check: changing weight in settings moves the layer 1 curve, the body clock moves layer 2's wave, the habit moves layer 3's receptor count, and all three move layer 4's alertness.
+
+### N11. Login and sign-up on a new device (Sunday stretch; decide first)
+
+What it should do: opening the app on a device it hasn't seen shows a login / sign-up screen before the layers. Signing up asks for the same values as personal settings (N10), so the sign-up form is the settings form in a first-run mode, plus whatever identifies the account. Logging in on another device brings those settings back.
+
+Decide before building, because it changes the stack rule in CLAUDE.md ("No login or database"):
+
+- **Option A, device only (no server).** The first open on a device shows a welcome screen that is the settings form; finishing it saves to local storage and the app opens. Every later open skips it. Fits CLAUDE.md and takes about an hour, since N10 already has the form. Limitation to say out loud: a second device starts fresh, because nothing leaves the browser.
+- **Option B, real accounts.** Settings follow you across devices. Needs `api.py` deployed (see the static-site open question above) with a small `sqlite3` table `users(email, passwordHash, settingsJson)`, routes `POST /api/signup` and `POST /api/login`, and passwords stored only as salted hashes (`hashlib.scrypt`), never as plain text. Expect 3 to 4 hours including the deploy, and update CLAUDE.md and PLAN.md if the team picks it.
+
+Recommendation: build A now, since it is the settings form with a first-run flag, and only do B on Sunday morning if `api.py` is being deployed anyway. Either way the login screen must not block the demo: keep a "skip, use defaults" button on it.
+
 ---
 
 ## Integration checkpoints (whole team, 5 minutes each)
@@ -376,11 +409,12 @@ README: problem, the five formulas (one sentence each, in PLAN.md order), how to
 - 2:30 PM: pk.py and sleep.py merged; C replaces fake arrays with `concentration` and `sleepPressure`. First real curve on screen.
 - 5:00 PM: alertness.py and optimizer v1 merged; the plan card shows one recommended dose. Screenshot it. This is your fallback demo.
 - 9:00 PM: optimizer v2 with naps and the what-if slider. Check that a coffee nap appears when a nap is allowed and the event is 2 to 3 h after wake-up. If not, Nolan tunes the inertia amplitudes with Andrew before sleeping.
+- 10:00 PM: frame 6 (personal settings, N10) replaces the body, body clock and habit cards on layers 1 to 3. Changing a setting moves every layer.
 - 10:30 PM: tolerance.py merged into the Reset tab. Go to sleep. Use the app to pick tomorrow's coffee time and tell the judges you did.
 - Sunday 9:30 AM: learn.py merged; "simulate a week" converges on the heatmap.
 - Sunday 10:00 AM: feature freeze. Bug fixes, README, rehearsal, submit by 12:30.
 
-Cut order if behind: uncertainty band, then learn.py (replace with a manual half-life slider), then the taper option, then naps. Never cut: curve, optimizer, bedtime constraint, deploy.
+Cut order if behind: login and sign-up (N11), then the uncertainty band, then learn.py (replace with a manual half-life slider), then the taper option, then naps. Never cut: curve, optimizer, bedtime constraint, deploy.
 
 ## Judge-proofing checklist (each person, Sunday 10:30 AM)
 - Open your file. Pick any line. Explain it in one breath.
