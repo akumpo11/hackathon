@@ -1,5 +1,5 @@
 """
-Glue between the layer 3 page and model/alertness.py. Runs in the browser via Pyodide.
+Glue between the layer 4 page and model/alertness.py. Runs in the browser via Pyodide.
 
 No math lives here: it turns the page's slider values into the arguments
 alertness.py expects, calls it, and hands back plain numbers for the page.

@@ -2,7 +2,7 @@
 
 import { startLayer1 } from "./layer1.js";
 import { startLayer2 } from "./layer2.js";
-import { startLayer3 } from "./layer3.js";
+import { startLayer4 } from "./layer4.js";
 
 const pager = document.getElementById("pager");
 const pill = document.getElementById("tabPill");
@@ -20,7 +20,7 @@ tabs.forEach((tab, i) => tab.addEventListener("click", () => {
   pager.scrollTo({ left: i * pager.clientWidth, behavior: "smooth" });
 }));
 
-// Opens on layer 1. index.html#layer3 etc. pick a different page.
+// Opens on layer 1. index.html#layer4 etc. pick a different page.
 const fromHash = Number(location.hash.replace("#layer", "")) - 1;
 const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 0;
 pager.scrollLeft = startPage * pager.clientWidth;
@@ -36,7 +36,7 @@ startLayer2().catch((err) => {
   document.getElementById("pressureNow").textContent = "Python didn't load";
 });
 
-startLayer3().catch((err) => {
+startLayer4().catch((err) => {
   console.error(err);
   document.getElementById("equation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
 });

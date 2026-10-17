@@ -6,5 +6,5 @@ One file per layer. Each equation lists what the symbols mean, the plain-English
 |---|---|---|
 | 1. Pharmacokinetics | [layer-1-pk.md](layer-1-pk.md) | 7 equations |
 | 2. Sleep pressure and circadian rhythm | [layer-2-sleep.md](layer-2-sleep.md) | 3 equations |
-| 3. Receptor occupancy | (todo) | |
-| 4. Tolerance and withdrawal | (todo) | |
+| 3. Tolerance and withdrawal | (todo) | |
+| 4. Receptor occupancy and alertness | (todo) | |

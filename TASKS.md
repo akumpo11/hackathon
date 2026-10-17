@@ -18,14 +18,14 @@ Owners by layer (see PLAN.md section 1 for the layers):
 |---|---|---|
 | 1. Pharmacokinetics | Andrew | `model/pk.py` |
 | 2. Sleep and circadian | Evan | `model/sleep.py`, `equations/` |
-| 3. Alertness | Nolan | `model/alertness.py` |
-| 4. Tolerance and reset | Andrew | `model/tolerance.py` |
+| 3. Tolerance and reset | Andrew | `model/tolerance.py` |
+| 4. Alertness | Nolan | `model/alertness.py` |
 | 5a. Optimizer | Evan | `model/optimizer.py` |
 | 5b. Learning (Sunday) | Evan | `model/learn.py` |
 | Frontend, deploy, demo | Nolan | the frontend, `README.md` |
 | Glue: contract, API | Andrew | `model/schema.py`, `model/params.py`, `api.py` |
 
-Nolan owns both the frontend and layer 3. Layer 3 is a 60-line file that joins Andrew's concentration and Evan's sleep pressure, so the person drawing the curve also owns the formula that produces it. It slots in at 2:30 PM between the inputs form and the chart.
+Nolan owns both the frontend and layer 4. Layer 4 is a 60-line file that joins Andrew's concentration and Evan's sleep pressure, so the person drawing the curve also owns the formula that produces it. It slots in at 2:30 PM between the inputs form and the chart.
 
 ### The one change to the workflow: an API boundary
 
@@ -129,8 +129,8 @@ Curves are numpy arrays over a shared time grid. Every curve function takes `t` 
 Dependencies, so you know who is waiting on whom:
 
     Andrew: pk.py (layer 1) ─────────────┐
-    Evan:   sleep.py (layer 2) ──────────┼─► Nolan: alertness.py (layer 3) ─► Evan: optimizer.py ─► Andrew: api.py ─► Nolan: frontend
-    Andrew: tolerance.py (layer 4) ──────┘                                                          
+    Evan:   sleep.py (layer 2) ──────────┼─► Nolan: alertness.py (layer 4) ─► Evan: optimizer.py ─► Andrew: api.py ─► Nolan: frontend
+    Andrew: tolerance.py (layer 3) ──────┘                                                          
     Evan:   learn.py (Sunday, needs alertness.py) ──────────────────────────────────────────────► Nolan: Learn tab
 
 Evan and Andrew each have about 90 minutes before anyone else needs them. Nolan builds the frontend against hand-typed fake arrays until then, and starts alertness.py at 2:30 PM when layers 1 and 2 are merged.
@@ -160,7 +160,7 @@ Steps:
    For the burn-in, assume the person's sleep schedule repeats: copy only the earliest night (not naps) back by 24 and 48 h with a helper `_repeatBack(sleep, days=2)`. Copying every block would overlap extra nights and repeat naps, adding sleep that never happened. The frontend sends last night and tonight (`buildPlanRequest` in `frontend/api.js`).
 4. The optimizer calls this many times with different nap lists. It is a 500-step loop in pure Python, about 1 ms; fine. If profiling shows it matters, use `functools.lru_cache` keyed on a tuple of the blocks.
 
-Once sleep.py exists, load it on the layer 2 page through Pyodide the way `layer3.js` loads alertness.py, and delete `frontend/sleepmodel.js`. That file is a JavaScript copy of this math, and CLAUDE.md keeps all calculations in Python. Keep `equations/layer-2-sleep.md` in step with the code.
+Once sleep.py exists, load it on the layer 2 page through Pyodide the way `layer4.js` loads alertness.py, and delete `frontend/sleepmodel.js`. That file is a JavaScript copy of this math, and CLAUDE.md keeps all calculations in Python. Keep `equations/layer-2-sleep.md` in step with the code.
 
 Tests: 8 h sleep + 16 h wake repeated 3 days gives the same S at each wake-up within 0.01; 4 h nights make S at wake-up rise each day (sleep debt); `circadian` is maximal at `circadianPeakH`.
 
@@ -217,7 +217,7 @@ Tests: no ratings gives the normalized prior; `simulateWeek(3.5)` then `posterio
 
 ---
 
-## Andrew: pharmacokinetics (layer 1), tolerance (layer 4), and the glue
+## Andrew: pharmacokinetics (layer 1), tolerance (layer 3), and the glue
 
 Files: `model/pk.py`, `model/tolerance.py`, `model/schema.py`, `model/params.py`, `api.py`, tests.
 Judge line: "I own how caffeine moves through the body, why coffee stops working, and the contract that ties the model to the app."
@@ -289,7 +289,7 @@ Tests: 0 mg/day gives R == 1; 300 mg/day for 8 weeks gives R within 0.05 of 1.5;
 
 ---
 
-## Nolan: frontend, alertness (layer 3), deploy, demo
+## Nolan: frontend, alertness (layer 4), deploy, demo
 
 The frontend sections below were written for Streamlit. Nolan is prototyping something else, so read the `st.*` widget names as "the equivalent control in your framework" and the Plotly calls as "your chart library". The inputs, outputs, and timing are what matter. Data comes from Andrew's API (JSON contract above); until it is live, from `frontend/mock/`.
 
@@ -309,7 +309,7 @@ Test both; they are the classic bug source. Streamlit's `st.time_input` returns 
 
 Streamlit reruns the whole script on every widget change, so there is no state machine to design. Read widgets at the top, convert to model inputs in one function `toModelInputs()`, call the model, draw. Use `st.session_state` only for the ratings list and the last plan.
 
-### N3. alertness.py (Tier 1, layer 3, 2:30 to 4:30 PM)
+### N3. alertness.py (Tier 1, layer 4, 2:30 to 4:30 PM)
 
 This is the join point: it reads Andrew's concentration and Evan's sleep pressure and produces the curve the optimizer and the chart both consume. Do it between the inputs form and the chart; the chart can keep using fake arrays until this lands.
 
@@ -342,7 +342,7 @@ Use `st.sidebar` for inputs and the main area for results. One screen.
 - `st.button("Plan my caffeine")`.
 Wrap the model call in `@st.cache_data` keyed on the inputs so dragging a slider does not re-run the optimizer unnecessarily. Pass plain tuples/floats into cached functions; dataclasses are fine if hashable, otherwise convert.
 
-### N5. Chart (by 6:00 PM, with fake arrays until layers 1 to 3 land)
+### N5. Chart (by 6:00 PM, with fake arrays until layers 1, 2 and 4 land)
 Plotly `make_subplots(specs=[[{"secondary_y": True}]])`:
 - Alertness (0 to 10, left axis). Multiply the model's 0..1 by 10 for display.
 - Caffeine mg/L (right axis).

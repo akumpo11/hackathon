@@ -13,7 +13,7 @@ const FILES = {
   "model/alertness.py": "../model/alertness.py",
   "layer1_bridge.py": "py/layer1_bridge.py",
   "layer2_bridge.py": "py/layer2_bridge.py",
-  "layer3_bridge.py": "py/layer3_bridge.py",
+  "layer4_bridge.py": "py/layer4_bridge.py",
 };
 
 let ready = null;

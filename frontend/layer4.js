@@ -1,16 +1,16 @@
-// Layer 3 page: read the sliders, run model/alertness.py (in the browser via
+// Layer 4 page: read the sliders, run model/alertness.py (in the browser via
 // Pyodide), and show the result. The math itself is only in the Python file.
 
 import { lineChart } from "./charts.js";
 import { loadPython } from "./python.js";
 
 const $ = (id) => document.getElementById(id);
-const form = $("layer3Inputs");
+const form = $("layer4Inputs");
 
-// The shared Python (python.js) already has model/alertness.py and layer3_bridge.py on its disk.
+// The shared Python (python.js) already has model/alertness.py and layer4_bridge.py on its disk.
 async function loadModel() {
   const pyodide = await loadPython();
-  return pyodide.pyimport("layer3_bridge").compute;
+  return pyodide.pyimport("layer4_bridge").compute;
 }
 
 function readInputs() {
@@ -54,7 +54,7 @@ function showOutputs(x, r) {
   });
 }
 
-export async function startLayer3() {
+export async function startLayer4() {
   const compute = await loadModel();
   const update = () => {
     const x = readInputs();

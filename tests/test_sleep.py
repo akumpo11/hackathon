@@ -67,7 +67,7 @@ def testIsAsleepIncludesStartExcludesEnd():
 
 
 def testAlertnessCurveRunsWithRealSleep():
-    # Layers 1, 2 and 3 joined: the full curve the optimizer and chart use.
+    # Layers 1, 2 and 4 joined: the full curve the optimizer and chart use.
     curve = alertnessCurve([], [SleepBlock(23.0, 31.0)], P, 1.0, 20.0, 34.0)
     assert set(curve) == {"t", "conc", "pressure", "felt", "alertness"}
     asleep = (curve["t"] >= 23.0) & (curve["t"] < 31.0)

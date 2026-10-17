@@ -1,5 +1,5 @@
 """
-Layer 3: alertness (owner: Nolan).
+Layer 4: alertness (owner: Nolan).
 
 Joins layer 1 (caffeine concentration, Andrew) and layer 2 (sleep pressure and
 circadian rhythm, Evan) into one alertness score between 0 and 1:

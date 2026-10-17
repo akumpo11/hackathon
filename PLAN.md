@@ -44,23 +44,7 @@ Process C (circadian alertness):
 
 Integrate S across the whole sleep history you entered, so short sleep carries debt into the next day. This is the "sleep correlation" feature.
 
-### Layer 3: How caffeine acts (receptor occupancy)
-
-Caffeine is a competitive antagonist at adenosine receptors. Adenosine is the signal behind sleep pressure. Fraction of receptors blocked follows the Langmuir / Hill binding equation:
-
-    occ(t) = C(t) / (C(t) + Kd)         Kd ~ 3 mg/L (~ 15 uM; one cup gives about half-maximal effect)
-
-Felt sleep pressure is the unblocked part:
-
-    S_felt(t) = S(t) * (1 - occ(t))
-
-Alertness score:
-
-    Alertness(t) = 1 - S_felt(t) + C_circ(t) - inertia(t)      (then map to 0..10 for display)
-
-Saturation falls out naturally: 400 mg is not 4x as good as 100 mg. Judges like that the model explains a thing people already feel.
-
-### Layer 4: Tolerance, withdrawal, and the caffeine reset
+### Layer 3: Tolerance, withdrawal, and the caffeine reset
 
 Chronic caffeine upregulates adenosine receptors. Model receptor count R(t) relaxing toward a target set by your average caffeine exposure:
 
@@ -80,6 +64,22 @@ Reset scheduler: given the exam date, pick the quit date so that R(exam) is with
 Inputs needed: usual mg/day and how long you have been at it (weeks). That sets R(0).
 
 Tolerance readout (Tier 2 output in CLAUDE.md): "your coffee feels like 60% strength". Solve the Langmuir equation for the dose a non-user would need to get the same felt pressure, and report effective mg / actual mg as a percent.
+
+### Layer 4: How caffeine acts (receptor occupancy)
+
+Caffeine is a competitive antagonist at adenosine receptors. Adenosine is the signal behind sleep pressure. Fraction of receptors blocked follows the Langmuir / Hill binding equation:
+
+    occ(t) = C(t) / (C(t) + Kd)         Kd ~ 3 mg/L (~ 15 uM; one cup gives about half-maximal effect)
+
+Felt sleep pressure is the unblocked part:
+
+    S_felt(t) = S(t) * (1 - occ(t))
+
+Alertness score:
+
+    Alertness(t) = 1 - S_felt(t) + C_circ(t) - inertia(t)      (then map to 0..10 for display)
+
+Saturation falls out naturally: 400 mg is not 4x as good as 100 mg. Judges like that the model explains a thing people already feel.
 
 ### Layer 5: Optimization and learning
 
@@ -167,9 +167,9 @@ Milestones are ordered so that at any cutoff you have something demoable.
 
 | When | Goal | Done when |
 |---|---|---|
-| Sat 12:00 to 1:00 | Lock scope. Whiteboard layers 1 to 3. Agree parameter table. Scaffold repo, deploy "hello world" link. Assign owners. | Live URL exists |
+| Sat 12:00 to 1:00 | Lock scope. Whiteboard layers 1 to 4. Agree parameter table. Scaffold repo, deploy "hello world" link. Assign owners. | Live URL exists |
 | Sat 1:00 to 4:00 | Tier 1: Layer 1 + chart + inputs (event time and length, drinks, sleep). | Caffeine curve draws for typed-in doses |
-| Sat 4:00 to 7:00 | Tier 1: Layer 2 + 3 + single-dose optimizer + sleep check. | App says "drink X mg at HH:MM", shows alertness curve, warns about bedtime caffeine |
+| Sat 4:00 to 7:00 | Tier 1: Layer 2 + 4 + single-dose optimizer + sleep check. | App says "drink X mg at HH:MM", shows alertness curve, warns about bedtime caffeine |
 | Sat 7:00 to 10:00 | Tier 2: multi-dose optimizer, nap plan within free slots, coffee nap. | Plan card with 1 to 3 doses and a nap |
 | Sat 10:00 to 12:00 | Tier 2: tolerance estimate ("feels like 60% strength"), reset date, taper vs cold turkey plot. | Reset planner works |
 | Sun 12:00 to 8:00 | SLEEP. Use the app to plan your own morning coffee; tell the judges you did. | |
@@ -180,9 +180,9 @@ Milestones are ordered so that at any cutoff you have something demoable.
 Cut order if behind: uncertainty band -> Bayesian learning (replace with manual half-life slider) -> taper planner -> nap. Never cut: curve, optimizer, bedtime constraint.
 
 Owners (details in TASKS.md):
-- Andrew: layer 1 pk.py, layer 4 tolerance.py, plus schema, params, api.py (kinetics, receptors, the contract)
+- Andrew: layer 1 pk.py, layer 3 tolerance.py, plus schema, params, api.py (kinetics, receptors, the contract)
 - Evan: layer 2 sleep.py, optimizer.py, then learn.py on Sunday (two-process model, search, Bayes)
-- Nolan: layer 3 alertness.py, the frontend, deploy, README, demo (the join formula and the product)
+- Nolan: layer 4 alertness.py, the frontend, deploy, README, demo (the join formula and the product)
 
 ---
 

@@ -66,6 +66,6 @@ Prefer simple ideas executed well over complex ones. Judges reward understanding
 - The project must be built during the event. Don't pull in pre-existing project code. Open-source libraries, frameworks, and APIs are fine.
 - Use camelCase for every name in Python and JavaScript: variables, functions, parameters, dataclass fields, and JSON keys (`halfLifeH`, `sleepPressure`, `meanHalfLife`). This goes against Python's usual snake_case on purpose, so one name works unchanged from the model through the JSON to the frontend. Exceptions:
   - Constants stay UPPER_CASE (`TAU_WAKE_H`) and classes stay PascalCase (`SleepBlock`).
-  - File and module names stay as they are (`test_alertness.py`, `layer3_bridge.py`). pytest needs the `test_` file prefix; test functions are camelCase (`testHalfBlockAtKd`).
+  - File and module names stay as they are (`test_alertness.py`, `layer4_bridge.py`). pytest needs the `test_` file prefix; test functions are camelCase (`testHalfBlockAtKd`).
   - Library names keep their real spelling (`np.zeros_like`, `lru_cache`).
   - Math notation in docs and formulas can keep subscripts (`t_half`, `tau_w`).

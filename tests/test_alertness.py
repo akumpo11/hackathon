@@ -1,4 +1,4 @@
-"""Tests for layer 3 that don't need layers 1 and 2.
+"""Tests for layer 4 that don't need layers 1 and 2.
 
 pk.py and sleep.py are now merged, so the TASKS.md tests that use real sleep
 and caffeine curves (minimum between 3 and 6 AM, 100 mg at 9 AM, nap
