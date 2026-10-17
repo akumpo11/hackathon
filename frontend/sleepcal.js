@@ -12,17 +12,28 @@ const NAP_MAX_H = 3;
 const slotOf = (day, row) => (day - FIRST_DAY) * SLOTS_PER_DAY + row;
 const hoursOf = (slot) => FIRST_DAY * 24 + slot * SLOT_H;
 
-export function initSleepCalendar(root, onChange = () => {}) {
+export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH: 23, wakeH: 7 }) {
   const asleep = new Set();
   const cells = [];
+  const SLOTS = DAYS * SLOTS_PER_DAY;
 
-  // Default week: 11:30 PM to 7:00 AM every night, so the grid starts out filled in.
-  for (let day = FIRST_DAY; day <= LAST_DAY; day++) {
-    for (let row = 0; row < SLOTS_PER_DAY; row++) {
-      const h = row * SLOT_H;
-      if (h < 7 || (h >= 23.5 && day < LAST_DAY)) asleep.add(slotOf(day, row));
+  // Fills every night with your usual sleep, so the grid starts out filled in.
+  // Night d starts on day d at bedtime (a bedtime before noon, like 1 AM, means
+  // after midnight) and lasts until wake time the next morning. Nights run from
+  // the one ending on the first morning to the one starting the day before the
+  // last, since the last night's morning is off the grid.
+  function fillUsual({ bedtimeH, wakeH }) {
+    asleep.clear();
+    const bed = bedtimeH < 12 ? bedtimeH + 24 : bedtimeH;
+    const length = (wakeH - bedtimeH + 24) % 24;
+    for (let day = FIRST_DAY - 1; day < LAST_DAY; day++) {
+      const start = day * 24 + bed, end = start + length;
+      for (let slot = 0; slot < SLOTS; slot++) {
+        if (hoursOf(slot) >= start && hoursOf(slot) < end) asleep.add(slot);
+      }
     }
   }
+  fillUsual(usual);
 
   // ---- build the grid
   const grid = document.createElement("div");
@@ -112,7 +123,13 @@ export function initSleepCalendar(root, onChange = () => {}) {
     });
   }
 
+  // Your usual sleep changed in settings: start the grid over from it.
+  function setUsual(newUsual) {
+    fillUsual(newUsual);
+    paint();
+  }
+
   paint();
   onChange(getBlocks());
-  return { getBlocks, setEvent };
+  return { getBlocks, setEvent, setUsual };
 }

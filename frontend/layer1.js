@@ -1,7 +1,7 @@
 // Layer 1 page: read the drinks and body inputs, run model/pk.py (in the browser
 // via Pyodide), and show the caffeine curve. The math itself is only in Python.
 
-import { clockToHours, hoursToClock } from "./api.js";
+import { clockToHours, hoursToClock } from "./time.js";
 import { areaChart } from "./charts.js";
 import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
@@ -55,7 +55,7 @@ function showOutputs(x, r) {
   $("pkLimit").style.left = `${(r.limitMg / meterMax) * 100}%`;
   $("pkSleepNote").textContent = ok
     ? `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, under the ${r.limitMg} mg cutoff.`
-    : `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, over the ${r.limitMg} mg cutoff. Move your last drink earlier or make it smaller.`;
+    : `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, over the ${r.limitMg} mg cutoff. Drink earlier or less.`;
 
   drawChart(x, r);
 }
@@ -79,6 +79,16 @@ function drawChart(x, r) {
 }
 
 export async function startLayer1() {
+  // Tonight's bedtime starts as your usual one from personal settings. You can
+  // change it here for tonight; a new usual bedtime in settings resets it.
+  form.elements.bedtime.value = shared.settings.bedtime;
+  let seenBedtime = shared.settings.bedtime;
+  onShared(() => {
+    if (shared.settings.bedtime === seenBedtime) return;
+    seenBedtime = shared.settings.bedtime;
+    form.elements.bedtime.value = seenBedtime;
+  });
+
   const pyodide = await loadPython();
   const bridge = pyodide.pyimport("layer1_bridge");
   const drinks = toObject(bridge.drinkOptions());

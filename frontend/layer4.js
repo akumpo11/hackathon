@@ -3,7 +3,7 @@
 // and show how alert you are.
 // The math itself is only in the Python files.
 
-import { hoursToClock } from "./api.js";
+import { hoursToClock } from "./time.js";
 import { areaChart, lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { shared, onShared, perFrame, onWidthChange } from "./shared.js";

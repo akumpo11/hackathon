@@ -2,7 +2,7 @@
 
 Mobile-first web app: plain HTML, CSS and JavaScript, no build step. On a phone it fills the screen; on a laptop it sits in a phone frame.
 
-One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. Layers 1 to 4 are built so far.
+One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. All five layers are built.
 
 ## Run it
 
@@ -23,10 +23,12 @@ The first load takes about 10 to 15 seconds while the browser downloads Pyodide 
 The math lives only in `model/`, the same files the optimizer imports. The browser runs them with [Pyodide](https://pyodide.org) (Python compiled to WebAssembly):
 
 1. `python.js` loads Pyodide and numpy once, then copies the `model/` files and the `py/*_bridge.py` files into Pyodide's virtual disk. Every page shares that one Python. A new model file has to be added to its `FILES` list.
-2. On every input change, a page calls `compute()` in its bridge: `layer1_bridge.py` calls `model/pk.py`, `layer2_bridge.py` calls `model/sleep.py`, `layer3_bridge.py` calls `model/tolerance.py`, `layer4_bridge.py` calls `model/alertness.py`.
+2. On every input change, a page calls `compute()` in its bridge: `layer1_bridge.py` calls `model/pk.py`, `layer2_bridge.py` calls `model/sleep.py`, `layer3_bridge.py` calls `model/tolerance.py`, `layer4_bridge.py` calls `model/alertness.py`, `layer5_bridge.py` calls `model/optimizer.py` and `model/learn.py`.
 3. The page writes the numbers back and redraws its chart.
 
-Layer 4 builds on the pages before it. Layers 1, 2 and 3 publish what they decided through `shared.js` (your drinks and body, your sleep calendar and body clock, your tolerance), and layer 4 reads them, so changing a drink, a night of sleep or your caffeine habit changes the alertness curve. It has no inputs of its own: Kd is the population average from `Profile` until layer 5 learns yours.
+Layer 4 builds on the pages before it. Layers 1, 2 and 3 publish what they decided through `shared.js` (your drinks and body, your sleep calendar and body clock, your tolerance), and layer 4 reads them, so changing a drink, a night of sleep or your caffeine habit changes the alertness curve. It has no inputs of its own: Kd is the population average from `Profile`.
+
+Layer 5 reads the same three pages plus your event and runs the optimizer on them, so a change on any layer changes the plan. It publishes the event, which layer 2 shades on the sleep calendar. Its 1-to-5 ratings and the drinks around them are saved in local storage (`caffeineRatings`); the learned half-life and Kd (`caffeineLearned`) are used for the plan only when you tick "Plan with my learned numbers".
 
 ## Files
 
@@ -40,6 +42,7 @@ Layer 4 builds on the pages before it. Layers 1, 2 and 3 publish what they decid
 - `shared.js`: what personal settings and layers 1, 2 and 3 publish for later pages to read.
 - `layer3.js`, `py/layer3_bridge.py`: layer 3 habit and exam inputs, the call into `model/tolerance.py`, coffee strength, the reset plan and its day-by-day chart. Publishes your tolerance for layer 4.
 - `layer4.js`, `py/layer4_bridge.py`: layer 4 reads layers 1, 2 and 3, calls `model/alertness.py`, and draws the alertness curve and its breakdown.
+- `layer5.js`, `py/layer5_bridge.py`: layer 5 event inputs, the call into `model/optimizer.py` (the plan, its chart and sleep check), and the ratings, heatmap and uncertainty band from `model/learn.py`.
 - `charts.js`: hand-written SVG charts.
+- `time.js`: the time convention, clock times to model hours and back.
 - `manifest.json`, `icons/`: what lets "Add to Home Screen" open the page full screen with its own icon. `icons/make_icons.py` draws the icons.
-- `api.js` and `mock/`: not used right now. The JSON contract client and sample responses for when `api.py` exists.

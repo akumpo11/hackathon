@@ -57,3 +57,5 @@ class Plan:
     score: float              # mean alertness over the event window, 0..1
     bedtimeCaffeineMg: float
     curve: dict               # {"t", "conc", "pressure", "felt", "alertness"}: numpy arrays on one time grid
+    baselineScore: float = 0.0  # the same score with no added caffeine and no nap, for comparison
+    tried: int = 0              # how many schedules the optimizer scored

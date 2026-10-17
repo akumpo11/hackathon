@@ -8,3 +8,5 @@ One file per layer. Each equation lists what the symbols mean, the plain-English
 | 2. Sleep pressure and circadian rhythm | [layer-2-sleep.md](layer-2-sleep.md) | 3 equations |
 | 3. Tolerance and withdrawal | [layer-3-tolerance.md](layer-3-tolerance.md) | 7 equations |
 | 4. Alertness (receptor occupancy) | [layer-4-alertness.md](layer-4-alertness.md) | 5 equations |
+| 5a. Optimizer | [layer-5-optimizer.md](layer-5-optimizer.md) | 6 equations |
+| 5b. Learning from ratings | [layer-5-learning.md](layer-5-learning.md) | 6 equations |

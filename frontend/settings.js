@@ -4,8 +4,10 @@
 // instead of asking again. It also holds the color theme. No math here.
 //
 // The first time the app opens on a device, this same frame opens as a survey
-// you have to finish (Start) before you see the layers.
+// you have to finish (Start) before you see the layers. It shows the same cards
+// one step at a time, each card marked with its step by data-step in index.html.
 
+import { clockToHours, hoursToClock } from "./time.js";
 import { publish } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
@@ -16,8 +18,19 @@ const SURVEY_KEY = "caffeineSurveyDone";   // set once the first-run survey is f
 const DEFAULTS = {
   weightKg: 70, halfLifeH: 5, smoker: false, oralContraceptives: false,
   chronotypeShiftH: 0, habitualMgPerDay: 300, habitWeeks: 8,
+  bedtime: "23:00", wakeTime: "07:00",      // your usual night, as clock times like the time inputs use
   theme: "coffee",
 };
+
+// Each survey step's title and one-line intro. Step 0 is the welcome; steps 1 to 4 are
+// questions. The longer "why we ask" sits behind each card's (i) button.
+const STEPS = [
+  { title: "Welcome! Let's set you up", intro: "Time your coffee for exam day without losing sleep." },
+  { title: "When do you sleep?", intro: "Your usual night." },
+  { title: "How much coffee do you drink?", intro: "On a normal day." },
+  { title: "Tell us about your body", intro: "How fast you clear caffeine." },
+  { title: "Last thing", intro: "Change any answer later with the gear." },
+];
 
 // The themes styles.css defines with :root[data-theme="..."]. Coffee is the default.
 const THEMES = ["coffee", "mint", "ocean", "berry", "night"];
@@ -40,7 +53,12 @@ const SHOW = {
   chronotypeShiftH: (v) => ({ "-2": "Morning person", 0: "In between", 2: "Night owl" })[v],
   habitualMgPerDay: (v) => `${v} mg (${(v / 95).toFixed(1)} coffees)`,
   habitWeeks: (v) => plural(v, "week"),
+  bedtime: (v) => hoursToClock(clockToHours(v)),
+  wakeTime: (v) => hoursToClock(clockToHours(v)),
 };
+
+// Hours from bedtime to wake time, going past midnight: 23:00 to 07:00 is 8 h.
+const nightHours = (s) => (clockToHours(s.wakeTime) - clockToHours(s.bedtime) + 24) % 24;
 
 // Local storage can be missing or blocked (private windows), so every use is guarded.
 function load() {
@@ -83,6 +101,8 @@ function fillForm(form, s) {
   el.chronotype.value = String(s.chronotypeShiftH);
   el.habitualMg.value = s.habitualMgPerDay;
   el.habitWeeks.value = s.habitWeeks;
+  el.bedtime.value = s.bedtime;
+  el.wakeTime.value = s.wakeTime;
   el.theme.value = s.theme;
 }
 
@@ -96,6 +116,8 @@ function readForm(form) {
     chronotypeShiftH: Number(el.chronotype.value),
     habitualMgPerDay: Number(el.habitualMg.value),
     habitWeeks: Number(el.habitWeeks.value),
+    bedtime: el.bedtime.value || DEFAULTS.bedtime,      // a cleared time box is "", so fall back
+    wakeTime: el.wakeTime.value || DEFAULTS.wakeTime,
     theme: el.theme.value,
   };
 }
@@ -108,6 +130,14 @@ function show(form, s) {
   out("halfLife", SHOW.halfLifeH(s.halfLifeH));
   out("habitualMg", SHOW.habitualMgPerDay(s.habitualMgPerDay));
   out("habitWeeks", SHOW.habitWeeks(s.habitWeeks));
+
+  // The sleep bar runs noon to noon, so place the night by hours after noon.
+  const night = nightHours(s);
+  const startAfterNoon = (clockToHours(s.bedtime) - 12 + 24) % 24;
+  $("sleepSpan").style.left = `${(startAfterNoon / 24) * 100}%`;
+  $("sleepSpan").style.width = `${(Math.min(night, 24 - startAfterNoon) / 24) * 100}%`;
+  $("sleepLength").textContent = `${+night.toFixed(1)} h a night`;
+  $("sleepLength").className = `chip ${night >= 7 ? "ok" : "bad"}`;     // adults need about 7 h or more
   document.querySelectorAll("[data-setting]").forEach((node) => {
     node.textContent = SHOW[node.dataset.setting](s[node.dataset.setting]);
   });
@@ -142,26 +172,40 @@ export function initSettings() {
     opener.focus();
   };
 
-  // First-run survey: the same frame and fields, with welcome text, no way back,
-  // and Start instead of Done. Finishing it saves your answers and remembers the device.
+  // First-run survey: the same frame and cards, one step at a time, with a progress
+  // bar instead of the back arrow and Next instead of Done. There's no way out but
+  // through, so the layers always start with your answers.
+  const stepCards = [...frame.querySelectorAll("[data-step]")];
+  const progress = [...$("surveyProgress").children];
   const normal = { title: $("settingsTitle").textContent, intro: $("settingsIntro").textContent, done: $("settingsDone").textContent };
-  let inSurvey = false;
-  const openSurvey = () => {
-    inSurvey = true;
-    frame.classList.add("first-run");
-    $("settingsTitle").textContent = "Welcome! Tell us about you";
-    $("settingsIntro").textContent =
-      "A few questions so every layer is about you, not an average person. You can change them later with the gear in the top right.";
-    $("settingsDone").textContent = "Start";
-    frame.hidden = false;
+  const last = STEPS.length - 1;
+  let step = null;                    // the survey step on screen, or null when it's the normal settings
+  const showStep = (n) => {
+    step = n;
+    stepCards.forEach((card) => { card.hidden = Number(card.dataset.step) !== n; });
+    progress.forEach((bar, i) => bar.classList.toggle("on", i < n));
+    $("surveyStepNo").textContent = n === 0 ? "Welcome" : `Question ${n} of ${last}`;
+    $("settingsTitle").textContent = STEPS[n].title;
+    $("settingsIntro").textContent = STEPS[n].intro;
+    $("surveyBack").hidden = n === 0;
+    $("settingsDone").textContent = n === 0 ? "Let's go" : n === last ? "Start" : "Next";
     frame.scrollTop = 0;
-    $("settingsTitle").focus();      // screen readers start at the welcome text
+    $("settingsTitle").focus();      // screen readers read each step from its title
+  };
+  const openSurvey = () => {
+    frame.classList.add("first-run");
+    $("surveyTop").hidden = false;
+    frame.hidden = false;
+    showStep(0);
   };
   const finishSurvey = () => {
     save(settings);                   // even if nothing was changed, the defaults become your answers
     markSurveyDone();
-    inSurvey = false;
+    step = null;
     frame.classList.remove("first-run");
+    $("surveyTop").hidden = true;
+    $("surveyBack").hidden = true;
+    stepCards.forEach((card) => { card.hidden = "surveyOnly" in card.dataset; });   // settings shows every card but the welcome
     $("settingsTitle").textContent = normal.title;
     $("settingsIntro").textContent = normal.intro;
     $("settingsDone").textContent = normal.done;
@@ -171,8 +215,13 @@ export function initSettings() {
   gear.addEventListener("click", () => open(gear));
   document.querySelectorAll("[data-open-settings]").forEach((b) => b.addEventListener("click", () => open(b)));
   $("settingsBack").addEventListener("click", close);
-  $("settingsDone").addEventListener("click", () => (inSurvey ? finishSurvey() : close()));
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !frame.hidden && !inSurvey) close(); });
+  $("surveyBack").addEventListener("click", () => showStep(step - 1));
+  $("settingsDone").addEventListener("click", () => {
+    if (step === null) close();
+    else if (step < last) showStep(step + 1);
+    else finishSurvey();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !frame.hidden && step === null) close(); });
 
   if (!surveyDone()) openSurvey();
 }

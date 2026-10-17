@@ -30,7 +30,7 @@
     <section class="page" aria-label="Layer 1">
       <p class="layer-no">Layer 1</p>
       <h1 class="page-title first">Caffeine in your blood</h1>
-      <p class="body">How much caffeine is in you over the day. Each drink climbs as your gut absorbs it, then fades as your liver clears it.</p>
+      <p class="body">Your caffeine level through the day.</p>
 
       <div class="hero">
         <div class="ring ring-dark">
@@ -45,12 +45,13 @@
 
       <article class="card">
         <div class="card-head">
-          <h2>Caffeine over the day</h2>
+          <h2>Caffeine over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPk" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <div class="toggle" id="pkToggle">
             <button class="on" data-series="bodyMg">mg in you</button>
             <button data-series="conc">mg/L blood</button>
           </div>
         </div>
+        <p class="info-pop" id="infoPk" hidden>Each drink climbs as your gut absorbs it, then halves every half-life as your liver clears it. Drag along the curve to read any time.</p>
         <div class="readout"><span class="readout-value" id="pkReadout">–</span><span class="muted" id="pkReadoutTime"></span></div>
         <svg class="chart" id="pkChart" role="img" aria-label="Caffeine level over the day, with drinks marked and bedtime shaded"></svg>
         <ul class="legend">
@@ -61,8 +62,8 @@
 
       <form id="layer1Inputs">
         <article class="card">
-          <h2>Your drinks today</h2>
-          <p class="muted small">Tap a drink to change it. Pick "No drink" to skip a row.</p>
+          <h2>Your drinks today <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoDrinks" aria-label="About your drinks"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <p class="info-pop" id="infoDrinks" hidden>Tap a drink to change it. Pick "No drink" to skip a row.</p>
           <div class="inputs">
             <div class="row drink-row">
               <label class="field">Time<input type="time" name="time0" value="08:00"></label>
@@ -77,7 +78,7 @@
               <div class="field"><span id="drinkLabel2">Drink</span><input type="hidden" name="drink2" value=""><button type="button" class="drink-pick" data-slot="2" aria-haspopup="dialog" aria-labelledby="drinkLabel2 drinkPick2" id="drinkPick2"><span class="pick-text"><small>Loading drinks…</small></span></button></div>
             </div>
             <div class="row drink-row">
-              <label class="field">Bedtime<input type="time" name="bedtime" value="23:00"></label>
+              <label class="field">Bedtime tonight<input type="time" name="bedtime" value="23:00"></label>
             </div>
           </div>
         </article>
@@ -120,33 +121,35 @@
     <section class="page" aria-label="Layer 2">
       <p class="layer-no">Layer 2</p>
       <h1 class="page-title first">Sleep pressure</h1>
-      <p class="body">How sleepy you'd be with no caffeine. Pressure builds while you're awake and drains while you sleep.</p>
+      <p class="body">How sleepy you'd be without caffeine.</p>
 
       <article class="card">
         <div class="card-head">
-          <h2>When you sleep</h2>
+          <h2>When you sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleepCal" aria-label="About the sleep calendar"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="sleepSummary">–</span>
         </div>
-        <p class="muted small">Press and drag over a day to mark sleep. Drag over marked time to erase it. Short blocks count as naps. Scroll with the hour labels.</p>
+        <p class="info-pop" id="infoSleepCal" hidden>It starts from your usual sleep in Settings. Press and drag over a day to mark sleep, or over marked time to erase it. Short blocks count as naps. Scroll with the hour labels.</p>
         <div id="sleepCal" class="cal-wrap"></div>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <h2>Body clock</h2>
+          <h2>Your schedule</h2>
           <button type="button" class="link-btn" data-open-settings>Change</button>
         </div>
         <ul class="breakdown given">
+          <li><span>Usual bedtime <em class="src">Settings</em></span><strong data-setting="bedtime">–</strong></li>
+          <li><span>Usual wake-up <em class="src">Settings</em></span><strong data-setting="wakeTime">–</strong></li>
           <li><span>When you're most alert <em class="src">Settings</em></span><strong data-setting="chronotypeShiftH">–</strong></li>
         </ul>
       </article>
 
       <article class="card">
         <div class="card-head">
-          <h2>Sleep pressure over the week</h2>
+          <h2>Sleep pressure over the week <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPressure" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="pressureNow">–</span>
         </div>
-        <p class="muted small">0 is fully rested, 1 is up all night. Short nights leave you starting the next day higher.</p>
+        <p class="info-pop" id="infoPressure" hidden>Pressure builds while you're awake and drains while you sleep. 0 is fully rested, 1 is up all night. Short nights leave you starting the next day higher.</p>
         <svg class="chart" id="pressureChart" role="img" aria-label="Sleep pressure and body clock over five days"></svg>
         <ul class="legend">
           <li><span class="swatch taper"></span>Sleep pressure</li>
@@ -159,7 +162,8 @@
     <section class="page" aria-label="Layer 3">
       <p class="layer-no">Layer 3</p>
       <h1 class="page-title first">Tolerance and reset</h1>
-      <p class="body">Daily caffeine makes your brain grow extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal.</p>
+      <p class="body">How much your habit weakens each cup. <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoTolerance" aria-label="About tolerance"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></p>
+      <p class="info-pop" id="infoTolerance" hidden>Daily caffeine makes your brain grow extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal.</p>
 
       <div class="hero">
         <div class="ring ring-dark">
@@ -212,13 +216,13 @@
 
       <article class="card">
         <div class="card-head">
-          <h2>Day by day</h2>
+          <h2>Day by day <button type="button" class="info-btn" aria-expanded="false" aria-controls="resetChartNote" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <div class="toggle" id="resetToggle">
             <button class="on" data-series="R">Receptors</button>
             <button data-series="withdrawal">Withdrawal</button>
           </div>
         </div>
-        <p class="muted small" id="resetChartNote"></p>
+        <p class="info-pop" id="resetChartNote" hidden></p>
         <svg class="chart" id="resetChart" role="img" aria-label="Receptor level and withdrawal over the days before the exam"></svg>
         <ul class="legend">
           <li><span class="swatch taper"></span>The plan</li>
@@ -232,7 +236,7 @@
     <section class="page" aria-label="Layer 4">
       <p class="layer-no">Layer 4</p>
       <h1 class="page-title first">Alertness</h1>
-      <p class="body">How awake you feel. It combines the drinks from layer 1, the sleep from layer 2 and the tolerance from layer 3.</p>
+      <p class="body">How awake you feel, from layers 1 to 3.</p>
 
       <div class="hero">
         <div class="ring" id="alertRing">
@@ -247,18 +251,19 @@
       </div>
 
       <article class="card">
-        <h2>Alertness over the day</h2>
+        <h2>Alertness over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoAlert" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoAlert" hidden>It combines the drinks from layer 1, the sleep from layer 2 and the tolerance from layer 3. Drag along the curve to pick a moment; everything below is for that moment.</p>
         <div class="readout"><span class="readout-value" id="alertReadout">–</span><span class="muted" id="alertReadoutTime"></span></div>
         <svg class="chart" id="alertChart" role="img" aria-label="Alertness over the day, with drinks marked and sleep shaded"></svg>
         <ul class="legend">
           <li><span class="swatch dose"></span>Drink</li>
           <li><span class="swatch sleep"></span>Asleep</li>
         </ul>
-        <p class="muted small">Drag along the curve to pick a moment. Everything below is for that moment.</p>
       </article>
 
       <article class="card">
-        <h2>What goes in</h2>
+        <h2>What goes in <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoInputs" aria-label="About the inputs"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoInputs" hidden>Tolerance is your extra adenosine receptors from layer 3: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; this uses the population average until layer 5 learns yours.</p>
         <ul class="breakdown given">
           <li><span>Caffeine in your blood <em class="src">Layer 1</em></span><strong id="inConc">–</strong></li>
           <li><span>Sleep pressure <em class="src">Layer 2</em></span><strong id="inS">–</strong></li>
@@ -266,7 +271,6 @@
           <li><span>Tolerance <em class="src">Layer 3</em></span><strong id="inR">–</strong></li>
           <li><span>Caffeine sensitivity <em class="src">Average</em></span><strong id="inKd">–</strong></li>
         </ul>
-        <p class="muted small">Tolerance is your extra adenosine receptors from layer 3: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; this uses the population average until layer 5 learns yours.</p>
       </article>
 
       <article class="card">
@@ -280,16 +284,144 @@
       </article>
 
       <article class="card">
-        <h2>Why more coffee stops helping</h2>
-        <p class="muted small">Receptors blocked as caffeine in your blood rises (mg/L). The curve flattens, so doubling the dose blocks far less than double.</p>
+        <h2>Why more coffee stops helping <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoOcc" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoOcc" hidden>Receptors blocked as caffeine in your blood rises (mg/L). The curve flattens, so doubling the dose blocks far less than double.</p>
         <svg class="chart" id="occChart" role="img" aria-label="Fraction of receptors blocked against caffeine level"></svg>
       </article>
     </section>
 
+    <!-- ============ Layer 5: optimizer (model/optimizer.py) and learning (model/learn.py) ============ -->
     <section class="page" aria-label="Layer 5">
       <p class="layer-no">Layer 5</p>
-      <h1 class="page-title first">Optimizer and learning</h1>
-      <p class="muted">Evan is building this in model/optimizer.py and model/learn.py.</p>
+      <h1 class="page-title first">Your caffeine plan</h1>
+      <p class="body">When to drink, and how much, to be sharp for your event. <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlan" aria-label="About the plan"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></p>
+      <p class="info-pop" id="infoPlan" hidden>Layers 1 to 4 predict your alertness for any coffee schedule. This page tries every schedule on a 15-minute grid, throws out the ones that break a safety limit, and keeps the best. Each extra 50 mg has to raise your alertness by at least 0.25 out of 10, so it never pushes caffeine for a tiny gain.</p>
+
+      <div class="hero">
+        <div class="ring" id="planRing">
+          <strong id="planScore">…</strong>
+          <span>out of 10<br>during it</span>
+        </div>
+        <div class="hero-side">
+          <p class="hero-lead" id="planLead">Alertness during your event</p>
+          <p class="equation" id="planEquation">Loading the Python model…</p>
+        </div>
+      </div>
+
+      <form id="layer5Inputs">
+        <article class="card">
+          <h2>Your event</h2>
+          <div class="inputs">
+            <div class="row">
+              <label class="field">Day
+                <select name="eventDay">
+                  <option value="0">Today</option>
+                  <option value="1" selected>Tomorrow</option>
+                </select>
+              </label>
+              <label class="field">Starts<input type="time" name="eventStart" value="09:00"></label>
+            </div>
+            <label class="slider">
+              <span class="slider-top"><span>Lasts</span><output data-for="eventLength"></output></span>
+              <input type="range" name="eventLength" min="0.5" max="6" step="0.5" value="2">
+            </label>
+            <label class="check"><input type="checkbox" name="allowNap" checked> A nap is OK</label>
+            <div class="row nap-slot">
+              <label class="field">Free from<input type="time" name="slotStart"></label>
+              <label class="field">Until<input type="time" name="slotEnd"></label>
+            </div>
+            <span class="hint">Optional: when a nap could fit. Leave empty for any time. Naps are only suggested after a short night.</span>
+          </div>
+        </article>
+      </form>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>The plan</h2>
+          <span class="chip ok" id="planChip">–</span>
+        </div>
+        <ul class="timeline" id="planList"></ul>
+        <p class="muted small" id="planNote"></p>
+      </article>
+
+      <article class="card">
+        <h2>Alertness with the plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlanChart" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoPlanChart" hidden>Layer 4's alertness with your drinks from layer 1 plus the plan's. Drag along the curve to read any time.</p>
+        <div class="readout"><span class="readout-value" id="planReadout">–</span><span class="muted" id="planReadoutTime"></span></div>
+        <svg class="chart" id="planChart" role="img" aria-label="Alertness from waking up to bedtime with the plan, event and sleep shaded"></svg>
+        <ul class="legend">
+          <li><span class="swatch dose"></span>Drink</li>
+          <li><span class="swatch event-soft"></span>Event</li>
+          <li><span class="swatch sleep"></span>Asleep or nap</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Sleep check</h2>
+          <span class="chip ok" id="planSleepChip">–</span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="planMeter"></div><div class="meter-limit" id="planLimit"></div></div>
+        <p class="muted small" id="planSleepNote"></p>
+      </article>
+
+      <article class="card">
+        <h2>How it chose <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoChose" aria-label="About the search"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoChose" hidden>It scores every single dose and every pair of doses at least an hour apart, then tries adding a third to the best pair. Sleep pressure doesn't depend on the doses, so it's worked out once; only the caffeine curve changes between schedules.</p>
+        <ul class="breakdown">
+          <li><span>Schedules tried</span><strong id="outTried">–</strong></li>
+          <li><span>Caffeine that day</span><strong id="outDayMg">–</strong></li>
+          <li><span>Each 50 mg must add at least</span><strong id="outMgCost">–</strong></li>
+          <li><span>Half-life and sensitivity used</span><strong id="outParams">–</strong></li>
+          <li><span>Without extra coffee</span><strong id="outBaseline">–</strong></li>
+          <li><span>With the plan</span><strong id="outWithPlan">–</strong></li>
+        </ul>
+      </article>
+
+      <h1 class="page-title">Learning about you</h1>
+      <p class="body">Rate how alert you feel, and the model learns your own half-life and sensitivity. <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoLearn" aria-label="About learning"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></p>
+      <p class="info-pop" id="infoLearn" hidden>Bayes' rule on a grid of 400 guesses: each guess's probability is its prior (close to your settings) times how well it predicts your ratings. Ratings a few hours after coffee teach it the most, because half-life shows in how fast caffeine wears off.</p>
+
+      <article class="card">
+        <h2>How alert are you right now?</h2>
+        <div class="rating" id="ratingButtons">
+          <button type="button" data-score="1">1</button>
+          <button type="button" data-score="2">2</button>
+          <button type="button" data-score="3">3</button>
+          <button type="button" data-score="4">4</button>
+          <button type="button" data-score="5">5</button>
+        </div>
+        <div class="rating-ends muted small"><span>Exhausted</span><span>Fully alert</span></div>
+        <p class="muted small" id="ratingNote"></p>
+        <div class="btn-row">
+          <button type="button" class="btn" id="simulateBtn">Simulate a week</button>
+          <button type="button" class="btn ghost" id="clearRatingsBtn">Clear ratings</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>What it has learned <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoHeat" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoHeat" hidden>Each square is one guess: half-life up the side, sensitivity (Kd, mg/L) along the bottom. Darker means more likely; the ring is the average. A longer half-life and a higher Kd predict similar ratings, so it often learns a diagonal band before it learns a point.</p>
+        <p class="muted small" id="learnSource"></p>
+        <svg class="chart heat" id="heatChart" role="img" aria-label="Probability of each half-life and sensitivity"></svg>
+        <div class="stats-row">
+          <p class="stat"><strong id="learnHalfLife">–</strong><br><span id="learnHalfLifeNote">half-life</span></p>
+          <p class="stat"><strong id="learnKd">–</strong><br><span id="learnKdNote">sensitivity (Kd)</span></p>
+        </div>
+        <label class="check learn-use"><input type="checkbox" id="useLearned"> Plan with my learned numbers</label>
+      </article>
+
+      <article class="card">
+        <h2>Your caffeine today, give or take <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoBand" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoBand" hidden>Your drinks from layer 1, with 200 half-lives drawn from what it has learned. The dashed lines are the 10th and 90th percentile: 8 in 10 of those curves fall between them. More ratings, narrower band.</p>
+        <svg class="chart" id="bandChart" role="img" aria-label="Caffeine in your blood today with an uncertainty band"></svg>
+        <ul class="legend">
+          <li><span class="swatch taper"></span>Most likely (mg/L)</li>
+          <li><span class="swatch cold"></span>10th to 90th percentile</li>
+        </ul>
+      </article>
+
+      <p class="footnote">A model for learning, not medical advice.</p>
     </section>
   </main>
 
@@ -325,29 +457,68 @@
         <svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" /></svg>
       </button>
     </div>
+    <!-- First-run survey only: how far through the steps you are. -->
+    <div class="survey-top" id="surveyTop" hidden>
+      <div class="survey-progress" id="surveyProgress" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <p class="layer-no" id="surveyStepNo">Welcome</p>
+    </div>
     <h1 class="page-title first" id="settingsTitle" tabindex="-1">Personal settings</h1>
-    <p class="body" id="settingsIntro">These describe you, not your day, so you set them once and every layer uses them. They're saved on this device.</p>
+    <p class="body" id="settingsIntro">Set once, used by every layer.</p>
+
+    <!-- Step 0 of the survey: what the app does and what it will ask. Not shown in settings. -->
+    <div data-step="0" data-survey-only hidden>
+      <div class="hero">
+        <div class="ring">
+          <strong>4</strong>
+          <span>quick<br>questions</span>
+        </div>
+        <div class="hero-side">
+          <p class="hero-lead">About a minute</p>
+          <p class="equation">Saved on this device only.</p>
+        </div>
+      </div>
+    </div>
 
     <form id="settingsForm">
-      <article class="card">
-        <h2>Your body</h2>
+      <article class="card" data-step="1">
+        <div class="card-head">
+          <h2>Your sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleep" aria-label="About your sleep"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <span class="chip ok" id="sleepLength">–</span>
+        </div>
+        <p class="info-pop" id="infoSleep" hidden>Your usual night. It fills in the sleep calendar on layer 2 and sets bedtime for the sleep check on layer 1. Caffeine left at bedtime hurts your sleep, and how much you sleep decides how tired you feel.</p>
+        <!-- Noon to noon, so a night is one unbroken stretch in the middle. -->
+        <div class="sleep-bar" aria-hidden="true"><span class="sleep-span" id="sleepSpan"></span></div>
+        <div class="sleep-ticks" aria-hidden="true"><span>12p</span><span>6p</span><span>12a</span><span>6a</span><span>12p</span></div>
+        <div class="inputs"><div class="row">
+          <label class="field">
+            <span class="field-name"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>Bedtime</span>
+            <input type="time" name="bedtime" value="23:00">
+          </label>
+          <label class="field">
+            <span class="field-name"><svg viewBox="0 0 24 24"><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>Wake up</span>
+            <input type="time" name="wakeTime" value="07:00">
+          </label>
+        </div></div>
+      </article>
+
+      <article class="card" data-step="3">
+        <h2>Your body <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoBody" aria-label="About your body"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoBody" hidden>Weight: caffeine spreads through about 0.6 L of body water per kg, so lighter people reach a higher level. Half-life: hours for your liver to clear half of it, about 5 h on average and 2.5 to 10 h across people. Smoking about halves it; the pill about doubles it.</p>
         <div class="inputs">
           <label class="slider">
             <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
             <input type="range" name="weight" min="40" max="130" step="1" value="70">
-            <span class="hint">Caffeine spreads through about 0.6 L of body water per kg, so lighter people get a higher level.</span>
           </label>
           <label class="slider">
             <span class="slider-top"><span>Half-life</span><output data-for="halfLife"></output></span>
             <input type="range" name="halfLife" min="2" max="10" step="0.5" value="5">
-            <span class="hint">Hours for your liver to clear half of it. About 5 h on average, 2.5 to 10 h across people.</span>
           </label>
-          <label class="check"><input type="checkbox" name="smoker"> I smoke (about halves the half-life)</label>
-          <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill (about doubles it)</label>
+          <label class="check"><input type="checkbox" name="smoker"> I smoke</label>
+          <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill</label>
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-step="4">
         <h2>Body clock</h2>
         <p class="muted small">When are you most alert?</p>
         <div class="segmented" role="radiogroup" aria-label="Chronotype">
@@ -357,25 +528,23 @@
         </div>
       </article>
 
-      <article class="card">
-        <h2>Your habit</h2>
+      <article class="card" data-step="2">
+        <h2>Your habit <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoHabit" aria-label="About your habit"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoHabit" hidden>Daily caffeine builds tolerance, so this decides how strong each cup still feels. A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg. Receptors take a few weeks to fully adjust, then stay put.</p>
         <div class="inputs">
           <label class="slider">
             <span class="slider-top"><span>Usual caffeine a day</span><output data-for="habitualMg"></output></span>
             <input type="range" name="habitualMg" min="0" max="500" step="10" value="300">
-            <span class="hint">A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg.</span>
           </label>
           <label class="slider">
             <span class="slider-top"><span>For how long</span><output data-for="habitWeeks"></output></span>
             <input type="range" name="habitWeeks" min="1" max="52" step="1" value="8">
-            <span class="hint">Receptors take a few weeks to fully adjust, then stay put.</span>
           </label>
         </div>
       </article>
 
-      <article class="card">
+      <article class="card" data-step="4">
         <h2>Theme</h2>
-        <p class="muted small">Colors for the whole app, charts included.</p>
         <div class="theme-picker" role="radiogroup" aria-label="Theme">
           <label><input type="radio" name="theme" value="coffee" checked><span class="theme-swatch" data-swatch="coffee"></span><span>Coffee</span></label>
           <label><input type="radio" name="theme" value="mint"><span class="theme-swatch" data-swatch="mint"></span><span>Mint</span></label>
@@ -385,7 +554,10 @@
         </div>
       </article>
     </form>
-    <button type="button" class="btn wide" id="settingsDone">Done</button>
+    <div class="settings-actions">
+      <button type="button" class="btn ghost" id="surveyBack" hidden>Back</button>
+      <button type="button" class="btn wide" id="settingsDone">Done</button>
+    </div>
   </section>
 
   <!-- Drink picker for layer 1: a grid of drinks, like an ordering kiosk. -->
