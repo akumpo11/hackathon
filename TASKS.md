@@ -400,6 +400,8 @@ Decide before building, because it changes the stack rule in CLAUDE.md ("No logi
 - **Option A, device only (no server).** The first open on a device shows a welcome screen that is the settings form; finishing it saves to local storage and the app opens. Every later open skips it. Fits CLAUDE.md and takes about an hour, since N10 already has the form. Limitation to say out loud: a second device starts fresh, because nothing leaves the browser.
 - **Option B, real accounts.** Settings follow you across devices. Needs `api.py` deployed (see the static-site open question above) with a small `sqlite3` table `users(email, passwordHash, settingsJson)`, routes `POST /api/signup` and `POST /api/login`, and passwords stored only as salted hashes (`hashlib.scrypt`), never as plain text. Expect 3 to 4 hours including the deploy, and update CLAUDE.md and PLAN.md if the team picks it.
 
+Done: the first-run survey (option A without the login screen). The first open on a device shows the settings frame as a survey with no way back; Start saves the answers and a flag (`caffeineSurveyDone`) in local storage. Open the app with `?reset` to forget the answers and show it again for a demo.
+
 Recommendation: build A now, since it is the settings form with a first-run flag, and only do B on Sunday morning if `api.py` is being deployed anyway. Either way the login screen must not block the demo: keep a "skip, use defaults" button on it.
 
 ---
