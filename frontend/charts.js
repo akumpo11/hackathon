@@ -116,6 +116,13 @@ export function lineChart(svg, opts) {
     const d = ser.xs.map((v, i) => `${i ? "L" : "M"}${s.x(v).toFixed(1)},${s.y(ser.ys[i]).toFixed(1)}`).join(" ");
     el("path", { d, stroke: ser.color, "stroke-width": 2.5, fill: "none", "stroke-dasharray": ser.dash ?? "" }, svg);
   }
+  for (const p of opts.points ?? []) {
+    const px = s.x(p.x), py = s.y(p.y);
+    el("line", { x1: px, x2: px, y1: py, y2: s.bottom, stroke: css("--coral"), "stroke-width": 1.5, "stroke-dasharray": "3 3" }, svg);
+    el("circle", { cx: px, cy: py, r: 6.5, fill: css("--coral"), stroke: "#fff", "stroke-width": 3 }, svg);
+    el("text", { x: px, y: py - 12, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg)
+      .textContent = p.label;
+  }
   xTicks(svg, s, xMin, xMax, opts.tickStep, opts.formatTick);
 }
 
