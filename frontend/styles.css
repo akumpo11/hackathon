@@ -222,6 +222,7 @@ button svg path, .avatar svg path { fill: none; stroke: currentColor; stroke-wid
 .breakdown { list-style: none; padding: 0; margin-top: 8px; }
 .breakdown li { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .breakdown li:first-child { border-top: 0; }
+.src { font-style: normal; font-size: 11.5px; font-weight: 700; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--mint-soft); color: #0E7A5F; }
 .breakdown li:last-child strong { color: var(--mint); }
 
 /* ---------- Layer 2: sleep calendar and body clock ---------- */

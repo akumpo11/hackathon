@@ -5,6 +5,7 @@
 import { lineChart } from "./charts.js";
 import { initSleepCalendar } from "./sleepcal.js";
 import { sleepPressure, circadian } from "./sleepmodel.js";
+import { publish } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -17,6 +18,7 @@ function draw(blocks) {
   $("sleepSummary").textContent = `${blocks.length} block${blocks.length === 1 ? "" : "s"}, ${hours.toFixed(1)} h`;
 
   const peak = 17 + Number($("layer2Inputs").elements.chronotype.value);
+  publish("layer2", { blocks, circadianPeakH: peak });
   const S = sleepPressure(ts, blocks);
   const C = circadian(ts, peak);
 

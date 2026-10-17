@@ -153,36 +153,43 @@
       </article>
     </section>
 
-    <!-- ============ Layer 3: alertness (inputs, processing, outputs) ============ -->
+    <!-- ============ Layer 3: alertness (model/alertness.py) ============ -->
     <section class="page" aria-label="Layer 3">
       <p class="layer-no">Layer 3</p>
       <h1 class="page-title first">Alertness</h1>
-      <p class="body">How caffeine and sleep pressure combine into how awake you feel.</p>
+      <p class="body">How awake you feel. It combines the drinks from layer 1 with the sleep from layer 2.</p>
 
       <div class="hero">
         <div class="ring" id="alertRing">
           <strong id="alertScore">…</strong>
-          <span>out of 10</span>
+          <span id="alertSub">out of 10</span>
         </div>
         <div class="hero-side">
           <p class="hero-lead">How alert you are</p>
+          <p class="muted" id="alertWhen"></p>
           <p class="equation" id="equation">Loading the Python model…</p>
         </div>
       </div>
 
       <article class="card">
+        <h2>Alertness over the day</h2>
+        <div class="readout"><span class="readout-value" id="alertReadout">–</span><span class="muted" id="alertReadoutTime"></span></div>
+        <svg class="chart" id="alertChart" role="img" aria-label="Alertness over the day, with drinks marked and sleep shaded"></svg>
+        <ul class="legend">
+          <li><span class="swatch dose"></span>Drink</li>
+          <li><span class="swatch sleep"></span>Asleep</li>
+        </ul>
+        <p class="muted small">Drag along the curve to pick a moment. Everything below is for that moment.</p>
+      </article>
+
+      <article class="card">
         <h2>What goes in</h2>
+        <ul class="breakdown">
+          <li><span>Caffeine in your blood <em class="src">Layer 1</em></span><strong id="inConc">–</strong></li>
+          <li><span>Sleep pressure <em class="src">Layer 2</em></span><strong id="inS">–</strong></li>
+          <li><span>Body clock <em class="src">Layer 2</em></span><strong id="inCirc">–</strong></li>
+        </ul>
         <form class="inputs" id="layer3Inputs">
-          <label class="slider">
-            <span class="slider-top"><span>Sleep pressure</span><output data-for="S"></output></span>
-            <input type="range" name="S" min="0" max="1" step="0.01" value="0.55">
-            <span class="hint">0 is fully rested, 1 is up all night. Will come from layer 2.</span>
-          </label>
-          <label class="slider">
-            <span class="slider-top"><span>Caffeine in your blood</span><output data-for="conc"></output></span>
-            <input type="range" name="conc" min="0" max="8" step="0.1" value="2">
-            <span class="hint">About 2 mg/L an hour after a 100 mg coffee. Will come from layer 1.</span>
-          </label>
           <label class="slider">
             <span class="slider-top"><span>Caffeine sensitivity</span><output data-for="kd"></output></span>
             <input type="range" name="kd" min="1" max="6" step="0.1" value="3">
@@ -193,25 +200,6 @@
             <input type="range" name="R" min="1" max="1.8" step="0.05" value="1">
             <span class="hint">Extra adenosine receptors. 1.0 for a non-drinker, about 1.5 at 300 mg a day. Will come from layer 4.</span>
           </label>
-          <label class="slider">
-            <span class="slider-top"><span>Body clock</span><output data-for="circ"></output></span>
-            <input type="range" name="circ" min="-0.15" max="0.15" step="0.01" value="0.05">
-            <span class="hint">Highest around 5 PM, lowest around 5 AM. Will come from layer 2.</span>
-          </label>
-          <div class="row">
-            <label class="field">Last sleep
-              <select name="sleepLen">
-                <option value="0">None recently</option>
-                <option value="0.33">20-minute nap</option>
-                <option value="0.75">45-minute nap</option>
-                <option value="1.5">90-minute nap</option>
-                <option value="8" selected>Full night</option>
-              </select>
-            </label>
-            <label class="field">Minutes since waking
-              <input type="number" name="minutesSince" min="0" max="600" step="5" value="60">
-            </label>
-          </div>
         </form>
       </article>
 

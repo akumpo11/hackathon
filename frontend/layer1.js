@@ -4,6 +4,7 @@
 import { clockToHours, hoursToClock } from "./api.js";
 import { areaChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
+import { publish } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -99,6 +100,8 @@ export async function startLayer1() {
   let last = null;
   const update = () => {
     const x = readInputs(drinks);
+    publish("layer1", { doses: x.doses, weightKg: x.weightKg, halfLifeH: x.halfLifeH,
+                        smoker: x.smoker, oralContraceptives: x.oralContraceptives });
     showSliderValues(x);
     const r = toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
                                       x.smoker, x.oralContraceptives, x.bedtimeH));
