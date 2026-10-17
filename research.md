@@ -6,7 +6,9 @@ The science behind the model's choices, with sources, so anyone on the team can 
 
 ### What each term in the Bateman formula means
 
-The formula gives the caffeine level in your blood, C(t) in mg/L, at time t after a drink:
+The formula gives the caffeine level in your blood, C(t) in mg/L, at time t after one drink:
+
+    C(t) = (D / V) * ka / (ka - ke) * ( exp(-ke * t) - exp(-ka * t) )        for t >= 0, and 0 before the drink
 
 - t: hours since you took the drink
 - D: the dose in mg (for example, 95 for a coffee)
@@ -23,6 +25,12 @@ Code: `model/pk.py`, constants in `model/params.py`. Equations: `equations/layer
 ### What we added to the Bateman formula
 
 The single-drink curve is the standard Bateman function. What we add is the superposition principle, so the plan can have several drinks: each drink gets its own curve, and the total level is the sum.
+
+    C_total(t) = sum over drinks i of (D_i / V) * ka / (ka - ke) * ( exp(-ke * (t - t_i)) - exp(-ka * (t - t_i)) )
+
+- D_i: dose of drink i, in mg
+- t_i: the time drink i was taken. Each drink counts only from t_i onward, so its term is 0 while t < t_i.
+- V, ka and ke are the same for every drink.
 
 Where this could break: if your liver got overloaded and cleared caffeine more slowly at high levels, the drinks would no longer be independent and simple addition would be wrong. Caffeine does start to saturate at very high doses, but at normal amounts, within the 400 mg daily limit, the addition is a good approximation.
 
