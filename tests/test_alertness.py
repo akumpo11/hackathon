@@ -11,7 +11,7 @@ import numpy as np
 
 from model.alertness import alertnessFrom, feltPressure, inertia, occupancy
 
-P = SimpleNamespace(kdMgL=3.0)
+KD = 3.0
 
 
 def block(startH, endH):
@@ -35,11 +35,11 @@ def testWorksOnArrays():
 
 
 def testToleranceMakesPressureFeelStronger():
-    assert feltPressure(0.5, 2.0, 1.5, P) > feltPressure(0.5, 2.0, 1.0, P)
+    assert feltPressure(0.5, 2.0, 1.5, KD) > feltPressure(0.5, 2.0, 1.0, KD)
 
 
 def testNoCaffeineNoToleranceFeelsLikeRawPressure():
-    assert feltPressure(0.6, 0.0, 1.0, P) == 0.6
+    assert feltPressure(0.6, 0.0, 1.0, KD) == 0.6
 
 
 def testShortNapLessGroggyThanDeepNap():
@@ -63,9 +63,9 @@ def testOnlyLatestSleepCounts():
 
 
 def testAlertnessIsClippedTo01():
-    assert alertnessFrom(0.0, 0.15, 0.0, 1.0, 0.0) == 1.0
-    assert alertnessFrom(1.0, -0.15, 0.0, 1.8, 0.3) == 0.0
+    assert alertnessFrom(0.0, 0.15, 0.0, 1.0, 0.0, KD) == 1.0
+    assert alertnessFrom(1.0, -0.15, 0.0, 1.8, 0.3, KD) == 0.0
 
 
 def testCaffeineRaisesAlertness():
-    assert alertnessFrom(0.7, 0.0, 3.0, 1.0, 0.0) > alertnessFrom(0.7, 0.0, 0.0, 1.0, 0.0)
+    assert alertnessFrom(0.7, 0.0, 3.0, 1.0, 0.0, KD) > alertnessFrom(0.7, 0.0, 0.0, 1.0, 0.0, KD)

@@ -135,12 +135,11 @@ Verify the numbers against a source before the demo and cite it in the README (a
 Decision: all Python. Team of 3, everyone is comfortable in Python, and judges weight understanding at 30%. Nobody should be explaining a framework they learned at 2 AM.
 
 - Math: a plain Python package `model/` using numpy. No framework code in it. One file per layer, one owner per file.
-- App: Streamlit (`app.py`). Sliders and time inputs, Plotly charts, re-runs top to bottom on every change. Phones can use it.
+- App: plain HTML, CSS and JavaScript in `frontend/`, mobile-first, with hand-written SVG charts (`frontend/charts.js`). No build step. (This replaced the original Streamlit plan.)
+- Running the model: the layer pages run the `model/` Python files in the browser with Pyodide. `api.py` (FastAPI) is the alternative for the full plan; see the open question in TASKS.md.
+- Storage: none. The model is stateless; Tier 3 ratings live in browser local storage.
 - Tests: pytest.
-- Deploy: Streamlit Community Cloud (free, connects to a public GitHub repo, gives a URL for the QR code). Fallback: run locally and show it on the laptop.
-- Setup: `brew install uv`, then `uv venv --python 3.12 && source .venv/bin/activate && uv pip install numpy plotly streamlit pytest`. The system Python is 3.9 with no packages; do not use it.
-
-If someone later wants a slicker frontend, wrap the same `model/` functions in FastAPI and point a React page at it. The math does not change, so this can be decided Sunday morning and is not required.
+- Setup: `brew install uv`, then `uv venv --python 3.12 && source .venv/bin/activate && uv pip install -r requirements.txt`. The system Python is 3.9 with no packages; do not use it.
 
     model/params.py       parameter table above, drink table
     model/schema.py        dataclasses: Dose, SleepBlock, EventWindow, Profile, Plan
@@ -151,7 +150,8 @@ If someone later wants a slicker frontend, wrap the same `model/` functions in F
     model/optimizer.py    grid search over dose schedules
     model/learn.py        Bayesian grid update from ratings
     tests/test_*.py
-    app.py                Streamlit app
+    frontend/             HTML, CSS, JavaScript, Pyodide bridge
+    equations/            one page of equations per layer
     README.md
 
 Unit tests that double as demo talking points:
@@ -180,8 +180,8 @@ Milestones are ordered so that at any cutoff you have something demoable.
 Cut order if behind: uncertainty band -> Bayesian learning (replace with manual half-life slider) -> taper planner -> nap. Never cut: curve, optimizer, bedtime constraint.
 
 Owners (details in TASKS.md):
-- Evan: layer 1 pk.py, optimizer.py, then learn.py on Sunday (kinetics, search, Bayes)
-- Andrew: layer 2 sleep.py, layer 4 tolerance.py, plus schema, params, api.py (two-process model, receptors, the contract)
+- Andrew: layer 1 pk.py, layer 4 tolerance.py, plus schema, params, api.py (kinetics, receptors, the contract)
+- Evan: layer 2 sleep.py, optimizer.py, then learn.py on Sunday (two-process model, search, Bayes)
 - Nolan: layer 3 alertness.py, the frontend, deploy, README, demo (the join formula and the product)
 
 ---

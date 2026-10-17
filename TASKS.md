@@ -16,8 +16,8 @@ Owners by layer (see PLAN.md section 1 for the layers):
 
 | Layer | Owner | Files |
 |---|---|---|
-| 1. Pharmacokinetics | Evan | `model/pk.py` |
-| 2. Sleep and circadian | Andrew | `model/sleep.py` |
+| 1. Pharmacokinetics | Andrew | `model/pk.py` |
+| 2. Sleep and circadian | Evan | `model/sleep.py`, `equations/` |
 | 3. Alertness | Nolan | `model/alertness.py` |
 | 4. Tolerance and reset | Andrew | `model/tolerance.py` |
 | 5a. Optimizer | Evan | `model/optimizer.py` |
@@ -25,7 +25,7 @@ Owners by layer (see PLAN.md section 1 for the layers):
 | Frontend, deploy, demo | Nolan | the frontend, `README.md` |
 | Glue: contract, API | Andrew | `model/schema.py`, `model/params.py`, `api.py` |
 
-Nolan owns both the frontend and layer 3. Layer 3 is a 60-line file that joins Evan's concentration and Andrew's sleep pressure, so the person drawing the curve also owns the formula that produces it. It slots in at 2:30 PM between the inputs form and the chart.
+Nolan owns both the frontend and layer 3. Layer 3 is a 60-line file that joins Andrew's concentration and Evan's sleep pressure, so the person drawing the curve also owns the formula that produces it. It slots in at 2:30 PM between the inputs form and the chart.
 
 ### The one change to the workflow: an API boundary
 
@@ -50,8 +50,8 @@ All times are decimal hours since midnight of day 0, same as the model. The fron
   "sleep": [{"startH": 23.5, "endH": 31.0, "isNap": false}, {"startH": 47.0, "endH": 55.0, "isNap": false}],
   "freeSlots": [{"startH": 31.5, "endH": 32.5}],
   "fixedDoses": [{"timeH": 31.25, "mg": 95, "label": "drip coffee"}],
-  "profile": {"weightKg": 70, "halfLifeH": 5, "kaPerH": 4, "vdLPerKg": 0.6, "kdMgL": 3,
-              "circadianPeakH": 17, "circadianAmp": 0.15, "habitualMgPerDay": 190, "habitWeeks": 8},
+  "profile": {"weightKg": 70, "halfLifeH": 5, "kdMgL": 3, "circadianPeakH": 17,
+              "habitualMgPerDay": 190, "habitWeeks": 8},
   "allowNap": true
 }
 ```
@@ -87,12 +87,14 @@ Tier 3 ratings need to persist between visits. Keep them in the browser's local 
 
 Two deploys instead of one: the frontend on Vercel or Netlify, the API on Render or Railway (free tiers, deploy from the GitHub repo with a start command of `uvicorn api:app --host 0.0.0.0 --port $PORT`). Do the API deploy Saturday evening so the Sunday morning is not spent on it. Fallback that always works: run both on the demo laptop and show it there; the phone QR link becomes a stretch goal instead of a given.
 
-### Andrew's next two hours, in order
+Open question for the team: the layer pages already run `model/` in the browser with Pyodide (see `frontend/README.md`). If the full plan runs that way too, the app is a static site (GitHub Pages), with no `api.py`, no Render, and no cold starts. The cost is a 10 to 15 s first load. Decide before anyone builds `api.py`.
 
-1. Push `model/schema.py`, `model/params.py`, `requirements.txt`, and the `.venv` gitignore (Step 0 below, minus Streamlit).
-2. Start `sleep.py` (A1); the 2:30 PM checkpoint needs `sleepPressure`. (The sample JSON is covered by `frontend/mock/`.)
-3. Write `api.py` with the three routes calling stub functions that return the `frontend/mock/` JSON. Run it, confirm the frontend can fetch it.
-4. Back to sleep.py tests. The calculations teammate should be on `pk.py` (A1) by then; check that their function signature matches `concentration(t, doses, p)`.
+### Andrew's next steps, in order
+
+1. Done: `model/schema.py`, `model/params.py`, `requirements.txt`, `.gitignore`.
+2. `pk.py` (A1). The 2:30 PM checkpoint needs `concentration`, and alertness.py already calls it.
+3. `pk.py` tests, then `feelsLikeMg` and `strengthPercent` in tolerance.py (A2 step 6), which need `concentration`.
+4. `api.py` stubs that return the `frontend/mock/` JSON, unless the team decides to run the whole model in the browser (see Deployment above).
 
 ---
 
@@ -118,16 +120,16 @@ echo ".venv/" >> .gitignore
 
 ### Shared contract
 
-Time convention: all times are decimal hours since midnight at the start of "day 0" (the day the plan starts). 14.5 means 2:30 PM today. 38.0 means 2:00 PM tomorrow. Only `app.py` touches clock times; the model never sees a datetime.
+Time convention: all times are decimal hours since midnight at the start of "day 0" (the day the plan starts). 14.5 means 2:30 PM today. 38.0 means 2:00 PM tomorrow. Only the frontend touches clock times; the model never sees a datetime.
 
 The contract lives in `model/schema.py` (dataclasses: Dose, SleepBlock, EventWindow, FreeSlot, Profile, Plan) and `model/params.py` (constants, limits, drink table). Read those files rather than copying code from here. Inputs are `frozen=True`, so build a changed copy with `dataclasses.replace(p, halfLifeH=4)` instead of assigning. It is called `schema.py` so it never shadows Python's built-in `types` module.
 
-Curves are numpy arrays over a shared time grid. Every curve function takes `t` as a numpy array and returns an array of the same shape. That one convention keeps everything vectorized and lets Plotly plot it directly.
+Curves are numpy arrays over a shared time grid. Every curve function takes `t` as a numpy array and returns an array of the same shape. That one convention keeps everything vectorized and lets the charts plot it directly.
 
 Dependencies, so you know who is waiting on whom:
 
-    Evan:   pk.py (layer 1) ─────────────┐
-    Andrew: sleep.py (layer 2) ──────────┼─► Nolan: alertness.py (layer 3) ─► Evan: optimizer.py ─► Andrew: api.py ─► Nolan: frontend
+    Andrew: pk.py (layer 1) ─────────────┐
+    Evan:   sleep.py (layer 2) ──────────┼─► Nolan: alertness.py (layer 3) ─► Evan: optimizer.py ─► Andrew: api.py ─► Nolan: frontend
     Andrew: tolerance.py (layer 4) ──────┘                                                          
     Evan:   learn.py (Sunday, needs alertness.py) ──────────────────────────────────────────────► Nolan: Learn tab
 
@@ -135,53 +137,32 @@ Evan and Andrew each have about 90 minutes before anyone else needs them. Nolan 
 
 ---
 
-## Evan: pharmacokinetics (layer 1), optimizer, learning
+## Evan: sleep (layer 2), optimizer, learning
 
-Files: `model/pk.py`, `model/optimizer.py`, `model/learn.py`, their tests.
-Judge line: "I own how caffeine moves through the body, how we search for the best schedule, and how the app learns your half-life."
+Files: `model/sleep.py`, `model/optimizer.py`, `model/learn.py`, their tests, `equations/`.
+Judge line: "I own the two-process model of sleep, how we search for the best schedule, and how the app learns your half-life."
 
-### E1. pk.py (Tier 1, done by 2:00 PM)
+### E1. sleep.py (Tier 1, done by 2:30 PM)
 
 ```python
-import numpy as np
-from .schema import Dose, Profile
-
-def eliminationRate(p: Profile) -> float:
-    """ke = ln2 / half-life. First-order kinetics: rate out is proportional to amount in."""
-    return np.log(2) / p.halfLifeH
-
-def volumeL(p: Profile) -> float:
-    return p.vdLPerKg * p.weightKg
-
-def peakTimeH(p: Profile) -> float:
-    """Set d/dt of the Bateman function to zero: ke*exp(-ke t) = ka*exp(-ka t)  =>  t = ln(ka/ke)/(ka-ke)."""
-    ka, ke = p.kaPerH, eliminationRate(p)
-    return np.log(ka / ke) / (ka - ke)
-
-def concentration(t, doses: list, p: Profile):
-    """Blood caffeine in mg/L at times t (numpy array). One-compartment model with first-order
-    absorption (ka) and elimination (ke). The model is linear, so doses add (superposition)."""
-    t = np.asarray(t, dtype=float)
-    ka, ke, vd = p.kaPerH, eliminationRate(p), volumeL(p)
-    total = np.zeros_like(t)
-    for d in doses:
-        dt = t - d.timeH
-        active = dt >= 0                              # a dose contributes nothing before it is taken
-        term = (d.mg / vd) * ka / (ka - ke) * (np.exp(-ke * dt) - np.exp(-ka * dt))
-        total += np.where(active, term, 0.0)
-    return total
-
-def bodyCaffeineMg(t, doses, p):
-    """Total caffeine in the body = concentration x volume. Used for the bedtime limit."""
-    return concentration(t, doses, p) * volumeL(p)
+def circadian(t, p: Profile):            # CIRCADIAN_AMP * cos(2π (t - p.circadianPeakH)/24)
+def isAsleep(t, sleep: list) -> np.ndarray   # boolean array
+def sleepPressure(t, sleep: list) -> np.ndarray
 ```
 
-Steps: type the above, understand every line, then write `tests/test_pk.py`:
-- Single 100 mg at t=0: value at `peak + halfLife` is about half the value at `peak` (within 10%; absorption is not fully finished at the peak, say that to the judge if asked why not exact).
-- `concentration(t, [d1, d2])` equals `concentration(t, [d1]) + concentration(t, [d2])`.
-- `np.argmax` of a fine scan over 0 to 3 h lands within 0.02 h of `peakTimeH`.
-- Concentration is 0 before the dose.
-- 100 mg at 70 kg peaks around 1.5 to 2.5 mg/L (sanity against published values).
+Steps:
+1. `circadian`: one cosine, peak at 5 PM, trough at 5 AM. Comment that real circadian curves have harmonics and we keep the first term.
+2. `isAsleep`: `np.zeros_like(t, bool)`, OR together `(t >= b.startH) & (t < b.endH)` for each block.
+3. `sleepPressure`: build an internal fine grid from `t.min() - 48` to `t.max()` with step `STEP_H` (the 48 h burn-in lets the starting guess wash out; time constants are under a day. Say this to the judge). Start `S = 0.5`. March forward:
+   - asleep: `S = S * exp(-STEP_H / TAU_SLEEP_H)`
+   - awake:  `S = 1 - (1 - S) * exp(-STEP_H / TAU_WAKE_H)`
+   These are the exact solutions of `dS/dt = -S/tau_s` and `dS/dt = (1-S)/tau_w` over one step, so there is no integration error. Put that sentence in a comment. Store the fine curve, then `np.interp(t, fineT, fineS)` to return values at the requested times.
+   For the burn-in, assume the person's sleep schedule repeats: copy only the earliest night (not naps) back by 24 and 48 h with a helper `_repeatBack(sleep, days=2)`. Copying every block would overlap extra nights and repeat naps, adding sleep that never happened. The frontend sends last night and tonight (`buildPlanRequest` in `frontend/api.js`).
+4. The optimizer calls this many times with different nap lists. It is a 500-step loop in pure Python, about 1 ms; fine. If profiling shows it matters, use `functools.lru_cache` keyed on a tuple of the blocks.
+
+Once sleep.py exists, load it on the layer 2 page through Pyodide the way `layer3.js` loads alertness.py, and delete `frontend/sleepmodel.js`. That file is a JavaScript copy of this math, and CLAUDE.md keeps all calculations in Python. Keep `equations/layer-2-sleep.md` in step with the code.
+
+Tests: 8 h sleep + 16 h wake repeated 3 days gives the same S at each wake-up within 0.01; 4 h nights make S at wake-up rise each day (sleep debt); `circadian` is maximal at `circadianPeakH`.
 
 ### E2. optimizer.py (Tier 1 v1 by 6:00 PM, Tier 2 naps by 9:00 PM)
 
@@ -197,8 +178,8 @@ Key insight, and your best judge talking point: sleep pressure and circadian do 
 
 Steps:
 1. Sample points: `ts = np.arange(event.startH, event.endH + 1e-9, 0.25)` (a 3 h exam gives 13 points). `tBed` = start of the first non-nap sleep block after the event. `wake` = end of the last sleep block before the event.
-2. Precompute `S = sleepPressure(ts, sleep)` and `circ = circadian(ts, p)` with Andrew's and Nolan's functions.
-3. `score(doses)`: `conc = concentration(ts, doses, p)`; `alert = alertnessFrom(S, circ, conc, tolerance, inertia=0)` (Nolan's pure helper, vectorized); return `alert.mean()`.
+2. Precompute `S = sleepPressure(ts, sleep)` and `circ = circadian(ts, p)` with your own sleep.py functions.
+3. `score(doses)`: `conc = concentration(ts, doses, p)`; `alert = alertnessFrom(S, circ, conc, tolerance, 0, p.kdMgL)` (Nolan's pure helper, vectorized); return `alert.mean()`.
 4. `feasible(doses)`: total mg <= daily limit, each <= single limit, each `timeH >= wake`, and `bodyCaffeineMg(tBed, doses, p) <= bedtimeLimit`.
 5. Candidate grid: `times = np.arange(wake, event.endH, 0.25)`, `sizes = [50, 100, 150, 200]`.
 6. v1: loop over every (time, size), keep the best feasible single dose. Test: for a point event (`startH == endH`) the dose lands at `startH - peakTimeH` within 15 min.
@@ -236,30 +217,54 @@ Tests: no ratings gives the normalized prior; `simulateWeek(3.5)` then `posterio
 
 ---
 
-## Andrew: sleep (layer 2), tolerance (layer 4), and the glue
+## Andrew: pharmacokinetics (layer 1), tolerance (layer 4), and the glue
 
-Files: `model/sleep.py`, `model/tolerance.py`, `model/schema.py`, `model/params.py`, `api.py`, tests.
-Judge line: "I own the two-process model of sleep, why coffee stops working, and the contract that ties the model to the app."
+Files: `model/pk.py`, `model/tolerance.py`, `model/schema.py`, `model/params.py`, `api.py`, tests.
+Judge line: "I own how caffeine moves through the body, why coffee stops working, and the contract that ties the model to the app."
 
-### A1. sleep.py (Tier 1, done by 2:30 PM)
+### A1. pk.py (Tier 1, done by 2:30 PM)
 
 ```python
-def circadian(t, p: Profile):            # p.circadianAmp * cos(2π (t - peak)/24)
-def isAsleep(t, sleep: list) -> np.ndarray   # boolean array
-def sleepPressure(t, sleep: list) -> np.ndarray
+import numpy as np
+from .params import KA_PER_H, VD_L_PER_KG
+from .schema import Dose, Profile
+
+def eliminationRate(p: Profile) -> float:
+    """ke = ln2 / half-life. First-order kinetics: rate out is proportional to amount in."""
+    return np.log(2) / p.halfLifeH
+
+def volumeL(p: Profile) -> float:
+    return VD_L_PER_KG * p.weightKg
+
+def peakTimeH(p: Profile) -> float:
+    """Set d/dt of the Bateman function to zero: ke*exp(-ke t) = ka*exp(-ka t)  =>  t = ln(ka/ke)/(ka-ke)."""
+    ka, ke = KA_PER_H, eliminationRate(p)
+    return np.log(ka / ke) / (ka - ke)
+
+def concentration(t, doses: list, p: Profile):
+    """Blood caffeine in mg/L at times t (numpy array). One-compartment model with first-order
+    absorption (ka) and elimination (ke). The model is linear, so doses add (superposition)."""
+    t = np.asarray(t, dtype=float)
+    ka, ke, vd = KA_PER_H, eliminationRate(p), volumeL(p)
+    total = np.zeros_like(t)
+    for d in doses:
+        dt = t - d.timeH
+        active = dt >= 0                              # a dose contributes nothing before it is taken
+        term = (d.mg / vd) * ka / (ka - ke) * (np.exp(-ke * dt) - np.exp(-ka * dt))
+        total += np.where(active, term, 0.0)
+    return total
+
+def bodyCaffeineMg(t, doses, p):
+    """Total caffeine in the body = concentration x volume. Used for the bedtime limit."""
+    return concentration(t, doses, p) * volumeL(p)
 ```
 
-Steps:
-1. `circadian`: one cosine, peak at 5 PM, trough at 5 AM. Comment that real circadian curves have harmonics and we keep the first term.
-2. `isAsleep`: `np.zeros_like(t, bool)`, OR together `(t >= b.startH) & (t < b.endH)` for each block.
-3. `sleepPressure`: build an internal fine grid from `t.min() - 48` to `t.max()` with step `STEP_H` (the 48 h burn-in lets the starting guess wash out; time constants are under a day. Say this to the judge). Start `S = 0.5`. March forward:
-   - asleep: `S = S * exp(-STEP_H / TAU_SLEEP_H)`
-   - awake:  `S = 1 - (1 - S) * exp(-STEP_H / TAU_WAKE_H)`
-   These are the exact solutions of `dS/dt = -S/tau_s` and `dS/dt = (1-S)/tau_w` over one step, so there is no integration error. Put that sentence in a comment. Store the fine curve, then `np.interp(t, fineT, fineS)` to return values at the requested times.
-   For the burn-in, assume the person's sleep schedule repeats: if the earliest block starts at 23 h, shift copies of all blocks back by 24 and 48 h. Keep it simple: a helper `_repeatBack(sleep, days=2)`.
-4. The optimizer calls this many times with different nap lists. It is a 500-step loop in pure Python, about 1 ms; fine. If profiling shows it matters, use `functools.lru_cache` keyed on a tuple of the blocks.
-
-Tests: 8 h sleep + 16 h wake repeated 3 days gives the same S at each wake-up within 0.01; 4 h nights make S at wake-up rise each day (sleep debt); `circadian` is maximal at `circadianPeakH`.
+Steps: type the above, understand every line, then write `tests/test_pk.py`:
+- Single 100 mg at t=0: value at `peak + halfLife` is about half the value at `peak` (within 10%; absorption is not fully finished at the peak, say that to the judge if asked why not exact).
+- `concentration(t, [d1, d2])` equals `concentration(t, [d1]) + concentration(t, [d2])`.
+- `np.argmax` of a fine scan over 0 to 3 h lands within 0.02 h of `peakTimeH`.
+- Concentration is 0 before the dose.
+- 100 mg at 70 kg peaks around 1.5 to 2.5 mg/L (sanity against published values).
 
 ### A2. tolerance.py (Tier 2, done by 10:00 PM)
 
@@ -276,9 +281,9 @@ Steps:
 1. `steadyStateConc`: at steady state, in = out. Clearance is `ke * vd` litres per hour, so average concentration is daily dose over clearance times 24. At defaults 300 mg/day is about 2.2 mg/L.
 2. Receptor target: `rTarget = 1 + G * steadyStateConc`, `G = 0.23` per mg/L so that 300 mg/day gives R about 1.5. Judge line: "chronic caffeine upregulates adenosine receptors by roughly 20 to 50%; G is tuned to that."
 3. `receptorRatioNow`: `1 + (rTarget - 1) * (1 - exp(-habitDays / TAU_TOLERANCE_DAYS))`.
-4. `simulateReset`: loop over days. Intake: habitual before the quit day, linear taper from habitual to 0 over `taperDays`, then 0. Update `R += (rTarget(intake) - R) / TAU_TOLERANCE_DAYS` (a one-day Euler step; fine because tau is 4 days and say so). Withdrawal on that day: `(R - 1) * (1 - occupancy(steadyStateConc(intake), kd))`, the felt pressure above baseline. Return arrays.
+4. `simulateReset`: loop over days. Intake: habitual before the quit day, linear taper from habitual to 0 over `taperDays`, then 0. Update `R = rTarget(intake) + (R - rTarget(intake)) * exp(-1 / TAU_TOLERANCE_DAYS)`, the exact solution of `dR/dt = (rTarget - R)/tau` over one day (same trick as sleep.py, so there is no integration error). Withdrawal on that day is the felt pressure above a non-user's baseline: `max(0, R * (1 - occupancy(steadyStateConc(intake), kd)) - 1)`. It is 0 while you keep up your habit and jumps to about R - 1 the day you quit. Return arrays.
 5. `recommendQuitDay`: try `quitInDays` in 0..examInDays and `taperDays` in {0, 3, 5}; keep options with `R[exam] <= 1.1`; among those minimize the peak withdrawal in the 3 days before the exam. If none qualifies, take the lowest `R[exam]` and say so. Write `reason` as a sentence the app prints: "Quit in 2 days with a 3-day taper: receptors back to 1.06x by the exam, worst day Oct 21."
-6. `feelsLikeMg` (do this right after step 3, it is a Tier 2 output in CLAUDE.md): a non-user with caffeine level cEq feels pressure `S * (1 - occ(cEq))`; you with tolerance R feel `S * R * (1 - occ(c))`. Set them equal and solve for cEq with the Langmuir equation: `1 - occ(cEq) = R * (1 - occ(c))`, so `occ(cEq) = 1 - R*(1 - occ(c))` and `cEq = kd * occ / (1 - occ)`. Convert c to mg with the peak concentration of that dose (Evan's `concentration` at `peakTimeH`) and back. `strengthPercent` is `100 * cEqMg / doseMg`, printed as "your coffee feels like 60% strength". If `occ(cEq)` comes out below 0 the dose is fully cancelled by tolerance; clamp to 0 and say "feels like 0%".
+6. `feelsLikeMg` (do this right after step 3, it is a Tier 2 output in CLAUDE.md): a non-user with caffeine level cEq feels pressure `S * (1 - occ(cEq))`; you with tolerance R feel `S * R * (1 - occ(c))`. Set them equal and solve for cEq with the Langmuir equation: `1 - occ(cEq) = R * (1 - occ(c))`, so `occ(cEq) = 1 - R*(1 - occ(c))` and `cEq = kd * occ / (1 - occ)`. Convert c to mg with the peak concentration of that dose (your own `concentration` at `peakTimeH` from pk.py) and back. `strengthPercent` is `100 * cEqMg / doseMg`, printed as "your coffee feels like 60% strength". If `occ(cEq)` comes out below 0 the dose is fully cancelled by tolerance; clamp to 0 and say "feels like 0%".
 
 Tests: 0 mg/day gives R == 1; 300 mg/day for 8 weeks gives R within 0.05 of 1.5; after quitting R decreases monotonically and is under 1.1 within 10 days; taper has lower peak withdrawal than cold turkey.
 
@@ -306,14 +311,14 @@ Streamlit reruns the whole script on every widget change, so there is no state m
 
 ### N3. alertness.py (Tier 1, layer 3, 2:30 to 4:30 PM)
 
-This is the join point: it reads Evan's concentration and Andrew's sleep pressure and produces the curve the optimizer and the chart both consume. Do it between the inputs form and the chart; the chart can keep using fake arrays until this lands.
+This is the join point: it reads Andrew's concentration and Evan's sleep pressure and produces the curve the optimizer and the chart both consume. Do it between the inputs form and the chart; the chart can keep using fake arrays until this lands.
 
 
 ```python
 def occupancy(conc, kd):                      # conc / (conc + kd): Langmuir binding, fraction of receptors blocked
-def feltPressure(S, conc, tolerance, p):     # S * tolerance * (1 - occupancy)
+def feltPressure(S, conc, tolerance, kd):    # S * tolerance * (1 - occupancy)
 def inertia(t, sleep: list) -> np.ndarray
-def alertnessFrom(S, circ, conc, tolerance, inertiaVal):   # clip(1 - felt + circ - inertia, 0, 1)
+def alertnessFrom(S, circ, conc, tolerance, inertiaVal, kd):   # clip(1 - felt + circ - inertia, 0, 1); kd required
 def alertnessAt(t, doses, sleep, p, tolerance) -> np.ndarray
 def alertnessCurve(doses, sleep, p, tolerance, t0, t1) -> dict   # the Plan.curve dict
 ```
@@ -322,7 +327,7 @@ Steps:
 1. `occupancy`: comment "caffeine is a competitive antagonist at adenosine receptors; Kd is the concentration at half block; this is why 400 mg is not 4x 100 mg."
 2. `feltPressure`: `tolerance` is the receptor ratio R/R0 from Andrew's tolerance.py, 1.0 for a non-user.
 3. `inertia`: for each t, find the most recent block that ended at or before t. Let `length = end - start`, `since = t - end`. Amplitude by length: `<= 0.35 h: 0.10`, `<= 1.0 h: 0.35`, `<= 1.75 h: 0.20`, else `0.25` (full night). Return `amp * exp(-since / 0.5)`. Comment: "grogginess after waking; worst after deep sleep (30 to 60 min naps), mild after a 20-min nap, gone in about 30 min." Vectorize by looping over blocks and using `np.where(since >= 0, ...)` to take the latest.
-4. `alertnessAt`: `S = sleepPressure(t, sleep)`, `conc = concentration(t, doses, p)` (Evan's), combine, and set alertness to 0 where `isAsleep`.
+4. `alertnessAt`: `S = sleepPressure(t, sleep)`, `conc = concentration(t, doses, p)` (Andrew's), combine, and set alertness to 0 where `isAsleep`.
 5. `alertnessCurve`: `t = np.arange(t0, t1, STEP_H)`, return the dict of arrays the Plan expects.
 
 Tests: `occupancy(3, 3) == 0.5`; no caffeine and normal sleep gives the minimum between 3 and 6 AM; 100 mg at 9 AM raises 10 AM alertness more than 10 PM alertness; a 20-min nap at 2 PM beats a 60-min nap at 2 PM at 3 PM, and both beat no nap by 4 PM. If that last test fails, tune the inertia amplitudes, not the test; the coffee-nap demo depends on it. The `occupancy` and `feltPressure` helpers are also imported by Andrew's tolerance.py, so keep their signatures stable.

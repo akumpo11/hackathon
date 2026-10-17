@@ -44,9 +44,9 @@ Tier 3 (stretch):
 
 ### Stack
 
-- **Backend and calculations: Python.** All backend code and all math (caffeine curve, tolerance, reset, planner, sleep check, naps, curve fitting) are written in Python. Don't put calculation logic in the frontend.
-- **Frontend**: plain HTML, CSS, and JavaScript, with Chart.js for the caffeine curve graph.
-- **Login and database**: Supabase (built-in auth plus Postgres, with Row Level Security so each user only sees their own rows). Tables: `drinks`, `ratings`, `sleep`.
+- **Calculations: Python.** All math (caffeine curve, tolerance, reset, planner, sleep check, naps, curve fitting) lives in `model/`. Don't put calculation logic in the frontend. The browser runs the `model/` files with Pyodide; `api.py` (FastAPI) is the alternative if the full plan needs a server.
+- **Frontend**: plain HTML, CSS, and JavaScript in `frontend/`, with hand-written SVG charts (`frontend/charts.js`). No build step.
+- **No login or database.** The model is stateless, so every answer is recomputed from the inputs. Tier 3 alertness ratings live in the browser's local storage.
 
 ## Idea generation
 

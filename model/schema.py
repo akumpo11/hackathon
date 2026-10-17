@@ -39,13 +39,12 @@ class FreeSlot:
 
 @dataclass(frozen=True)
 class Profile:
+    """What differs from person to person. Population constants (absorption rate,
+    volume of distribution, circadian amplitude) live in params.py instead."""
     weightKg: float = 70.0
     halfLifeH: float = 5.0           # caffeine half-life; smoker / contraceptive adjustments already applied
-    kaPerH: float = 4.0              # absorption rate from the gut (absorption half-life ~10 min)
-    vdLPerKg: float = 0.6            # volume of distribution
-    kdMgL: float = 3.0               # concentration that blocks half the adenosine receptors
-    circadianPeakH: float = 17.0     # time of day the circadian rhythm peaks (5 PM)
-    circadianAmp: float = 0.15
+    kdMgL: float = 3.0               # concentration that blocks half the adenosine receptors; learned in Tier 3
+    circadianPeakH: float = 17.0     # time of day the circadian rhythm peaks (5 PM); chronotype shifts it
     habitualMgPerDay: float = 200.0
     habitWeeks: float = 8.0
 

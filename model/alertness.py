@@ -18,7 +18,6 @@ optimizer can score a whole time grid in one call.
 
 import numpy as np
 
-DEFAULT_KD_MG_L = 3.0       # concentration that blocks half the receptors (~ one cup of coffee)
 INERTIA_DECAY_H = 0.5       # grogginess fades with a 30-minute time constant
 
 
@@ -33,14 +32,14 @@ def occupancy(conc, kd):
     return conc / (conc + kd)
 
 
-def feltPressure(S, conc, tolerance, p):
+def feltPressure(S, conc, tolerance, kd):
     """Sleep pressure you feel after caffeine blocks part of the adenosine signal.
 
     tolerance is the receptor ratio R/R0 from tolerance.py (1.0 for a non-user).
     More receptors (R > 1) means the same adenosine is felt more strongly, which
     is both tolerance (caffeine works less) and withdrawal (no caffeine feels awful).
     """
-    return S * tolerance * (1 - occupancy(conc, p.kdMgL))
+    return S * tolerance * (1 - occupancy(conc, kd))
 
 
 def _inertiaAmplitude(lengthH):
@@ -76,18 +75,19 @@ def inertia(t, sleep):
     return penalty
 
 
-def alertnessFrom(S, circ, conc, tolerance, inertiaVal, kd=DEFAULT_KD_MG_L):
+def alertnessFrom(S, circ, conc, tolerance, inertiaVal, kd):
     """Alertness between 0 and 1 from already-computed pieces.
 
     This is the pure formula, with no sleep or caffeine modelling inside, so the
     optimizer can precompute S and circ once and only recompute conc per candidate.
+    kd is required (no default) so a learned Kd from Tier 3 can't be silently ignored.
     """
-    felt = S * tolerance * (1 - occupancy(conc, kd))
+    felt = feltPressure(S, conc, tolerance, kd)
     return np.clip(1 - felt + circ - inertiaVal, 0, 1)
 
 
-def alertnessAt(t, doses, sleep, p, tolerance):
-    """Alertness at times t, using layer 1 and layer 2. Zero while asleep."""
+def _curves(t, doses, sleep, p, tolerance):
+    """Caffeine, sleep pressure, felt pressure and alertness at times t, each computed once."""
     # Imported here, not at the top, so the helpers above work before
     # pk.py and sleep.py are merged. Move these up once they exist.
     from .pk import concentration
@@ -97,22 +97,21 @@ def alertnessAt(t, doses, sleep, p, tolerance):
     S = sleepPressure(t, sleep)
     conc = concentration(t, doses, p)
     alert = alertnessFrom(S, circadian(t, p), conc, tolerance, inertia(t, sleep), p.kdMgL)
-    return np.where(isAsleep(t, sleep), 0.0, alert)
+    return {
+        "t": t,
+        "conc": conc,
+        "pressure": S,
+        "felt": feltPressure(S, conc, tolerance, p.kdMgL),
+        "alertness": np.where(isAsleep(t, sleep), 0.0, alert),     # zero while asleep
+    }
+
+
+def alertnessAt(t, doses, sleep, p, tolerance):
+    """Alertness at times t, using layer 1 and layer 2. Zero while asleep."""
+    return _curves(t, doses, sleep, p, tolerance)["alertness"]
 
 
 def alertnessCurve(doses, sleep, p, tolerance, t0, t1):
     """Every curve the chart needs, on one shared time grid (the Plan.curve dict)."""
     from .params import STEP_H
-    from .pk import concentration
-    from .sleep import sleepPressure
-
-    t = np.arange(t0, t1, STEP_H)
-    S = sleepPressure(t, sleep)
-    conc = concentration(t, doses, p)
-    return {
-        "t": t,
-        "conc": conc,
-        "pressure": S,
-        "felt": feltPressure(S, conc, tolerance, p),
-        "alertness": alertnessAt(t, doses, sleep, p, tolerance),
-    }
+    return _curves(np.arange(t0, t1, STEP_H), doses, sleep, p, tolerance)

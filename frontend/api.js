@@ -73,8 +73,8 @@ export function buildPlanRequest(form) {
     freeSlots: [],
     fixedDoses: [],
     profile: {
-      weightKg: Number(form.weight), halfLifeH: form.halfLife ?? 5, kaPerH: 4, vdLPerKg: 0.6,
-      kdMgL: 3, circadianPeakH: 17, circadianAmp: 0.15,
+      weightKg: Number(form.weight), halfLifeH: form.halfLife ?? 5,
+      kdMgL: 3, circadianPeakH: 17,
       habitualMgPerDay: Number(form.habitualMg), habitWeeks: 8,
     },
     allowNap: form.allowNap,

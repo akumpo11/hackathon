@@ -4,9 +4,14 @@ Sources to cite in the README: Borbely 1982 / Daan et al. 1984 for the two-proce
 FDA and EFSA guidance for the caffeine limits, the FDA caffeine page for the drink table.
 """
 
+# Layer 1: pharmacokinetics (population values; half-life and weight are per person, in Profile)
+KA_PER_H = 4.0          # absorption rate from the gut; absorption half-life ~10 min, peak ~50 min after a drink
+VD_L_PER_KG = 0.6       # volume of distribution: caffeine spreads through ~0.6 L per kg of body weight
+
 # Layer 2: two-process sleep model (normalized sleep pressure S in 0..1)
 TAU_WAKE_H = 18.2       # S rises toward 1 with this time constant while awake
 TAU_SLEEP_H = 4.2       # S falls toward 0 with this time constant while asleep
+CIRCADIAN_AMP = 0.15    # circadian swing: +0.15 at the peak, -0.15 twelve hours later
 
 # Layer 4: tolerance (adenosine receptor upregulation)
 TAU_TOLERANCE_DAYS = 4.0        # receptors relax toward their target with this time constant
