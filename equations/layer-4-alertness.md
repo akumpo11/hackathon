@@ -1,8 +1,8 @@
-# Layer 3: Alertness (how awake you feel)
+# Layer 4: Alertness (how awake you feel)
 
 Joins layer 1 (caffeine in the blood) and layer 2 (sleep pressure and body clock) into one score between 0 and 1. Code: `model/alertness.py`. Constants: `model/params.py`.
 
-Inputs: caffeine concentration C (layer 1), sleep pressure S and body clock circ (layer 2), your sleep blocks (for grogginess), Kd (a per-person setting, `Profile.kdMgL`), and tolerance R (layer 4; 1.0 for a non-drinker).
+Inputs: caffeine concentration C (layer 1), sleep pressure S and body clock circ (layer 2), your sleep blocks (for grogginess), Kd (a per-person setting, `Profile.kdMgL`), and tolerance R (layer 3; 1.0 for a non-drinker).
 
 ## 1. Receptor occupancy
 
@@ -23,7 +23,7 @@ Code: `occupancy(conc, kd)`.
     S_felt = S * R * (1 - occ)
 
 - S: sleep pressure from layer 2, 0 (rested) to 1 (exhausted)
-- R: receptor ratio from layer 4. 1.0 for a non-drinker, about 1.5 at 300 mg a day
+- R: receptor ratio from layer 3. 1.0 for a non-drinker, about 1.5 at 300 mg a day
 - (1 - occ): the part of the adenosine signal that gets through
 
 Plain English: sleep pressure is adenosine landing on receptors. Caffeine blocks some receptors, so you feel less of it. Regular drinkers grow extra receptors (R above 1), so the same adenosine is felt more strongly. That one factor explains both tolerance (the same coffee works less) and withdrawal (with no caffeine, S_felt is S times R, worse than a non-drinker's).
@@ -75,7 +75,7 @@ Substitute equations 1 to 3 into equation 4. The step that does the work is rewr
 | C | caffeine in the blood | mg/L, layer 1 |
 | Kd | concentration that blocks half the receptors | 3 mg/L |
 | S | sleep pressure | 0 to 1, layer 2 |
-| R | tolerance (receptor ratio) | 1.0 for a non-drinker, about 1.5 at 300 mg/day, layer 4 |
+| R | tolerance (receptor ratio) | 1.0 for a non-drinker, about 1.5 at 300 mg/day, layer 3 |
 | t_peak | when the body clock peaks | 17 (5 PM), shifted -2 / 0 / +2 h by chronotype |
 | t_wake | when the last sleep block ended | from the sleep blocks |
 | amp | grogginess after the last sleep | 0.10, 0.35, 0.20 or 0.25 by its length (equation 3) |

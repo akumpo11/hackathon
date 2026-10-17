@@ -25,7 +25,7 @@ Plain English: each hour awake closes a fixed share of the remaining gap to "ful
 
 Plain English: each hour asleep removes a fixed share of what is left. Draining is much faster than filling.
 
-Implementation: both equations are the exact solutions of dS/dt = (1 - S)/tau_w and dS/dt = -S/tau_s, so stepping them over `STEP_H` = 0.1 h has no integration error. The simulation starts 48 h before the first entry (initial S = 0.5) so the starting guess washes out, and S carries across nights, which is how sleep debt shows up.
+Implementation: both equations are the exact solutions of dS/dt = (1 - S)/tau_w and dS/dt = -S/tau_s, so stepping them over `STEP_H` = 0.1 h has no integration error. The simulation starts 48 h before the first time asked for (initial S = 0.5), assuming your earliest night repeats on the two nights before it, so the starting guess washes out. S carries across nights, which is how sleep debt shows up.
 
 ## 3. Circadian alertness
 

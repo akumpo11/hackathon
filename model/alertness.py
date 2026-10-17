@@ -1,8 +1,8 @@
 """
-Layer 3: alertness (owner: Nolan).
+Layer 4: alertness (owner: Nolan).
 
-Joins layer 1 (caffeine concentration, Evan) and layer 2 (sleep pressure and
-circadian rhythm, Andrew) into one alertness score between 0 and 1:
+Joins layer 1 (caffeine concentration, Andrew) and layer 2 (sleep pressure and
+circadian rhythm, Evan) into one alertness score between 0 and 1:
 
     occupancy  = C / (C + Kd)                      fraction of adenosine receptors caffeine blocks
     felt       = S * R * (1 - occupancy)           sleep pressure you actually feel
@@ -17,6 +17,10 @@ optimizer can score a whole time grid in one call.
 """
 
 import numpy as np
+
+from .params import STEP_H
+from .pk import concentration
+from .sleep import circadian, isAsleep, sleepPressure
 
 INERTIA_DECAY_H = 0.5       # grogginess fades with a 30-minute time constant
 
@@ -88,11 +92,6 @@ def alertnessFrom(S, circ, conc, tolerance, inertiaVal, kd):
 
 def _curves(t, doses, sleep, p, tolerance):
     """Caffeine, sleep pressure, felt pressure and alertness at times t, each computed once."""
-    # Imported here, not at the top, so the helpers above work before
-    # pk.py and sleep.py are merged. Move these up once they exist.
-    from .pk import concentration
-    from .sleep import sleepPressure, circadian, isAsleep
-
     t = np.asarray(t, dtype=float)
     S = sleepPressure(t, sleep)
     conc = concentration(t, doses, p)
@@ -113,5 +112,4 @@ def alertnessAt(t, doses, sleep, p, tolerance):
 
 def alertnessCurve(doses, sleep, p, tolerance, t0, t1):
     """Every curve the chart needs, on one shared time grid (the Plan.curve dict)."""
-    from .params import STEP_H
     return _curves(np.arange(t0, t1, STEP_H), doses, sleep, p, tolerance)
