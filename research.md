@@ -107,3 +107,57 @@ Why 1.1x:
 "Chronic caffeine makes the brain add adenosine receptors to make up for the blocked ones. That's shown in rat studies, but the exact size in humans isn't known, so we tuned it. We did check the timing against human withdrawal data: symptoms last 2 to 9 days, and our model's reset takes about a week."
 
 "Receptors decay exponentially, so they never fully return. We call it reset at 10% above baseline. That takes about a week and gets the coffee from 18% to 77% strength. Going further costs a lot more days for a little more strength."
+
+## Layer 5: learning from your ratings
+
+### What the "What it has learned" heatmap shows
+
+A map of 400 guesses about your body, for two numbers we can't measure directly:
+
+- **Up the side: half-life, 2 to 10 h.** How fast your body clears caffeine.
+- **Along the bottom: Kd, 1 to 6 mg/L.** Your sensitivity: the caffeine level that blocks half your adenosine receptors. Lower Kd means each mg hits harder.
+
+20 half-lives times 20 Kd values. Each square's color is how likely that guess is given your ratings: the darkest square is the most likely, and the rest are shaded relative to it (`heatmap` in `frontend/charts.js`). The ring is the average of all 400 guesses weighted by their probability, which isn't always the darkest square. The two numbers below are that average for each axis, ± how spread out the likely guesses are.
+
+With no ratings it's a round blob around your settings (your half-life, adjusted for smoking or the pill, and the population Kd of 3). That's the prior: what the app assumes before it knows anything about you.
+
+### Where the data comes from
+
+| Input | Source |
+|---|---|
+| Your 1-to-5 ratings and when you made them | Local storage on your phone (`caffeineRatings`) |
+| What you drank around those times | A copy of layer 1's drinks, saved with each rating |
+| How you slept | Layer 2's sleep calendar |
+| Your tolerance R | Layer 3 |
+| Weight, half-life, smoker, pill | Settings |
+
+Only ratings from the last two days count, since that's how far back the sleep calendar goes. Without your sleep the model can't predict how alert you should have been.
+
+### How it's calculated (`posterior` in `model/learn.py`)
+
+For each of the 400 squares:
+
+1. **Predict your ratings.** Run layers 1 to 4 at each moment you rated, with that square's half-life (layer 1's caffeine curve) and Kd (layer 4's occupancy), plus your sleep pressure and body clock (layer 2) and tolerance (layer 3). Result: "if you were this person, you'd have felt 0.72 at 3 PM."
+2. **Compare with what you said.** Your rating goes onto the same 0-to-1 scale with `(rating - 1) / 4`, so a 4 is 0.75. The guess scores `-0.5 * (error / 0.15)^2`, summed over all ratings. Small errors, good score.
+3. **Add the prior.** Guesses far from your settings lose a little, so one odd rating can't drag the estimate far.
+4. **Turn scores into probabilities.** Exponentiate, then divide by the total so all 400 add up to 1. That's Bayes' rule: posterior is proportional to prior times likelihood.
+
+`frontend/py/layer5_bridge.py` hands the 400 probabilities, the averages and the spreads to the page, which draws them. Full formulas: `equations/layer-5-learning.md`.
+
+### Why it's often a diagonal band, not a dot
+
+Two different people can give the same ratings: one with a long half-life (lots of caffeine left) but a high Kd (each mg does little), and one with a short half-life and a low Kd. So a set of ratings fits a whole line of guesses running up and to the right. Your ratings tell the app which band you're on well before they say where on it you sit.
+
+Not every rating is equally useful. A rating shortly after coffee says almost nothing about half-life. Ratings 5 or more hours after your last drink say the most, because that's when a fast and a slow clearer feel different. A week of ratings narrows the half-life from about ±1.5 h to about ±1.1 h.
+
+### "Simulate a week" mode
+
+The ratings aren't yours. `simulateDays` invents a person with a hidden half-life (random, 3 to 8 h) and Kd 3, who drinks 100 mg at 8 AM and 1 PM for 7 days and rates their alertness at 10 AM, 3 PM, 6 PM and 9 PM with some noise. The heatmap shows what the app learns from those 28 made-up ratings, and the caption reveals the hidden value so you can see how close it got.
+
+The "Your caffeine today, give or take" chart uses the same probabilities: it draws 200 half-lives in proportion to their probability, computes your caffeine curve for each, and shades between the 10th and 90th percentile.
+
+### If a judge asks
+
+"Each square is a guess about your half-life and sensitivity. We run our model with that guess at the times you rated yourself, and the closer it predicts your ratings, the more likely it gets. That's Bayes' rule on a grid of 400 guesses."
+
+"It learns slowly, and we checked why. One step on a 1-to-5 scale is bigger than the difference half-life makes to how alert you feel, and a long half-life with low sensitivity looks the same as a short one with high sensitivity. With perfect ratings it finds the true half-life, so the method works; the ratings just carry little information."
