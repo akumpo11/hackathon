@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#EEF1F0">
+  <title>Caffeine Optimizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="device">
+
+  <!-- The three pages sit side by side; the pager scrolls (and snaps) between them. -->
+  <main class="pager" id="pager">
+
+    <!-- ============ Page 1: Tier 1, the caffeine plan ============ -->
+    <section class="page" aria-label="Plan">
+      <header class="top">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Zm12 1h1.5a2.5 2.5 0 0 1 0 5H16" /></svg>
+        </div>
+        <div class="top-text">
+          <p class="muted">Planning for</p>
+          <p class="top-title" id="eventName">Calculus exam</p>
+        </div>
+        <button class="icon-btn" id="editBtn" aria-label="Edit your day">
+          <svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4Z M13 7l4 4" /></svg>
+        </button>
+      </header>
+
+      <div class="hero">
+        <div class="ring" id="scoreRing">
+          <strong id="score">–</strong>
+          <span>alertness<br>at your event</span>
+        </div>
+        <div class="hero-side">
+          <p class="muted" id="eventWhen">Tomorrow</p>
+          <p class="hero-lead">First drink</p>
+          <p class="hero-big" id="firstDrink">–</p>
+          <p class="muted" id="firstDrinkWhen"></p>
+        </div>
+      </div>
+
+      <h1 class="page-title">Your plan</h1>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Over the day</h2>
+          <div class="toggle" role="tablist" id="curveToggle">
+            <button class="on" data-series="caffeine">Caffeine</button>
+            <button data-series="alertness">Alertness</button>
+          </div>
+        </div>
+        <div class="readout">
+          <p class="readout-value" id="readoutValue">–</p>
+          <p class="muted" id="readoutTime"></p>
+        </div>
+        <svg class="chart" id="curveChart" role="img" aria-label="Caffeine level over the day"></svg>
+        <ul class="legend">
+          <li><span class="swatch event"></span>Event</li>
+          <li><span class="swatch sleep"></span>Sleep and nap</li>
+          <li><span class="swatch dose"></span>Drink</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>When to drink</h2>
+        <ol class="timeline" id="planList"></ol>
+      </article>
+
+      <article class="card" id="sleepCard">
+        <div class="card-head">
+          <h2>Sleep check</h2>
+          <span class="chip" id="sleepChip">–</span>
+        </div>
+        <p class="stat"><strong id="bedMg">–</strong> mg left at bedtime</p>
+        <div class="meter" aria-hidden="true">
+          <div class="meter-fill" id="bedMeter"></div>
+          <div class="meter-limit" id="bedLimit"></div>
+        </div>
+        <p class="muted small" id="sleepNote"></p>
+      </article>
+
+      <p class="footnote">Not medical advice. <span id="dataSource"></span></p>
+    </section>
+
+    <!-- ============ Page 2: Tier 2, tolerance, reset, nap ============ -->
+    <section class="page" aria-label="Tolerance">
+      <h1 class="page-title first">Tolerance</h1>
+
+      <div class="hero">
+        <div class="ring ring-dark" id="strengthRing">
+          <strong id="strength">–</strong>
+          <span>strength</span>
+        </div>
+        <div class="hero-side">
+          <p class="hero-lead">Your coffee feels weaker</p>
+          <p class="muted" id="strengthNote"></p>
+        </div>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Caffeine reset</h2>
+          <div class="toggle" id="resetToggle">
+            <button class="on" data-series="R">Receptors</button>
+            <button data-series="withdrawal">Withdrawal</button>
+          </div>
+        </div>
+        <p class="body" id="resetReason"></p>
+        <svg class="chart" id="resetChart" role="img" aria-label="Reset plan, taper versus quitting at once"></svg>
+        <ul class="legend">
+          <li><span class="swatch taper"></span>Taper</li>
+          <li><span class="swatch cold"></span>Quit at once</li>
+          <li><span class="swatch event"></span>Event day</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>Nap plan</h2>
+        <p class="stat" id="napTitle">–</p>
+        <p class="muted" id="napNote"></p>
+      </article>
+    </section>
+
+    <!-- ============ Page 3: Tier 3, learning from ratings ============ -->
+    <section class="page" aria-label="Learn">
+      <h1 class="page-title first">Learn</h1>
+
+      <article class="card">
+        <h2>How alert do you feel right now?</h2>
+        <div class="rating" id="ratingButtons">
+          <button data-score="1">1</button>
+          <button data-score="2">2</button>
+          <button data-score="3">3</button>
+          <button data-score="4">4</button>
+          <button data-score="5">5</button>
+        </div>
+        <div class="rating-ends muted small"><span>Exhausted</span><span>Fully alert</span></div>
+        <p class="muted small" id="ratingCount">No ratings yet. Each one sharpens the model.</p>
+      </article>
+
+      <article class="card">
+        <h2>What the app has learned about you</h2>
+        <div class="stats-row">
+          <div><p class="stat"><strong id="meanHalfLife">–</strong> h</p><p class="muted small">caffeine half-life</p></div>
+          <div><p class="stat"><strong id="meanKd">–</strong> mg/L</p><p class="muted small">sensitivity</p></div>
+        </div>
+        <svg class="chart heat" id="heatmap" role="img" aria-label="Probability of each half-life and sensitivity"></svg>
+        <p class="muted small">Darker cells are more likely. The dark spot shrinks as you rate.</p>
+        <div class="btn-row">
+          <button class="btn ghost" id="simulateBtn">Simulate a week</button>
+          <button class="btn" id="useLearnedBtn">Use my half-life</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Bottom slider: switches pages, and its pill slides as you swipe. -->
+  <nav class="tabbar" aria-label="Pages">
+    <span class="tab-pill" id="tabPill" aria-hidden="true"></span>
+    <button class="tab on" data-page="0">
+      <svg viewBox="0 0 24 24"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Zm12 1h1.5a2.5 2.5 0 0 1 0 5H16" /></svg>Plan
+    </button>
+    <button class="tab" data-page="1">
+      <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4h-4" /></svg>Tolerance
+    </button>
+    <button class="tab" data-page="2">
+      <svg viewBox="0 0 24 24"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2L12 3Z" /></svg>Learn
+    </button>
+  </nav>
+
+  <!-- Bottom sheet with the inputs from CLAUDE.md. -->
+  <div class="scrim" id="scrim" hidden></div>
+  <form class="sheet" id="sheet" aria-label="Edit your day" hidden>
+    <div class="grabber" aria-hidden="true"></div>
+    <h2>Your day</h2>
+    <label>What are you preparing for?<input name="eventName" value="Calculus exam"></label>
+    <div class="row">
+      <label>Day<select name="eventDay"><option value="0">Today</option><option value="1" selected>Tomorrow</option></select></label>
+      <label>Starts<input type="time" name="eventStart" value="09:00"></label>
+      <label>Hours<input type="number" name="eventLength" value="2" min="0.5" max="6" step="0.5"></label>
+    </div>
+    <div class="row">
+      <label>Bedtime<input type="time" name="bedtime" value="23:30"></label>
+      <label>Wake up<input type="time" name="wake" value="07:00"></label>
+    </div>
+    <div class="row">
+      <label>Usual caffeine a day (mg)<input type="number" name="habitualMg" value="190" min="0" max="800" step="5"></label>
+      <label>Weight (kg)<input type="number" name="weight" value="70" min="35" max="160"></label>
+    </div>
+    <p class="muted small">A cup of drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg.</p>
+    <label class="check"><input type="checkbox" name="allowNap" checked> Suggest a nap if it helps</label>
+    <button class="btn wide" type="submit">Update plan</button>
+  </form>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
