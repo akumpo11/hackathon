@@ -1,5 +1,6 @@
 // Page navigation for the five layer pages, then each page's own code.
 
+import { startLayer1 } from "./layer1.js";
 import { startLayer2 } from "./layer2.js";
 import { startLayer3 } from "./layer3.js";
 
@@ -19,11 +20,16 @@ tabs.forEach((tab, i) => tab.addEventListener("click", () => {
   pager.scrollTo({ left: i * pager.clientWidth, behavior: "smooth" });
 }));
 
-// Opens on layer 3 for now, since it's the only one built. index.html#layer1 etc. pick a page.
+// Opens on layer 1. index.html#layer3 etc. pick a different page.
 const fromHash = Number(location.hash.replace("#layer", "")) - 1;
-const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 2;
+const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 0;
 pager.scrollLeft = startPage * pager.clientWidth;
 pager.dispatchEvent(new Event("scroll"));
+
+startLayer1().catch((err) => {
+  console.error(err);
+  document.getElementById("pkEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
+});
 
 startLayer2();
 

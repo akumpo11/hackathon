@@ -18,10 +18,99 @@
   <!-- One page per model layer (PLAN.md section 1). Swipe or tap the bar at the bottom. -->
   <main class="pager" id="pager">
 
+    <!-- ============ Layer 1: pharmacokinetics (model/pk.py) ============ -->
     <section class="page" aria-label="Layer 1">
       <p class="layer-no">Layer 1</p>
       <h1 class="page-title first">Caffeine in your blood</h1>
-      <p class="muted">Evan is building this in model/pk.py.</p>
+      <p class="body">How much caffeine is in you over the day. Each drink climbs as your gut absorbs it, then fades as your liver clears it.</p>
+
+      <div class="hero">
+        <div class="ring ring-dark">
+          <strong id="peakMin">…</strong>
+          <span>min to peak</span>
+        </div>
+        <div class="hero-side">
+          <p class="hero-lead">Each drink peaks after</p>
+          <p class="equation" id="pkEquation">Loading the Python model…</p>
+        </div>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Caffeine over the day</h2>
+          <div class="toggle" id="pkToggle">
+            <button class="on" data-series="bodyMg">mg in you</button>
+            <button data-series="conc">mg/L blood</button>
+          </div>
+        </div>
+        <div class="readout"><span class="readout-value" id="pkReadout">–</span><span class="muted" id="pkReadoutTime"></span></div>
+        <svg class="chart" id="pkChart" role="img" aria-label="Caffeine level over the day, with drinks marked and bedtime shaded"></svg>
+        <ul class="legend">
+          <li><span class="swatch dose"></span>Drink</li>
+          <li><span class="swatch sleep"></span>Bedtime</li>
+        </ul>
+      </article>
+
+      <form id="layer1Inputs">
+        <article class="card">
+          <h2>Your drinks today</h2>
+          <p class="muted small">Pick "None" to skip a row.</p>
+          <div class="inputs">
+            <div class="row drink-row">
+              <label class="field">Time<input type="time" name="time0" value="08:00"></label>
+              <label class="field">Drink<select name="drink0" data-default="drip coffee (8 oz)"></select></label>
+            </div>
+            <div class="row drink-row">
+              <label class="field">Time<input type="time" name="time1" value="13:00"></label>
+              <label class="field">Drink<select name="drink1" data-default="drip coffee (8 oz)"></select></label>
+            </div>
+            <div class="row drink-row">
+              <label class="field">Time<input type="time" name="time2" value="16:00"></label>
+              <label class="field">Drink<select name="drink2" data-default=""></select></label>
+            </div>
+            <div class="row drink-row">
+              <label class="field">Bedtime<input type="time" name="bedtime" value="23:00"></label>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Your body</h2>
+          <div class="inputs">
+            <label class="slider">
+              <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
+              <input type="range" name="weight" min="40" max="130" step="1" value="70">
+              <span class="hint">Caffeine spreads through about 0.6 L of body water per kg, so lighter people get a higher level.</span>
+            </label>
+            <label class="slider">
+              <span class="slider-top"><span>Half-life</span><output data-for="halfLife"></output></span>
+              <input type="range" name="halfLife" min="2" max="10" step="0.5" value="5">
+              <span class="hint">Hours for your liver to clear half of it. About 5 h on average, 2.5 to 10 h across people.</span>
+            </label>
+            <label class="check"><input type="checkbox" name="smoker"> I smoke (about halves the half-life)</label>
+            <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill (about doubles it)</label>
+          </div>
+        </article>
+      </form>
+
+      <article class="card">
+        <h2>What comes out</h2>
+        <ul class="breakdown">
+          <li><span>Half-life used</span><strong id="outHalfLife">–</strong></li>
+          <li><span>Cleared each hour</span><strong id="outCleared">–</strong></li>
+          <li><span>Peak from your first drink</span><strong id="outPeak">–</strong></li>
+          <li><span>Left in you at bedtime</span><strong id="outBedtime">–</strong></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-head">
+          <h2>Sleep check</h2>
+          <span class="chip ok" id="pkSleepChip">–</span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="pkMeter"></div><div class="meter-limit" id="pkLimit"></div></div>
+        <p class="muted small" id="pkSleepNote"></p>
+      </article>
     </section>
 
     <section class="page" aria-label="Layer 2">

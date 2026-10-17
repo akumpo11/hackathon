@@ -249,3 +249,8 @@ button svg path, .avatar svg path { fill: none; stroke: currentColor; stroke-wid
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Layer 1: drinks and body ---------- */
+.drink-row { margin-bottom: 10px; }
+.inputs .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 10px; }
+.inputs .check input { width: 20px; height: 20px; accent-color: var(--mint); }

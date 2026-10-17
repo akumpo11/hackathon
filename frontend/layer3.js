@@ -2,28 +2,14 @@
 // Pyodide), and show the result. The math itself is only in the Python file.
 
 import { lineChart } from "./charts.js";
+import { loadPython } from "./python.js";
 
 const $ = (id) => document.getElementById(id);
 const form = $("layer3Inputs");
 
-// Loads Python + numpy, copies our model files into Pyodide's virtual disk,
-// and returns the Python function compute() from layer3_bridge.py.
+// The shared Python (python.js) already has model/alertness.py and layer3_bridge.py on its disk.
 async function loadModel() {
-  const pyodide = await loadPyodide();
-  await pyodide.loadPackage("numpy");
-
-  // Python's working directory inside Pyodide is /home/pyodide, so files put
-  // there can be imported like normal: `import layer3_bridge`, `from model import ...`.
-  const home = "/home/pyodide";
-  const files = {
-    "model/__init__.py": "../model/__init__.py",
-    "model/alertness.py": "../model/alertness.py",
-    "layer3_bridge.py": "py/layer3_bridge.py",
-  };
-  pyodide.FS.mkdirTree(`${home}/model`);
-  for (const [dest, src] of Object.entries(files)) {
-    pyodide.FS.writeFile(`${home}/${dest}`, await (await fetch(src)).text());
-  }
+  const pyodide = await loadPython();
   return pyodide.pyimport("layer3_bridge").compute;
 }
 

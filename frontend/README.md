@@ -2,7 +2,7 @@
 
 Mobile-first web app: plain HTML, CSS and JavaScript, no build step. On a phone it fills the screen; on a laptop it sits in a phone frame.
 
-One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. Only layer 3 is built so far.
+One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. Layers 1, 2 and 3 are built so far.
 
 ## Run it
 
@@ -16,22 +16,24 @@ Then open http://localhost:5500/frontend/. A phone on the same Wi-Fi can open `h
 
 The first load takes about 10 to 15 seconds while the browser downloads Pyodide and numpy. Later loads are cached.
 
-## How layer 3 works
+## How the layer pages run Python
 
-The math lives only in `model/alertness.py`, the same file the optimizer imports. The browser runs it with [Pyodide](https://pyodide.org) (Python compiled to WebAssembly):
+The math lives only in `model/`, the same files the optimizer imports. The browser runs them with [Pyodide](https://pyodide.org) (Python compiled to WebAssembly):
 
-1. `layer3.js` loads Pyodide and numpy, then copies `model/alertness.py` and `py/layer3_bridge.py` into Pyodide's virtual disk.
-2. On every slider move, it calls `compute()` in `layer3_bridge.py`, which calls `occupancy`, `feltPressure`, `inertia` and `alertnessFrom`.
-3. It writes the numbers back into the page and redraws the chart.
+1. `python.js` loads Pyodide and numpy once, then copies the `model/` files and the `py/*_bridge.py` files into Pyodide's virtual disk. Every page shares that one Python. A new model file has to be added to its `FILES` list.
+2. On every input change, a page calls `compute()` in its bridge: `layer1_bridge.py` calls `model/pk.py`, `layer3_bridge.py` calls `model/alertness.py`.
+3. The page writes the numbers back and redraws its chart.
 
-The sliders stand in for the outputs of layers 1, 2 and 4 until those exist.
+Layer 3's sliders stand in for the outputs of layers 1, 2 and 4 until the pages are joined. Layer 2 still uses a JavaScript copy of the sleep math (`sleepmodel.js`) until `model/sleep.py` exists.
 
 ## Files
 
 - `index.html`: the five layer pages and the bottom slider.
 - `styles.css`: colors and layout. Colors are variables at the top.
-- `app.js`: page switching.
-- `layer3.js`: layer 3 inputs, the call into Python, and the outputs.
-- `py/layer3_bridge.py`: turns slider values into arguments for `model/alertness.py`.
+- `app.js`: page switching, then starts each page.
+- `python.js`: loads Pyodide once and puts the model files on its disk.
+- `layer1.js`, `py/layer1_bridge.py`: layer 1 drinks and body inputs, the call into `model/pk.py`, the caffeine curve and the sleep check.
+- `layer2.js`, `sleepcal.js`, `sleepmodel.js`: layer 2 sleep calendar and sleep pressure chart.
+- `layer3.js`, `py/layer3_bridge.py`: layer 3 sliders, the call into `model/alertness.py`, and the outputs.
 - `charts.js`: hand-written SVG charts.
 - `api.js` and `mock/`: not used right now. The JSON contract client and sample responses for when `api.py` exists.
