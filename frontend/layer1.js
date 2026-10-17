@@ -3,6 +3,7 @@
 
 import { clockToHours, hoursToClock } from "./api.js";
 import { areaChart } from "./charts.js";
+import { initDrinkPicker } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
 import { publish } from "./shared.js";
 
@@ -11,16 +12,6 @@ const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyV
 const form = $("layer1Inputs");
 const DRINK_ROWS = 3;
 let series = "bodyMg";     // which curve the chart shows: "bodyMg" or "conc"
-
-// Fills each drink menu from the drink table in model/params.py.
-function fillDrinkMenus(drinks) {
-  for (let i = 0; i < DRINK_ROWS; i++) {
-    const select = form.elements[`drink${i}`];
-    const options = [["", "None"], ...Object.entries(drinks).map(([name, mg]) => [name, `${name}, ${mg} mg`])];
-    select.replaceChildren(...options.map(([value, text]) => new Option(text, value)));
-    select.value = select.dataset.default;
-  }
-}
 
 function readInputs(drinks) {
   const el = form.elements;
@@ -95,7 +86,6 @@ export async function startLayer1() {
   const pyodide = await loadPython();
   const bridge = pyodide.pyimport("layer1_bridge");
   const drinks = toObject(bridge.drinkOptions());
-  fillDrinkMenus(drinks);
 
   let last = null;
   const update = () => {
@@ -108,6 +98,7 @@ export async function startLayer1() {
     last = { x, r };
     showOutputs(x, r);
   };
+  initDrinkPicker(form, drinks, update);     // the drink list comes from model/params.py, so it waits for Python
 
   $("pkToggle").addEventListener("click", (e) => {
     const btn = e.target.closest("button");
