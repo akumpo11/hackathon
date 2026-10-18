@@ -34,10 +34,14 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   let shown = 0;                      // the day on screen
   let event = null;                   // { startH, endH } shaded on the bars
 
-  // A bedtime before noon, like 1 AM, means after midnight.
+  // A bedtime before noon, like 1 AM, means after midnight. The night bar only covers
+  // 6 PM to noon, so a night that doesn't fit (an afternoon bedtime like 12 PM) is cut
+  // to that window instead of spilling off the bar into the day before.
   function usualNight({ bedtimeH, wakeH }) {
     const bed = bedtimeH < 12 ? bedtimeH + 24 : bedtimeH;
-    return { bed, wake: bed + ((wakeH - bedtimeH + 24) % 24) };
+    const wake = bed + ((wakeH - bedtimeH + 24) % 24);
+    const fitBed = clamp(bed, NIGHT.startH, NIGHT.endH - NIGHT.minH);
+    return { bed: fitBed, wake: clamp(wake, fitBed + NIGHT.minH, NIGHT.endH) };
   }
   function fillUsual(u) {
     for (let d = FIRST_DAY; d <= LAST_DAY; d++) nights.set(d, { ...usualNight(u) });
