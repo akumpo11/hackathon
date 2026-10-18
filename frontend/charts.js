@@ -68,8 +68,11 @@ export function areaChart(svg, opts) {
     row = mx - lastLabelX < 48 ? 1 - row : 0;     // drop a label one row if it would overlap the last one
     lastLabelX = mx;
     el("circle", { cx: mx, cy: s.y(valueAt(m.x)), r: 4.5, fill: css("--ink"), stroke: css("--card"), "stroke-width": 2 }, svg);
-    el("text", { x: mx, y: row ? 23 : 11, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg)
-      .textContent = m.label;
+    const label = el("text", { x: mx, y: row ? 23 : 11, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg);
+    label.textContent = m.label;
+    // A drink near either edge would have half its label cut off, so slide the label inward.
+    const half = label.getComputedTextLength() / 2;
+    label.setAttribute("x", Math.min(Math.max(mx, half), s.W - half));
   }
 
   // Peaks: an amber dot on the curve where each drink tops out.

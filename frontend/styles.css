@@ -372,6 +372,8 @@ button { cursor: pointer; border: 0; background: none; }
 .settings-top { display: flex; margin-bottom: 16px; }
 .settings-frame.first-run .settings-top { display: none; }        /* no back arrow: the first-run survey can't be skipped */
 .settings-frame.first-run { animation: none; }                     /* it's already there when the app opens */
+/* Settings-only fields, like the half-life slider: most people don't know theirs on day one. */
+.settings-frame.first-run .settings-only { display: none; }
 #settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */
 .settings-frame .page-title.first { margin-top: 0; }
 .settings-frame .layer-no + .page-title { margin-top: 2px; }
@@ -384,6 +386,27 @@ button { cursor: pointer; border: 0; background: none; }
 .survey-progress span.on { background: var(--accent); }
 .first-run [data-step]:not([hidden]) { animation: step-in .28s ease-out; }
 @keyframes step-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* Survey welcome: a sample curve with the logo, then what the app gives you. */
+.welcome[hidden] { display: none; }
+.welcome-hero { margin: 0 0 16px; }
+.welcome-curve { display: block; width: 100%; height: auto; overflow: visible; }
+.welcome-curve text { font-size: 11px; font-weight: 700; fill: var(--muted); }
+.welcome-event { fill: var(--coral-soft); }
+.welcome-night { fill: var(--night); }
+.welcome-line { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.welcome-dot { fill: var(--ink); stroke: var(--card); stroke-width: 2; }
+.welcome-logo { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.welcome-logo strong { font-size: 18px; font-weight: 800; }
+.welcome-logo .brand-logo { background: var(--accent); color: var(--on-accent); }
+.welcome-list { list-style: none; margin: 0 0 16px; display: grid; gap: 16px; }
+.welcome-list li { display: flex; align-items: center; gap: 14px; line-height: 1.3; }
+.welcome-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent-ink);
+}
+.welcome-icon svg { width: 22px; }
+.welcome-icon svg path { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Back and Next/Done. In the survey they stay at the bottom of the screen. */
 .settings-actions { display: flex; gap: 8px; margin-top: 24px; }
