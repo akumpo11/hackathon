@@ -399,7 +399,7 @@ button { cursor: pointer; border: 0; background: none; }
   background: linear-gradient(transparent, var(--canvas) 18px);
 }
 
-/* Your sleep: a noon-to-noon bar you drag like the night on the sleep page (.bar below). */
+/* Your sleep: the same draggable night bar as the sleep page (.bar below). */
 .bar.sleep-bar { padding-top: 0; margin-top: 14px; }
 .field-name { display: flex; align-items: center; gap: 6px; }
 .field-name svg { width: 16px; height: 16px; color: var(--night-ink); }

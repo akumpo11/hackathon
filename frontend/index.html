@@ -404,8 +404,8 @@
           <span class="chip ok" id="sleepLength">–</span>
         </div>
         <p class="info-pop" id="infoSleep" hidden>Your usual night. It fills in your sleep calendar and sets tonight's bedtime for the sleep check. Caffeine left at bedtime hurts your sleep, and how much you sleep decides how tired you feel.</p>
-        <!-- Noon to noon, so a night is one unbroken stretch in the middle. Drag it like the
-             night on the sleep page, or type the times below. -->
+        <!-- 6 PM to noon, the same bar as the night on the sleep page. Drag it, or type
+             the times below. settings.js fills in the tick labels. -->
         <div class="bar night sleep-bar">
           <div class="bar-track" id="sleepTrack" aria-label="Your usual night: drag the ends to change bedtime and wake up">
             <div class="bar-span" id="sleepSpan">
@@ -413,7 +413,7 @@
               <span class="bar-handle" data-edge="wake" aria-hidden="true"></span>
             </div>
           </div>
-          <div class="bar-ticks" aria-hidden="true"><span>12p</span><span>6p</span><span>12a</span><span>6a</span><span>12p</span></div>
+          <div class="bar-ticks" id="sleepTicks" aria-hidden="true"></div>
         </div>
         <div class="inputs"><div class="row">
           <label class="field">

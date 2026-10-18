@@ -9,7 +9,7 @@
 
 import { clockToHours, hoursToClock } from "./time.js";
 import { publish } from "./shared.js";
-import { dragBar } from "./sleepcal.js";
+import { dragBar, usualNight, tickLabel, NIGHT } from "./sleepcal.js";
 
 const $ = (id) => document.getElementById(id);
 const KEY = "caffeineSettings";
@@ -59,18 +59,10 @@ const SHOW = {
   wakeTime: (v) => hoursToClock(clockToHours(v)),
 };
 
-// Hours from bedtime to wake time, going past midnight: 23:00 to 07:00 is 8 h.
-const nightHours = (s) => (clockToHours(s.wakeTime) - clockToHours(s.bedtime) + 24) % 24;
+// Your night on the sleep bar, the same 6 PM to noon bar as the sleep page:
+// 23:00 to 07:00 is { bed: 23, wake: 31 }.
+const nightSpan = (s) => usualNight({ bedtimeH: clockToHours(s.bedtime), wakeH: clockToHours(s.wakeTime) });
 
-// The sleep bar runs noon to noon (12 to 36 hours), in 15-minute steps, at least 1 h long.
-const SLEEP_BAR = { startH: 12, endH: 36, stepH: 0.25, minH: 1 };
-// Your night as { bed, wake } hours on that bar: a bedtime before noon, like 1 AM, is
-// after midnight (25). A night too long to fit is cut off at noon.
-function nightSpan(s) {
-  const bedClock = clockToHours(s.bedtime);
-  const bed = bedClock < 12 ? bedClock + 24 : bedClock;
-  return { bed, wake: Math.min(bed + nightHours(s), SLEEP_BAR.endH) };
-}
 // Back to the "HH:MM" the time inputs use, e.g. 31.5 -> "07:30".
 function toInputTime(h) {
   const mins = Math.round(h * 60) % (24 * 60);
@@ -150,13 +142,14 @@ function readForm(form) {
 
 // Writes the current values into the settings form's slider labels and every
 // [data-setting] row on the layer pages.
-// Places the night on the noon-to-noon bar and updates the hours chip.
+// Places the night on the sleep bar and updates the hours chip. The chip counts the
+// night as the bar shows it, so it matches the sleep page.
 function paintSleep(s) {
   const { bed, wake } = nightSpan(s);
-  const pct = (h) => `${(h / (SLEEP_BAR.endH - SLEEP_BAR.startH)) * 100}%`;
-  $("sleepSpan").style.left = pct(bed - SLEEP_BAR.startH);
+  const pct = (h) => `${(h / (NIGHT.endH - NIGHT.startH)) * 100}%`;
+  $("sleepSpan").style.left = pct(bed - NIGHT.startH);
   $("sleepSpan").style.width = pct(wake - bed);
-  const night = nightHours(s);
+  const night = wake - bed;
   $("sleepLength").textContent = `${+night.toFixed(1)} h a night`;
   $("sleepLength").className = `chip ${night >= 7 ? "ok" : "bad"}`;     // adults need about 7 h or more
 }
@@ -180,6 +173,7 @@ export function initSettings() {
   let settings = load();
   applyTheme(settings.theme);
   fillForm(form, settings);
+  $("sleepTicks").innerHTML = NIGHT.ticks.map((h) => `<span>${tickLabel(h)}</span>`).join("");
   show(form, settings);
   publish("settings", settings);      // before the layers start, so they can read it right away
 
@@ -200,7 +194,7 @@ export function initSettings() {
       form.elements.wakeTime.value = toInputTime(span.wake);
       paintSleep(readForm(form));
     };
-    dragBar(e, $("sleepTrack"), SLEEP_BAR, span, fill, () => form.dispatchEvent(new Event("input")));
+    dragBar(e, $("sleepTrack"), NIGHT, span, fill, () => form.dispatchEvent(new Event("input")));
   });
 
   let opener = gear;                  // where focus goes back to when the frame closes

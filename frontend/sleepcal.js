@@ -9,7 +9,7 @@ const FIRST_DAY = -2;                 // two days ago ...
 const LAST_DAY = 1;                   // ... through tomorrow
 // Each bar is a window of hours into its day. The night runs from 6 PM to noon the
 // next day (36 = noon tomorrow), the nap window covers the afternoon.
-const NIGHT = { startH: 18, endH: 36, stepH: 0.25, minH: 1, ticks: [18, 21, 24, 27, 30, 33, 36] };
+export const NIGHT = { startH: 18, endH: 36, stepH: 0.25, minH: 1, ticks: [18, 21, 24, 27, 30, 33, 36] };
 const NAP = { startH: 11, endH: 19, stepH: 1 / 12, minH: 1 / 6, ticks: [11, 13, 15, 17, 19] };   // 5-minute steps, 10 minutes at least
 const DEFAULT_NAP = { bed: 14, wake: 14 + 1 / 3 };   // a new nap starts as 2:00 to 2:20 PM
 export const CALENDAR_END_H = (LAST_DAY + 1) * 24 + 12;   // noon after the last night: the last time this page covers
@@ -18,13 +18,24 @@ const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
 const dateOf = (day) => { const d = new Date(); d.setDate(d.getDate() + day); return d; };
 const dayLabel = (day) => ({ "-1": "Yesterday", 0: "Today", 1: "Tomorrow" })[day] ?? dateOf(day).toLocaleDateString(undefined, { weekday: "long" });
 const dateLabel = (day) => dateOf(day).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-const tickLabel = (h) => { const c = h % 24; return c === 0 ? "12a" : c === 12 ? "12p" : c < 12 ? `${c}a` : `${c - 12}p`; };
+export const tickLabel = (h) => { const c = h % 24; return c === 0 ? "12am" : c === 12 ? "12pm" : c < 12 ? `${c}am` : `${c - 12}pm`; };
 // "8 h", "7 h 30 m" or "20 min", whichever reads best for the length.
 const lengthLabel = (h) => {
   const mins = Math.round(h * 60);
   if (mins < 60) return `${mins} min`;
   return mins % 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins / 60} h`;
 };
+
+// Your usual night as { bed, wake } hours on the night bar. A bedtime before noon, like
+// 1 AM, means after midnight. The bar only covers 6 PM to noon, so a night that doesn't
+// fit (an afternoon bedtime like 12 PM) is cut to that window instead of spilling off
+// the bar into the day before. Settings uses this too, so both bars agree.
+export function usualNight({ bedtimeH, wakeH }) {
+  const bed = bedtimeH < 12 ? bedtimeH + 24 : bedtimeH;
+  const wake = bed + ((wakeH - bedtimeH + 24) % 24);
+  const fitBed = clamp(bed, NIGHT.startH, NIGHT.endH - NIGHT.minH);
+  return { bed: fitBed, wake: clamp(wake, fitBed + NIGHT.minH, NIGHT.endH) };
+}
 
 export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH: 23, wakeH: 7 }) {
   // One entry per day. Times are hours into that day (bedtime 23 = 11 PM, wake 31 =
@@ -34,15 +45,6 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   let shown = 0;                      // the day on screen
   let event = null;                   // { startH, endH } shaded on the bars
 
-  // A bedtime before noon, like 1 AM, means after midnight. The night bar only covers
-  // 6 PM to noon, so a night that doesn't fit (an afternoon bedtime like 12 PM) is cut
-  // to that window instead of spilling off the bar into the day before.
-  function usualNight({ bedtimeH, wakeH }) {
-    const bed = bedtimeH < 12 ? bedtimeH + 24 : bedtimeH;
-    const wake = bed + ((wakeH - bedtimeH + 24) % 24);
-    const fitBed = clamp(bed, NIGHT.startH, NIGHT.endH - NIGHT.minH);
-    return { bed: fitBed, wake: clamp(wake, fitBed + NIGHT.minH, NIGHT.endH) };
-  }
   function fillUsual(u) {
     for (let d = FIRST_DAY; d <= LAST_DAY; d++) nights.set(d, { ...usualNight(u) });
   }
