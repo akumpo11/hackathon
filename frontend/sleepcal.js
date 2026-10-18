@@ -23,7 +23,7 @@ const tickLabel = (h) => { const c = h % 24; return c === 0 ? "12a" : c === 12 ?
 const lengthLabel = (h) => {
   const mins = Math.round(h * 60);
   if (mins < 60) return `${mins} min`;
-  return mins % 60 ? `${Math.floor(mins / 60)} h ${mins % 60} m` : `${mins / 60} h`;
+  return mins % 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins / 60} h`;
 };
 
 export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH: 23, wakeH: 7 }) {

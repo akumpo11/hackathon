@@ -183,9 +183,11 @@ export function heatmap(svg, { prob, xs, ys, mark }) {
   const max = Math.max(...prob.flat());
   const cw = (s.right - s.left) / xs.length, ch = (s.bottom - s.top) / ys.length;
 
-  // Each cell's color is a blend from white to mint, by its probability relative to the most likely cell.
-  const mint = css("--accent").match(/\w\w/g).map((h) => parseInt(h, 16));
-  const blend = (f) => `rgb(${mint.map((c) => Math.round(255 + (c - 255) * f)).join(",")})`;
+  // Each cell's color is a blend from the card color to the accent, by its probability relative to
+  // the most likely cell. Starting from the card (not white) means empty cells vanish in every theme.
+  const hex = (name) => css(name).match(/\w\w/g).map((h) => parseInt(h, 16));
+  const accent = hex("--accent"), card = hex("--card");
+  const blend = (f) => `rgb(${accent.map((c, i) => Math.round(card[i] + (c - card[i]) * f)).join(",")})`;
   prob.forEach((row, i) => row.forEach((p, j) => {
     el("rect", { x: s.left + j * cw, y: s.bottom - (i + 1) * ch, width: cw + 0.5, height: ch + 0.5,
                  fill: blend(0.06 + 0.94 * (p / max)) }, svg);

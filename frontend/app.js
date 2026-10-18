@@ -1,5 +1,6 @@
 // Page navigation for the five layer pages, then each page's own code.
 
+import { loadPython } from "./python.js";
 import { initSettings } from "./settings.js";
 import { initInfo } from "./info.js";
 import { startLayer1 } from "./layer1.js";
@@ -30,6 +31,26 @@ pager.addEventListener("scroll", () => {
   }
 }, { passive: true });
 
+// The gear belongs to the page header, so it fades out once you scroll past it (styles.css .scrolled)
+// instead of sitting on top of charts and numbers.
+const device = document.querySelector(".device");
+const markScrolled = () => device.classList.toggle("scrolled", (pages[shownPage]?.scrollTop ?? 0) > 40);
+pages.forEach((p) => p.addEventListener("scroll", markScrolled, { passive: true }));
+document.addEventListener("pageshown", markScrolled);
+
+// Every page's header band is as tall as the tallest one, so the band stays the same
+// size as you swipe between pages. Measured, not a fixed height, because how the titles
+// wrap depends on the phone's width.
+const heads = [...document.querySelectorAll(".page-head")];
+function matchHeadHeights() {
+  heads.forEach((h) => { h.style.minHeight = ""; });
+  const tallest = Math.max(...heads.map((h) => h.offsetHeight));
+  heads.forEach((h) => { h.style.minHeight = `${tallest}px`; });
+}
+matchHeadHeights();
+document.fonts.ready.then(matchHeadHeights);   // again once the web font loads, since it changes how text wraps
+window.addEventListener("resize", matchHeadHeights);
+
 tabs.forEach((tab, i) => tab.addEventListener("click", () => {
   pager.scrollTo({ left: i * pager.clientWidth, behavior: "smooth" });
 }));
@@ -46,27 +67,32 @@ initInfo();
 // Personal settings first: layers 1 to 3 read them as soon as they start.
 initSettings();
 
+// A thin bar across the top while Python downloads (styles.css .loading). The pages
+// start the download themselves; this only watches for it to finish.
+document.documentElement.classList.add("loading");
+loadPython().finally(() => document.documentElement.classList.remove("loading"));
+
 startLayer1().catch((err) => {
   console.error(err);
-  document.getElementById("pkReadout").textContent = "Python didn't load";
+  document.getElementById("pkReadout").textContent = "Couldn't load";
 });
 
 startLayer2().catch((err) => {
   console.error(err);
-  document.getElementById("pressureNow").textContent = "Python didn't load";
+  document.getElementById("pressureNow").textContent = "Couldn't load";
 });
 
 startLayer3().catch((err) => {
   console.error(err);
-  document.getElementById("tolEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
+  document.getElementById("tolEquation").textContent = "Couldn't load. Check your connection and reload.";
 });
 
 startLayer4().catch((err) => {
   console.error(err);
-  document.getElementById("alertReadout").textContent = "Python didn't load";
+  document.getElementById("alertReadout").textContent = "Couldn't load";
 });
 
 startLayer5().catch((err) => {
   console.error(err);
-  document.getElementById("planEquation").textContent = `Couldn't load the Python model. ${err?.message ?? err}`;
+  document.getElementById("planEquation").textContent = "Couldn't load. Check your connection and reload.";
 });

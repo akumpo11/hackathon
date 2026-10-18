@@ -1,6 +1,8 @@
 // Drink picker for layer 1: tapping a drink row opens a sheet with every drink
 // as a tile, like an ordering kiosk. Picking one fills the row's hidden input
 // (drink0, drink1, ...), so layer1.js reads it exactly like a form field.
+// Rows come and go (layer1.js adds and removes them), so clicks are caught on
+// the form rather than on each button.
 // The "Custom" tile is for a drink that isn't listed: you type a name and its
 // caffeine, and the row keeps the mg on its hidden input (data-mg).
 // No math here: the drink list and caffeine amounts come from model/params.py.
@@ -19,14 +21,12 @@ const SHAPES = {
   shot: (c) => `<rect x="18" y="14" width="12" height="26" rx="3" fill="${c}"/><rect x="20" y="8" width="8" height="7" rx="2" fill="${c}" opacity=".6"/><rect x="18" y="22" width="12" height="7" fill="#fff" opacity=".35"/>`,
   bar: (c) => `<rect x="10" y="12" width="28" height="24" rx="3" fill="${c}"/><path d="M19.3 12v24M28.6 12v24M10 24h28" stroke="#fff" stroke-width="1.6" opacity=".35"/>`,
   custom: (c) => `<path d="M12 16h20v14a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8V16Z" fill="none" stroke="${c}" stroke-width="3"/><path d="M32 20h3a5 5 0 0 1 0 10h-3" fill="none" stroke="${c}" stroke-width="3"/><path d="M22 21v10M17 26h10" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`,
-  none: (c) => `<circle cx="24" cy="24" r="13" fill="none" stroke="${c}" stroke-width="3"/><path d="M15 33 33 15" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`,
 };
 
 // Which drawing and colors each drink gets, matched on its name in params.DRINKS.
 function look(name, custom = false) {
   const n = name.toLowerCase();
   if (custom) return { shape: "custom", ink: "#7A6A5C", tint: "#F1EEEB" };
-  if (!n) return { shape: "none", ink: "#9AA6A1", tint: "#EEF1F0" };
   if (n.includes("espresso")) return { shape: "espresso", ink: "#6B4226", tint: "#F3E7DA" };
   if (n.includes("coffee")) return { shape: "mug", ink: "#8B5A2B", tint: "#F3E7DA" };
   if (n.includes("green tea")) return { shape: "teacup", ink: "#5E9E4B", tint: "#E6F2DF" };
@@ -63,7 +63,6 @@ export function drinkMg(input, drinks) {
 export function initDrinkPicker(form, drinks, onChange) {
   const sheet = $("drinkSheet"), scrim = $("drinkScrim"), grid = $("drinkGrid");
   const custom = $("customDrink"), heading = $("drinkSheetTitle");
-  const buttons = [...form.querySelectorAll(".drink-pick")];
   let openSlot = null;       // which row the sheet is choosing for
   let opener = null;         // the button to return focus to
   const slotInput = () => form.elements[`drink${openSlot}`];
@@ -76,21 +75,18 @@ export function initDrinkPicker(form, drinks, onChange) {
     button.innerHTML = input.dataset.mg
       ? `<span class="pick-icon" style="background:${look(value, true).tint}">${icon(value, true)}</span>
          <span class="pick-text"><strong>${escape(value)}</strong><small>${input.dataset.mg} mg, custom</small></span>`
-      : value
-      ? `<span class="pick-icon" style="background:${look(value).tint}">${icon(value)}</span>
-         <span class="pick-text"><strong>${title}</strong><small>${drinks[value]} mg${size ? `, ${size}` : ""}</small></span>`
-      : `<span class="pick-icon" style="background:${look("").tint}">${icon("")}</span>
-         <span class="pick-text"><strong>No drink</strong><small>Tap to add one</small></span>`;
+      : `<span class="pick-icon" style="background:${look(value).tint}">${icon(value)}</span>
+         <span class="pick-text"><strong>${title}</strong><small>${drinks[value]} mg${size ? `, ${size}` : ""}</small></span>`;
   }
 
   function tile(value) {
     const { title, size } = split(value);
     const current = !slotInput().dataset.mg && slotInput().value === value;
     return `<button type="button" class="drink-tile${current ? " picked" : ""}" data-value="${value}" aria-pressed="${current}">
-      ${value ? `<span class="tile-badge">${drinks[value]} mg</span>` : ""}
+      <span class="tile-badge">${drinks[value]} mg</span>
       <span class="tile-art" style="background:${look(value).tint}">${icon(value)}</span>
-      <span class="tile-name">${value ? title : "No drink"}</span>
-      <span class="tile-size">${value ? size || "1 serving" : "Skip this row"}</span>
+      <span class="tile-name">${title}</span>
+      <span class="tile-size">${size || "1 serving"}</span>
     </button>`;
   }
 
@@ -121,7 +117,7 @@ export function initDrinkPicker(form, drinks, onChange) {
     opener = button;
     const time = hoursToClock(clockToHours(form.elements[`time${openSlot}`].value));
     $("drinkSheetNote").textContent = `For your ${time} drink.`;
-    grid.innerHTML = ["", ...Object.keys(drinks)].map(tile).join("") + customTile();
+    grid.innerHTML = Object.keys(drinks).map(tile).join("") + customTile();
     showCustom(false);
     sheet.hidden = false;
     scrim.hidden = false;
@@ -172,10 +168,13 @@ export function initDrinkPicker(form, drinks, onChange) {
     showCustom(false);
     grid.querySelector("[data-custom]").focus();
   });
-  buttons.forEach((b) => b.addEventListener("click", () => open(b)));
+  form.addEventListener("click", (e) => {
+    const b = e.target.closest(".drink-pick");
+    if (b) open(b);
+  });
   $("drinkClose").addEventListener("click", close);
   scrim.addEventListener("click", close);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden) close(); });
 
-  buttons.forEach(showPick);
+  return showPick;      // layer1.js draws each new row's button with it
 }

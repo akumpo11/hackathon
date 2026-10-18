@@ -120,7 +120,7 @@ function showPlan(x, r) {
   list.replaceChildren();
   if (r.error) {
     $("planScore").textContent = "–";
-    $("planEquation").textContent = "Your sleep calendar (layer 2) needs the night before and the night after your event.";
+    $("planEquation").textContent = "Your sleep calendar needs the night before and the night after your event.";
     $("planChip").textContent = "Needs sleep";
     $("planNote").textContent = "";
     return;
@@ -142,7 +142,7 @@ function showPlan(x, r) {
   rows.push({ t: x.event.startH, li: timelineRow(x.event.startH, "Your event", `${eventDay}, ${x.lengthH} h, until ${hoursToClock(x.event.endH)}`, "Event", "event") });
   rows.sort((a, b) => a.t - b.t).forEach((row) => list.append(row.li));
 
-  const drinksNote = shared.layer1.doses.length ? " It counts the drinks you entered on layer 1." : "";
+  const drinksNote = shared.layer1.doses.length ? " It counts today's drinks too." : "";
   $("planNote").textContent = (added
     ? "Caffeine peaks about 50 minutes after a drink, so doses come shortly before you need them."
     : "No extra caffeine is worth it: it wouldn't add 0.25 out of 10 per 50 mg, or it would break a limit.") + drinksNote;
@@ -261,7 +261,7 @@ function updateLearn() {
   if (simulated) {
     const r = toObject(bridge.simulate(JSON.stringify({ ...you(), ...simulated, todayDoses: layer1.doses })));
     $("ratingNote").textContent = "Showing a simulated week. Rate yourself to go back to your own ratings.";
-    showLearn(r, `${r.ratingCount} made-up ratings from a hidden half-life of ${r.trueHalfLife.toFixed(1)} h. ` +
+    showLearn(r, `${r.ratingCount} simulated ratings from a hidden half-life of ${r.trueHalfLife.toFixed(1)} h. ` +
                  `It guessed ${r.meanHalfLife.toFixed(1)} ± ${r.sdHalfLife.toFixed(1)} h.`);
     return;
   }

@@ -22,6 +22,8 @@
   --backdrop: #DDD6CF;   /* behind the phone frame on a laptop */
   --frame: #2A211B;      /* the phone frame's bezel */
   --scrim: rgba(22, 32, 28, .35);
+  --head: var(--accent);   /* the band behind each page title (follows the theme's accent) */
+  --on-head: #FFFFFF;    /* text on that band */
   --radius-lg: 28px;
   --radius-md: 18px;
   --tabbar-h: 84px;
@@ -56,6 +58,7 @@
   --mid-soft: #39311F;  --mid-ink: #E6CD8C;
   --bad-soft: #3B2524;  --bad-ink: #EFB0A9;
   --backdrop: #070A09; --frame: #000000; --scrim: rgba(0, 0, 0, .55);
+  --head: #23725B;       /* the mint accent dimmed toward the card color: bright mint is too loud behind white text */
 }
 
 * { box-sizing: border-box; margin: 0; }
@@ -90,8 +93,16 @@ button { cursor: pointer; border: 0; background: none; }
   flex: 0 0 100%; min-width: 0; height: 100%; overflow-y: auto; overflow-x: hidden;
   scroll-snap-align: start;
   overscroll-behavior-y: contain;  /* at the end of a page, stop instead of scrolling the whole app */
-  padding: max(28px, env(safe-area-inset-top)) 16px calc(var(--tabbar-h) + 36px);
+  padding: 0 16px calc(var(--tabbar-h) + 36px);   /* no top padding: the dark header band (.page-head) runs to the top edge */
 }
+
+.loading .device::after {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 7;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background-size: 50% 100%; background-repeat: no-repeat;
+  animation: loading-sweep 1.2s ease-in-out infinite;
+}
+@keyframes loading-sweep { from { background-position: -100% 0; } to { background-position: 200% 0; } }
 
 /* ---------- Header ---------- */
 .top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
@@ -112,8 +123,25 @@ button { cursor: pointer; border: 0; background: none; }
 .small { font-size: 12.5px; line-height: 1.45; }
 .body { font-size: 14.5px; line-height: 1.5; margin: 4px 0 10px; }
 
-.page-title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 26px 0 14px; }
-.page-title.first { margin-top: 8px; }
+.page-title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; margin: 40px 0 12px; }   /* 40px above: a mid-page title reads as a new section */
+.page-title.first { margin-top: 0; }
+.page > .body, .settings-frame > .body { margin-bottom: 20px; }   /* the subtitle belongs to the title, not to the first card */
+
+/* ---------- Page header: a band in the theme color behind the title and subtitle ---------- */
+.page-head {
+  position: relative;
+  margin: 0 -16px;                                                  /* bleed past the page gutter to both edges */
+  padding: calc(max(18px, env(safe-area-inset-top)) + 5px) 20px 68px;   /* top: the title's first line lines up with the gear; bottom: room for the first card to tuck in */
+  border-radius: 0 0 36px 36px;
+  color: var(--on-head);
+  background: linear-gradient(150deg, var(--head), color-mix(in srgb, var(--head) 55%, var(--canvas)));   /* the theme color fading lighter, so it sits softly on the page */
+}
+.page-head + * { position: relative; margin-top: -44px; }          /* the first card or ring covers the band's rounded bottom */
+.page-head .page-title { padding-right: 56px; }                    /* clear of the gear */
+.page-head .body { margin: 6px 0 0; color: color-mix(in srgb, var(--on-head) 75%, transparent); }
+.page-head .info-btn { color: color-mix(in srgb, var(--on-head) 70%, transparent); }
+.page-head .info-btn[aria-expanded="true"] { color: var(--on-head); }
+.page-head .info-pop { margin: 12px 0 0; background: rgba(255, 255, 255, .14); color: var(--on-head); }
 
 /* ---------- Hero: the big ring, like the steps circle in the mockup ---------- */
 .hero {
@@ -128,15 +156,16 @@ button { cursor: pointer; border: 0; background: none; }
 }
 .ring strong { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
 .ring span { font-size: 11.5px; line-height: 1.25; opacity: .9; }
-.ring-dark { background: var(--ink); color: var(--on-ink); }
 .hero-side { min-width: 0; }
-.hero-lead { font-weight: 700; font-size: 15px; margin-top: 6px; }
+.hero-lead { font-weight: 700; font-size: 15px; margin-top: 6px; text-wrap: balance; }   /* no one-word last line */
 .hero-big { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
 
 /* ---------- Cards ---------- */
-.card { background: var(--card); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 12px; }
-.card h2 { font-size: 16px; font-weight: 700; }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.card { background: var(--card); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; }   /* 16px gap, the same as the side gutter */
+.card, .hero { box-shadow: 0 1px 2px rgba(22, 32, 28, .03), 0 14px 34px -26px rgba(22, 32, 28, .25); }   /* a whisper of depth lifts white cards off the cream canvas */
+:root[data-theme="night"] .card, :root[data-theme="night"] .hero { box-shadow: none; border: 1px solid var(--line); }   /* shadows vanish on dark; a hairline does the same job */
+.card h2 { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 
 /* (i) buttons: short captions stay on screen, the long explanation opens on tap (info.js). */
 .info-btn {
@@ -151,23 +180,23 @@ button { cursor: pointer; border: 0; background: none; }
   margin: 8px 0 10px; padding: 10px 12px; border-radius: 14px;
   background: var(--canvas); font-size: 13px; line-height: 1.5; color: var(--ink);
 }
-.page > .info-pop { background: var(--card); margin-top: 0; }   /* on the page background, not inside a card */
+.page > .info-pop { background: var(--card); margin: -8px 0 20px; }   /* on the page background, not inside a card */
 .info-pop[hidden] { display: none; }
 .info-pop .breakdown { margin-top: 0; }   /* a list of numbers inside the pop, tighter than in a card */
 .info-pop .breakdown li { padding: 7px 0; font-size: 13px; }
 
 .toggle { display: flex; background: var(--canvas); border-radius: 999px; padding: 3px; }
-.toggle button { padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.toggle button { padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
 .toggle button.on { background: var(--accent); color: var(--on-accent); }
 
-.readout { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 2px; }
+.readout { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 6px; }
 .readout-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
 
 .chart { display: block; width: 100%; height: 190px; overflow: visible; touch-action: pan-y; }
 .chart text { font-size: 10.5px; fill: var(--muted); font-family: inherit; }
 .chart.heat { height: 230px; margin: 10px 0 8px; }
 
-.legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; padding: 0; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; padding: 0; margin-top: 12px; font-size: 12px; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 6px; }
 .swatch { width: 10px; height: 10px; border-radius: 3px; }
 .swatch.event { background: var(--coral); }
@@ -192,7 +221,7 @@ button { cursor: pointer; border: 0; background: none; }
 .timeline .tag.event { background: var(--coral-soft); color: var(--coral-ink); }
 
 /* Sleep check */
-.chip { font-size: 12.5px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
+.chip { font-size: 12.5px; font-weight: 700; padding: 5px 10px; border-radius: 999px; white-space: nowrap; }   /* one phrase, never broken in two */
 .chip.ok { background: var(--accent-soft); color: var(--accent-ink); }
 .chip.bad { background: var(--coral-soft); color: var(--coral-ink); }
 .chip.plain { background: var(--canvas); color: var(--ink); }   /* a fact, not good or bad news */
@@ -204,7 +233,7 @@ button { cursor: pointer; border: 0; background: none; }
 .meter-fill.bad { background: var(--coral); }
 .meter-limit { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); border-radius: 2px; }
 
-.footnote { text-align: center; color: var(--muted); font-size: 12px; margin-top: 18px; }
+.footnote { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
 
 /* Learn page */
 .rating { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0 6px; }
@@ -234,10 +263,12 @@ button { cursor: pointer; border: 0; background: none; }
   will-change: transform;
 }
 .tab {
-  position: relative; display: flex; align-items: center; justify-content: center;
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   color: color-mix(in srgb, var(--on-ink) 60%, transparent); border-radius: 999px; min-width: 0;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.01em;
 }
-.tab svg { width: 24px; height: 24px; }
+.tab svg { width: 22px; height: 22px; }
+.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tab.on { color: var(--on-accent); }
 
 /* ---------- Bottom sheet for inputs ---------- */
@@ -252,7 +283,7 @@ button { cursor: pointer; border: 0; background: none; }
 .sheet[hidden], .scrim[hidden] { display: none; }
 @keyframes rise { from { transform: translateY(100%); } }
 .grabber { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto 14px; }
-.sheet h2 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+.sheet h2 { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
 .sheet label { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 12px; flex: 1; min-width: 0; }
 .sheet input, .sheet select {
   width: 100%; padding: 12px; border-radius: 14px; border: 1.5px solid var(--line);
@@ -265,10 +296,11 @@ button { cursor: pointer; border: 0; background: none; }
 /* ---------- Layer pages ---------- */
 .layer-no { color: var(--accent); font-weight: 700; font-size: 14px; margin-top: 8px; }
 .layer-no + .page-title { margin-top: 2px; }
-.page .hero { margin-bottom: 12px; }
+.page .hero { margin-bottom: 16px; }
 .equation { font-size: 14px; font-weight: 600; line-height: 1.45; margin-top: 4px; color: var(--muted); }
 
 .inputs { margin-top: 12px; }
+.inputs > :last-child, .slider:last-child, .drink-row:last-child { margin-bottom: 0; }   /* the card's own padding closes it; no dead space under the last slider */
 .slider { display: block; margin-bottom: 16px; }
 .slider-top { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
 .slider-top output { font-weight: 800; }
@@ -283,16 +315,33 @@ button { cursor: pointer; border: 0; background: none; }
 }
 /* iPhone Safari gives time pickers a fixed built-in width that ignores width: 100%,
    so they spilled into the drink buttons. appearance: none lets them shrink to fit. */
-.field input[type="time"], .field input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; min-height: 46px; }
+.field input[type="time"], .field input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; min-height: 46px; padding-right: 32px; }
+/* Chrome's built-in clock icon plus its padding left too little room, so "08:00 AM" was cut to "08:00 AN".
+   Hide the native icon but stretch it over the whole field (a click anywhere still opens the picker),
+   then draw our own 16px glyph with a mask so it takes the theme's muted color. */
+.field { position: relative; }
+.field input[type="time"]::-webkit-calendar-picker-indicator,
+.field input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: auto; height: auto; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+.field:has(> input[type="time"])::after, .field:has(> input[type="date"])::after {
+  content: ""; position: absolute; right: 11px; bottom: 15px; width: 16px; height: 16px; pointer-events: none;   /* 15px = (46px field - 16px glyph) / 2 */
+  background: var(--muted);
+  -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat;
+  --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E");
+}
+.field:has(> input[type="date"])::after {
+  --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+}
 .field input[type="time"]::-webkit-date-and-time-value, .field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 
 /* ---------- Personal settings (frame 6) ---------- */
 .settings-btn {
-  position: absolute; z-index: 6;
+  position: absolute; z-index: 6; transition: opacity .2s, transform .2s;
   top: max(18px, env(safe-area-inset-top)); right: 16px;
   border-radius: 50%;            /* round, unlike the other icon buttons */
+  background: rgba(255, 255, 255, .14); color: var(--on-head);   /* frosted, on the dark header band */
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
 }
-.page > .layer-no, .page > .page-title.first { padding-right: 56px; }   /* keep titles clear of the gear */
+.device.scrolled .settings-btn { opacity: 0; transform: translateY(-6px); pointer-events: none; }   /* app.js adds .scrolled past 40px, so the gear never covers content */
 
 .settings-frame {
   position: absolute; inset: 0; z-index: 8; overflow-y: auto;
@@ -302,7 +351,7 @@ button { cursor: pointer; border: 0; background: none; }
 }
 .settings-frame[hidden] { display: none; }
 @keyframes slide-in { from { transform: translateX(100%); } }
-.settings-top { display: flex; margin-bottom: 14px; }
+.settings-top { display: flex; margin-bottom: 16px; }
 .settings-frame.first-run .settings-top { display: none; }        /* no back arrow: the first-run survey can't be skipped */
 .settings-frame.first-run { animation: none; }                     /* it's already there when the app opens */
 #settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */
@@ -317,10 +366,10 @@ button { cursor: pointer; border: 0; background: none; }
 .survey-progress span.on { background: var(--accent); }
 .first-run [data-step]:not([hidden]) { animation: step-in .28s ease-out; }
 @keyframes step-in { from { opacity: 0; transform: translateY(10px); } }
-.first-run .hero { margin-bottom: 12px; }
+.first-run .hero { margin-bottom: 16px; }
 
 /* Back and Next/Done. In the survey they stay at the bottom of the screen. */
-.settings-actions { display: flex; gap: 8px; margin-top: 16px; }
+.settings-actions { display: flex; gap: 8px; margin-top: 24px; }
 .settings-actions .btn { padding: 15px; }
 .settings-actions .btn.wide { flex: 1; margin-top: 0; }
 .settings-actions .btn.ghost { flex: none; width: 96px; background: var(--card); }
@@ -365,7 +414,7 @@ button { cursor: pointer; border: 0; background: none; }
 .card-head .link-btn { flex: none; }
 
 /* ---------- Drink picker (layer 1) ---------- */
-.drink-row .field:has(.drink-pick) { flex: 1.7; }
+.drink-row .field:has(.drink-pick) { flex: 1.2; }   /* with the × and a tighter gap, leaves the time column room for "08:00 AM" */
 .drink-pick {
   display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; text-align: left;
   padding: 5px 10px 5px 5px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--canvas);
@@ -376,10 +425,10 @@ button { cursor: pointer; border: 0; background: none; }
 .pick-text strong { font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pick-text small { font-size: 12px; color: var(--muted); font-weight: 600; }
 
-.sheet-head { display: flex; align-items: center; justify-content: space-between; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; position: sticky; top: -10px; z-index: 1; padding: 8px 0; background: var(--card); }   /* title and close stay put while the grid scrolls; -10px cancels the sheet's top padding */
 .sheet-head h2 { margin-bottom: 0; }
 .sheet-head .icon-btn { background: var(--canvas); }
-.drink-sheet .muted { margin: 4px 0 14px; }
+.drink-sheet .muted { margin: 4px 0 16px; }
 .drink-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .drink-tile {
   position: relative; display: flex; flex-direction: column; align-items: stretch; text-align: left;
@@ -420,7 +469,7 @@ button { cursor: pointer; border: 0; background: none; }
    when it starts and ends, the middle slides the whole thing. */
 .day-card { margin-top: 8px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .day-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.day-arrow { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--canvas); color: var(--ink); }
+.day-arrow { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--canvas); color: var(--ink); }
 .day-arrow svg { width: 20px; height: 20px; }
 .day-arrow svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .day-arrow:disabled { opacity: .3; cursor: default; }
@@ -439,7 +488,7 @@ button { cursor: pointer; border: 0; background: none; }
 .bar-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13.5px; min-height: 30px; }
 .bar-head strong { font-weight: 700; }
 .bar-times { flex: 1; color: var(--muted); font-weight: 600; font-size: 12.5px; white-space: nowrap; }
-.bar-remove { width: 30px; height: 30px; border-radius: 50%; font-size: 18px; color: var(--muted); background: var(--canvas); }
+.bar-remove { width: 36px; height: 36px; border-radius: 50%; font-size: 18px; color: var(--muted); background: var(--canvas); }
 .bar.empty .bar-remove, .bar.empty .bar-len, .bar.empty .bar-track, .bar.empty .bar-ticks, .bar:not(.empty) .bar-add { display: none; }
 .bar-add { margin-left: auto; }
 .bar-track {
@@ -488,11 +537,17 @@ button { cursor: pointer; border: 0; background: none; }
 
 /* ---------- Layer 1: drinks and body ---------- */
 .drink-row { margin-bottom: 10px; }
+.drink-row:has(.drink-remove) { gap: 8px; }
+.drink-remove {      /* sits level with the inputs, under their labels */
+  flex: none; align-self: flex-end; width: 28px; height: 28px; margin-bottom: 9px; border-radius: 50%;
+  font-size: 18px; color: var(--muted); background: var(--canvas);
+}
+.add-drink { display: block; margin: 6px 0 10px; }
 .inputs .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 10px; }
 .inputs .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 
 /* ---------- Layer 5: plan and learning ---------- */
 .swatch.event-soft { background: var(--coral-soft); box-shadow: inset 0 0 0 1.5px var(--coral); }
 .nap-slot { margin: 12px 0 6px; }
-.card > .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 14px; }
+.card > .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 16px; }
 .card > .check input { width: 20px; height: 20px; accent-color: var(--accent); }

@@ -17,7 +17,7 @@ function draw(blocks) {
   // Average hours a night, naps included, so the chip reads as "how much sleep am I getting".
   const nights = blocks.filter((b) => !b.isNap).length || 1;
   const hours = blocks.reduce((sum, b) => sum + (b.endH - b.startH), 0);
-  $("sleepSummary").textContent = `${(hours / nights).toFixed(1)} h a night`;
+  $("sleepSummary").textContent = `${+(hours / nights).toFixed(1)} h a night`;
   // Tell later pages (layer 4) what your sleep and body clock are.
   // The body clock comes from personal settings (settings.js), not this page.
   const shiftH = shared.settings.chronotypeShiftH;

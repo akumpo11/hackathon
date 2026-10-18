@@ -25,7 +25,7 @@ const DEFAULTS = {
 // Each survey step's title and one-line intro. Step 0 is the welcome; steps 1 to 4 are
 // questions. The longer "why we ask" sits behind each card's (i) button.
 const STEPS = [
-  { title: "Welcome! Let's set you up", intro: "Time your coffee for exam day without losing sleep." },
+  { title: "Welcome to DeCaf", intro: "Time your coffee for exam day without losing sleep." },
   { title: "When do you sleep?", intro: "Your usual night." },
   { title: "How much coffee do you drink?", intro: "On a normal day." },
   { title: "Tell us about your body", intro: "How fast you clear caffeine." },
@@ -39,8 +39,8 @@ const THEMES = ["coffee", "mint", "ocean", "berry", "night"];
 // every page redraws when settings change, so they pick up the new colors too.
 function applyTheme(theme) {
   document.documentElement.dataset.theme = THEMES.includes(theme) ? theme : DEFAULTS.theme;
-  const canvas = getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim();
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", canvas);   // the phone's status bar
+  const head = getComputedStyle(document.documentElement).getPropertyValue("--head").trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", head);   // the phone's status bar, matched to the dark header band
 }
 
 // How each setting reads on the layer pages' "Settings" rows.
