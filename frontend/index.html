@@ -111,7 +111,7 @@
           <h2>When you sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleepCal" aria-label="About the sleep calendar"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="sleepSummary">–</span>
         </div>
-        <p class="info-pop" id="infoSleepCal" hidden>One day at a time: use the arrows or swipe sideways to change day. Each night starts from your usual sleep in Settings. Drag the ends of a bar to change when it starts and ends, or drag the middle to slide it. Add a nap the same way.</p>
+        <p class="info-pop" id="infoSleepCal" hidden>One day at a time: use the arrows or swipe sideways to change day. Each day shows the night before it, then any nap, and your event if it falls that day; sleep can't overlap it. Each night starts from your usual sleep in Settings. Drag the ends of a bar to change when it starts and ends, or drag the middle to slide it. Add a nap the same way.</p>
         <div id="sleepCal" class="cal-wrap"></div>
       </article>
 
@@ -132,11 +132,12 @@
           <h2>Sleep pressure over the week <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPressure" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="pressureNow">–</span>
         </div>
-        <p class="info-pop" id="infoPressure" hidden>Pressure builds while you're awake and drains while you sleep. 0 is fully rested, 1 is up all night. Short nights leave you starting the next day higher.</p>
+        <p class="info-pop" id="infoPressure" hidden>Pressure builds while you're awake and drains while you sleep (the shaded times). 0% is fully rested, 100% is up all night. Short nights leave you starting the next day higher. The dashed body clock has no scale: it only shows when your body is most awake (late afternoon) and least awake (before dawn).</p>
         <svg class="chart" id="pressureChart" role="img" aria-label="Sleep pressure and body clock over five days"></svg>
         <ul class="legend">
           <li><span class="swatch taper"></span>Sleep pressure</li>
           <li><span class="swatch cold"></span>Body clock</li>
+          <li><span class="swatch sleep"></span>Asleep</li>
         </ul>
       </article>
     </section>

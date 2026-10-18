@@ -177,18 +177,27 @@ function addTouchScrub(svg) {
 }
 
 /**
- * Plain multi-line chart (reset plan).
+ * Plain multi-line chart (reset plan, sleep pressure).
  * opts: series [{xs, ys, color, dash}], yMin, yMax, vline {x, label}, points [{x, y, label}],
- *       formatTick(x), tickStep
+ *       formatTick(x), tickStep,
+ *       yTicks [{y, label}] (optional: grid lines with labels down the left side),
+ *       bands [{from, to, color}] (optional: shaded windows, like sleep)
  */
 export function lineChart(svg, opts) {
   const all = opts.series.flatMap((ser) => ser.xs);
   const xMin = Math.min(...all), xMax = Math.max(...all);
-  const s = frame(svg, { xMin, xMax, yMin: opts.yMin, yMax: opts.yMax, pad: { l: 4, r: 4, t: 18, b: 22 } });
+  const s = frame(svg, { xMin, xMax, yMin: opts.yMin, yMax: opts.yMax, pad: { l: opts.yTicks ? 32 : 4, r: 4, t: 18, b: 22 } });
 
-  for (const f of [0, 0.5, 1]) {
-    const yy = s.top + f * (s.bottom - s.top);
+  for (const b of opts.bands ?? []) {
+    const x1 = s.x(Math.max(b.from, xMin)), x2 = s.x(Math.min(b.to, xMax));
+    if (x2 > x1) el("rect", { x: x1, y: s.top, width: x2 - x1, height: s.bottom - s.top, fill: b.color }, svg);
+  }
+  // Grid lines: at the labelled values, or else at the bottom, middle and top.
+  const grid = opts.yTicks ?? [0, 0.5, 1].map((f) => ({ y: opts.yMin + f * (opts.yMax - opts.yMin) }));
+  for (const g of grid) {
+    const yy = s.y(g.y);
     el("line", { x1: s.left, x2: s.right, y1: yy, y2: yy, stroke: css("--line") }, svg);
+    if (g.label) el("text", { x: s.left - 6, y: yy + 3.5, "text-anchor": "end" }, svg).textContent = g.label;
   }
   if (opts.vline) {
     const vx = s.x(opts.vline.x);

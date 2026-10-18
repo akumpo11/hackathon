@@ -37,6 +37,10 @@ function draw(blocks) {
       { xs: r.t, ys: r.pressure, color: cssVar("--accent") },
     ],
     yMin: 0, yMax: 1,
+    // The same percent as the "24% now" chip: 0% is fully rested, 100% is exhausted.
+    yTicks: [0, 0.25, 0.5, 0.75, 1].map((y) => ({ y, label: `${y * 100}%` })),
+    // Your sleep, shaded, so you can see pressure drain while you're asleep.
+    bands: blocks.map((b) => ({ from: b.startH, to: b.endH, color: cssVar("--night") })),
     vline: { x: nowH, label: "Now" },
     tickStep: 24,
     formatTick: (h) => {
