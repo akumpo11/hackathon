@@ -4,7 +4,7 @@
 // The math itself is only in the Python files.
 
 import { hoursToClock, nowHours } from "./time.js";
-import { areaChart, lineChart } from "./charts.js";
+import { areaChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
@@ -59,13 +59,6 @@ function showMoment(i, atNow) {
   $("outFelt").textContent = `${felt.toFixed(2)} of ${S.toFixed(2)}`;
   $("outInertia").textContent = groggy > 0.005 ? `−${groggy.toFixed(2)}` : "none";
   $("outAlert").textContent = alert.toFixed(2);
-
-  lineChart($("occChart"), {
-    series: [{ xs: r.chartConc, ys: r.chartOcc, color: cssVar("--accent") }],
-    yMin: 0, yMax: 1, tickStep: 2,
-    formatTick: (c) => `${c}`,
-    points: [{ x: Math.min(conc, 10), y: r.occupancy[i], label: pct(r.occupancy[i]) }],
-  });
 }
 
 function drawChart() {

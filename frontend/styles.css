@@ -61,7 +61,9 @@
   --head: #23725B;       /* the mint accent dimmed toward the card color: bright mint is too loud behind white text */
 }
 
-* { box-sizing: border-box; margin: 0; }
+/* touch-action: manipulation keeps taps, scrolling, and pinch-zoom but turns off double-tap zoom on phones.
+   Set on every element because iOS Safari doesn't inherit it; the pan-y / none rules below still win. */
+* { box-sizing: border-box; margin: 0; touch-action: manipulation; }
 html, body { height: 100%; }
 body { background: var(--canvas); -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 button, input, select { font: inherit; color: inherit; }

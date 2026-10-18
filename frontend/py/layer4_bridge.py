@@ -41,7 +41,6 @@ def compute(dosesJson, blocksJson, tJson, circadianPeakH,
     groggy = inertia(t, sleep)
     kd = p.kdMgL                               # population average (Profile default)
 
-    chartConc = np.linspace(0, 10, 101)
     return {
         "kd": kd,
         "conc": conc.tolist(),
@@ -52,6 +51,4 @@ def compute(dosesJson, blocksJson, tJson, circadianPeakH,
         "felt": feltPressure(S, conc, tolerance, kd).tolist(),
         "inertia": groggy.tolist(),
         "alertness": alertnessFrom(S, circ, conc, tolerance, groggy, kd).tolist(),
-        "chartConc": chartConc.tolist(),
-        "chartOcc": occupancy(chartConc, kd).tolist(),
     }
