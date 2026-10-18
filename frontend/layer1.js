@@ -12,7 +12,7 @@ const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const form = $("layer1Inputs");
 // The rows you start with. Add as many more as you drank; remove any with ×.
-const START_DRINKS = [{ time: "08:00", drink: "drip coffee (8 oz)" }, { time: "13:00", drink: "drip coffee (8 oz)" }];
+const START_DRINKS = [{ time: "08:00", drink: "drip coffee (8 oz)" }];
 let nextSlot = 0;          // each row gets a new number (time3, drink3), never reused after a remove
 let series = "bodyMg";     // which curve the chart shows: "bodyMg" or "conc"
 const todayKey = dateKey();   // fixed when the page opens, so drinks after midnight still count as tonight's

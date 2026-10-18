@@ -128,9 +128,7 @@ function showPlan(x, r) {
 
   const added = r.doses.reduce((sum, d) => sum + d.mg, 0);
   $("planScore").textContent = (r.score * 10).toFixed(1);
-  $("planEquation").textContent =
-    `${(r.baselineScore * 10).toFixed(1)} → ${(r.score * 10).toFixed(1)} out of 10, ` +
-    `the best of ${r.tried.toLocaleString()} schedules.`;
+  $("planEquation").textContent = `${(r.baselineScore * 10).toFixed(1)} → ${(r.score * 10).toFixed(1)} out of 10.`;
   $("planChip").textContent = added ? `${added} mg added` : "Nothing to add";
 
   // Doses, the nap and the event, in time order.
