@@ -42,14 +42,19 @@ export function areaChart(svg, opts) {
   const xMin = xs[0], xMax = xs[xs.length - 1];
   const s = frame(svg, { xMin, xMax, yMax: opts.yMax, pad: { l: 4, r: 4, t: 32, b: 22 } });
 
-  // Shaded windows (sleep, nap, event) go behind everything else.
+  // Shaded windows (sleep, nap, event) go behind everything else, each named on the chart
+  // itself (b.label) so there's no legend to decode.
   for (const b of opts.bands) {
     const x1 = s.x(Math.max(b.from, xMin)), x2 = s.x(Math.min(b.to, xMax));
-    if (x2 > x1) el("rect", { x: x1, y: s.top, width: x2 - x1, height: s.bottom - s.top, rx: 8, fill: b.color }, svg);
+    if (x2 <= x1) continue;
+    el("rect", { x: x1, y: s.top, width: x2 - x1, height: s.bottom - s.top, rx: 3, fill: b.color }, svg);
+    if (b.label && x2 - x1 > 30) {
+      el("text", { x: x1 + 5, y: s.top + 13, "font-weight": 600, style: `fill:${b.labelColor ?? css("--muted")}` }, svg).textContent = b.label;
+    }
   }
 
   const grad = el("linearGradient", { id: `${svg.id}-fill`, x1: 0, x2: 0, y1: 0, y2: 1 }, el("defs", {}, svg));
-  el("stop", { offset: "0%", "stop-color": css("--accent"), "stop-opacity": 0.45 }, grad);
+  el("stop", { offset: "0%", "stop-color": css("--accent"), "stop-opacity": 0.16 }, grad);
   el("stop", { offset: "100%", "stop-color": css("--accent"), "stop-opacity": 0.02 }, grad);
 
   const pts = xs.map((t, i) => `${s.x(t).toFixed(1)},${s.y(ys[i]).toFixed(1)}`);
@@ -90,6 +95,8 @@ export function areaChart(svg, opts) {
     const cx = s.x(xs[i]), cy = s.y(ys[i]);
     guide.setAttribute("x1", cx); guide.setAttribute("x2", cx);
     dot.setAttribute("cx", cx); dot.setAttribute("cy", cy);
+    const color = css(atNow ? "--coral" : "--ink");      // red pen means "now"; a reading you dragged to is ink
+    guide.setAttribute("stroke", color); dot.setAttribute("fill", color);
     opts.onScrub(i, atNow);
   };
   const nearestTo = (t) => {

@@ -110,7 +110,7 @@ function drawChart(x, r) {
   const yMax = Math.max(step, Math.ceil((Math.max(...ys) * 1.15) / step) * step);
   areaChart($("pkChart"), {
     xs: r.t, ys, yMax,
-    bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night") }],
+    bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night"), label: "Bed", labelColor: cssVar("--night-ink") }],
     markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
     peaks: x.doses.map((d) => d.timeH + r.peakMin / 60),     // every drink peaks the same time after it
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
@@ -152,7 +152,7 @@ function drawHistory() {
     areaChart(day.querySelector("svg"), {
       xs: r.t, ys,
       yMax: Math.max(step, Math.ceil((Math.max(...ys) * 1.15) / step) * step),
-      bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night") }],
+      bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night"), label: "Bed", labelColor: cssVar("--night-ink") }],
       markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
       formatTick: (h) => hoursToClock(h).replace(":00", ""),
       startX: x.doses[0].timeH + r.peakMin / 60,     // no "now" on a past day, so rest on the first peak

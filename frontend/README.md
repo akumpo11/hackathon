@@ -2,7 +2,13 @@
 
 Mobile-first web app: plain HTML, CSS and JavaScript, no build step. On a phone it fills the screen; on a laptop it sits in a phone frame.
 
-One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. All five layers are built.
+One page per model layer (PLAN.md section 1). Swipe, or tap the bar at the bottom. All five layers are built. The app opens on the Plan page (the answer); `index.html#layer1` opens a different page.
+
+## The look
+
+The design is an exam desk, so every color means one thing: blue pen for caffeine and anything you can act on (the curve, planned drinks, buttons), a yellow highlighter over the exam window, red pen only for "now" and warnings, slate for sleep, and a cool grey page. White appears only behind things you can change (input groups, the drink sheet); results sit straight on the page. One typeface (Schibsted Grotesk), light and dark only (`[data-theme]` in `styles.css`, following the phone by default).
+
+The Plan page leads with the answer as a sentence ("Drink 150 mg at 8:30 AM"), then the exam day as an itinerary: waking up, drinks, the exam (highlighted), each time half the caffeine is gone, and bed with the sleep check. The half-life stops come from `py/layer5_bridge.py`, so the math stays in Python.
 
 ## Run it
 
@@ -33,7 +39,7 @@ Layer 5 reads the same three pages plus your event and runs the optimizer on the
 ## Files
 
 - `index.html`: the five layer pages, the learning page (layer 5's ratings) and the bottom slider.
-- `styles.css`: colors and layout. Colors are variables at the top; each theme (`:root[data-theme="..."]`) only changes those variables.
+- `styles.css`: colors and layout. Colors are variables at the top; dark mode only changes those variables. `.block` is a result section on the page, `.group` a white list of inputs, `.timeline` the plan's itinerary.
 - `app.js`: page switching, then starts each page.
 - `python.js`: loads Pyodide once and puts the model files on its disk.
 - `layer1.js`, `py/layer1_bridge.py`: layer 1 drinks and body inputs, the call into `model/pk.py`, the caffeine curve, the sleep check and the previous days' curves.

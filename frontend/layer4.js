@@ -75,7 +75,7 @@ function drawChart() {
   const ys = r.alertness.map((a, i) => (r.asleep[i] ? 0 : a * 10));
   areaChart($("alertChart"), {
     xs: ts, ys, yMax: 10,
-    bands: layer2.blocks.map((b) => ({ from: b.startH, to: b.endH, color: cssVar("--night") })),
+    bands: layer2.blocks.map((b) => ({ from: b.startH, to: b.endH, color: cssVar("--night"), label: b.isNap ? "Nap" : "Asleep", labelColor: cssVar("--night-ink") })),
     markers: layer1.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
     nowX: nowHours,

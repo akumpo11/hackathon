@@ -42,6 +42,7 @@ function showSliderValues(x) {
 function showOutputs(x, r) {
   const plan = r.plan;
   $("strengthNow").textContent = `${Math.round(r.strengthNow)}%`;
+  $("cmpStrength").style.setProperty("--w", `${Math.round(r.strengthNow)}%`);   // the bar under it, full width = a non-drinker's coffee
   $("feelsLike").textContent = `Your ${r.doseMg} mg feels like ${Math.round(r.feelsLikeMg)} mg`;
   $("tolEquation").textContent = `${r.nowR.toFixed(2)}x a non-drinker's receptors`;
 

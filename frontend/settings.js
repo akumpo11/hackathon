@@ -20,7 +20,7 @@ const DEFAULTS = {
   weightKg: 70, halfLifeH: 5, smoker: false, oralContraceptives: false,
   chronotypeShiftH: 0, habitualMgPerDay: 300, habitWeeks: 8,
   bedtime: "23:00", wakeTime: "07:00",      // your usual night, as clock times like the time inputs use
-  theme: "coffee",
+  theme: "system",                           // "system" follows the phone's light or dark mode
 };
 
 // Each survey step's title and one-line intro (an empty intro hides the line). Step 0 is
@@ -34,15 +34,16 @@ const STEPS = [
   { title: "Last thing", intro: "" },
 ];
 
-// The themes styles.css defines with :root[data-theme="..."]. Coffee is the default.
-const THEMES = ["coffee", "mint", "ocean", "berry", "night"];
+// Light or dark. styles.css applies the dark tokens for data-theme="dark", and for
+// data-theme="system" whenever the phone itself is in dark mode.
+const THEMES = ["system", "light", "dark"];
 
 // Switches every color token at once. Charts read the tokens when they draw, and
 // every page redraws when settings change, so they pick up the new colors too.
 function applyTheme(theme) {
   document.documentElement.dataset.theme = THEMES.includes(theme) ? theme : DEFAULTS.theme;
-  const head = getComputedStyle(document.documentElement).getPropertyValue("--head").trim();
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", head);   // the phone's status bar, matched to the dark header band
+  const paper = getComputedStyle(document.documentElement).getPropertyValue("--canvas").trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", paper);   // the phone's status bar, matched to the page
 }
 
 // How each setting reads on the layer pages' "Settings" rows.
@@ -73,7 +74,9 @@ function load() {
   try {
     // Half-life isn't a setting any more: everyone starts at the 5 h average, and the
     // learning page fits your own from your ratings.
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}"), halfLifeH: DEFAULTS.halfLifeH };
+    const saved = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}"), halfLifeH: DEFAULTS.halfLifeH };
+    if (!THEMES.includes(saved.theme)) saved.theme = DEFAULTS.theme;   // a theme from an older version of the app
+    return saved;
   } catch {
     return { ...DEFAULTS };
   }

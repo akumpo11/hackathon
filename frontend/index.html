@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-theme="coffee">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#A0673A">
+  <meta name="theme-color" content="#F4F5F8">
   <title>DeCaf</title>
   <!-- "Add to Home Screen" opens the app full screen, with no browser bars, like a native app.
        manifest.json covers Android/Chrome; the apple-* tags cover iPhone Safari. -->
@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <!-- Pyodide runs our Python model files directly in the browser. -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
@@ -23,19 +23,20 @@
 <body>
 <div class="device">
 
-  <!-- One page per model layer (PLAN.md section 1). Swipe or tap the bar at the bottom. -->
+  <!-- One page per model layer (PLAN.md section 1). Swipe or tap the bar at the bottom. The app opens on Plan. -->
   <main class="pager" id="pager">
 
     <!-- ============ Layer 1: pharmacokinetics (model/pk.py) ============ -->
     <section class="page" aria-label="Caffeine in your blood">
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
-        <h1 class="page-label">Caffeine in your blood</h1>
+        <h1 class="page-label">Caffeine</h1>
+        <p class="lede">What's in your blood today, from the drinks you log here.</p>
       </header>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>Caffeine over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPk" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+      <section class="block">
+        <div class="block-head">
+          <h2>In your blood <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPk" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <div class="toggle" id="pkToggle">
             <button class="on" data-series="bodyMg">mg</button>
             <button data-series="conc">mg/L</button>
@@ -44,31 +45,24 @@
         <p class="info-pop" id="infoPk" hidden>Each drink climbs as your gut absorbs it, then halves every half-life as your liver clears it. Drag along the curve to read any time.</p>
         <div class="readout"><span class="readout-value" id="pkReadout">–</span><span class="muted" id="pkReadoutTime"></span></div>
         <svg class="chart" id="pkChart" role="img" aria-label="Caffeine level over the day, with drinks marked and bedtime shaded"></svg>
-        <ul class="legend">
-          <li><span class="swatch dose"></span>Drink</li>
-          <li><span class="swatch sleep"></span>Bedtime</li>
-          <li class="chip plain"><span class="swatch peak"></span><span id="pkPeakTag">–</span></li>
-        </ul>
-      </article>
+        <p class="muted small" id="pkPeakTag">–</p>
+      </section>
 
       <form id="layer1Inputs">
-        <article class="card">
-          <h2>Your drinks today <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoDrinks" aria-label="About your drinks"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-          <p class="info-pop" id="infoDrinks" hidden>Tap a drink to change it, or pick "Custom" for a drink that isn't listed. Add a row for every drink you have, and tap × to remove one.</p>
-          <div class="inputs">
+        <section class="block">
+          <h2>Today's drinks</h2>
+          <div class="group inputs">
             <div id="drinkRows"></div>
             <button type="button" class="link-btn add-drink" id="addDrink">+ Add a drink</button>
-            <div class="row drink-row">
-              <label class="field">Bedtime tonight<input type="time" name="bedtime" value="23:00"></label>
-            </div>
+            <label class="field">Bedtime tonight<input type="time" name="bedtime" value="23:00"></label>
           </div>
-        </article>
-
+          <p class="hint">Tap a drink to change it, or pick "Custom" for one that isn't listed.</p>
+        </section>
       </form>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>Sleep check <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkNumbers" aria-label="The numbers behind it"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+      <section class="block">
+        <div class="block-head">
+          <h2>At bedtime <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkNumbers" aria-label="The numbers behind it"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="pkSleepChip">–</span>
         </div>
         <div class="info-pop" id="infoPkNumbers" hidden>
@@ -80,46 +74,50 @@
         </div>
         <div class="meter"><div class="meter-fill" id="pkMeter"></div><div class="meter-limit" id="pkLimit"></div></div>
         <p class="muted small" id="pkSleepNote"></p>
-      </article>
+      </section>
 
-      <article class="card">
-        <h2>Previous days <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkHistory" aria-label="About previous days"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoPkHistory" hidden>Each day's drinks are saved on this device, and the last week shows here, newest first. Drag along a curve to read any time.</p>
+      <section class="block">
+        <h2>Earlier this week</h2>
+        <p class="lede small">Each day's drinks are saved on this device. Drag along a curve to read any time.</p>
         <div id="pkHistory"></div>
-      </article>
+      </section>
     </section>
 
+    <!-- ============ Layer 2: sleep pressure (model/sleep.py) ============ -->
     <section class="page" aria-label="Sleep pressure">
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
-        <h1 class="page-label">Sleep pressure</h1>
+        <h1 class="page-label">Sleep</h1>
+        <p class="lede">Your nights and naps, and how much sleep pressure they leave you with.</p>
       </header>
 
-      <article class="card">
-        <div class="card-head">
+      <section class="block">
+        <div class="block-head">
           <h2>When you sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleepCal" aria-label="About the sleep calendar"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-          <span class="chip ok" id="sleepSummary">–</span>
+          <span class="chip plain" id="sleepSummary">–</span>
         </div>
         <p class="info-pop" id="infoSleepCal" hidden>One day at a time: use the arrows or swipe sideways to change day. Each night starts from your usual sleep in Settings. Drag the ends of a bar to change when it starts and ends, or drag the middle to slide it. Add a nap the same way.</p>
         <div id="sleepCal" class="cal-wrap"></div>
-      </article>
+      </section>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>Your schedule</h2>
+      <section class="block">
+        <div class="block-head">
+          <h2>Your usual night</h2>
           <button type="button" class="link-btn" data-open-settings>Change</button>
         </div>
-        <ul class="breakdown given">
-          <li><span>Usual bedtime</span><strong data-setting="bedtime">–</strong></li>
-          <li><span>Usual wake-up</span><strong data-setting="wakeTime">–</strong></li>
-          <li><span>Body clock</span><strong data-setting="chronotypeShiftH">–</strong></li>
-        </ul>
-      </article>
+        <div class="group">
+          <ul class="breakdown given">
+            <li><span>Bedtime</span><strong data-setting="bedtime">–</strong></li>
+            <li><span>Wake-up</span><strong data-setting="wakeTime">–</strong></li>
+            <li><span>Body clock</span><strong data-setting="chronotypeShiftH">–</strong></li>
+          </ul>
+        </div>
+      </section>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>Sleep pressure over the week <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPressure" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-          <span class="chip ok" id="pressureNow">–</span>
+      <section class="block">
+        <div class="block-head">
+          <h2>Sleep pressure <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPressure" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <span class="chip plain" id="pressureNow">–</span>
         </div>
         <p class="info-pop" id="infoPressure" hidden>Pressure builds while you're awake and drains while you sleep. 0 is fully rested, 1 is up all night. Short nights leave you starting the next day higher.</p>
         <svg class="chart" id="pressureChart" role="img" aria-label="Sleep pressure and body clock over five days"></svg>
@@ -127,42 +125,39 @@
           <li><span class="swatch taper"></span>Sleep pressure</li>
           <li><span class="swatch cold"></span>Body clock</li>
         </ul>
-      </article>
+      </section>
     </section>
 
     <!-- ============ Layer 3: tolerance and reset (model/tolerance.py) ============ -->
     <section class="page" aria-label="Tolerance and reset">
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
-        <h1 class="page-label">Tolerance and reset <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoTolerance" aria-label="About tolerance"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h1>
-        <p class="info-pop" id="infoTolerance" hidden>Daily caffeine makes your brain grow extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal. With R times the receptors, you feel R times the sleep pressure caffeine doesn't block.</p>
+        <h1 class="page-label">Tolerance</h1>
+        <p class="lede">Daily caffeine grows extra adenosine receptors, so the same coffee does less. Stop for long enough and they go back to normal.</p>
       </header>
 
-      <div class="hero">
-        <div class="ring">
-          <strong id="strengthNow">…</strong>
-          <span>coffee<br>strength</span>
-        </div>
-        <div class="hero-side">
-          <p class="hero-lead" id="feelsLike">Your coffee feels like</p>
-          <p class="equation" id="tolEquation">Loading…</p>
-        </div>
+      <div class="answer">
+        <h2 class="answer-lead" id="feelsLike">Your coffee feels like…</h2>
+        <p class="answer-sub" id="tolEquation">Loading…</p>
       </div>
+      <ul class="compare">
+        <li><span>Coffee strength now</span><strong id="strengthNow">…</strong><i class="gauge" id="cmpStrength"></i></li>
+      </ul>
 
       <form id="layer3Inputs">
-        <article class="card">
+        <section class="block">
           <h2>Your exam</h2>
-          <div class="inputs">
+          <div class="group inputs">
             <label class="slider">
               <span class="slider-top"><span>Exam in</span><output data-for="examInDays"></output></span>
               <input type="range" name="examInDays" min="0" max="21" step="1" value="14">
             </label>
           </div>
-        </article>
+        </section>
       </form>
 
-      <article class="card">
-        <div class="card-head">
+      <section class="block">
+        <div class="block-head">
           <h2>Reset plan</h2>
           <span class="chip ok" id="resetChip">–</span>
         </div>
@@ -172,10 +167,10 @@
           <li><span>Receptors on exam day</span><strong id="outExamR">–</strong></li>
           <li><span>Strength on exam day</span><strong id="outStrengthExam">–</strong></li>
         </ul>
-      </article>
+      </section>
 
-      <article class="card">
-        <div class="card-head">
+      <section class="block">
+        <div class="block-head">
           <h2>Day by day <button type="button" class="info-btn" aria-expanded="false" aria-controls="resetChartNote" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <div class="toggle" id="resetToggle">
             <button class="on" data-series="R">Receptors</button>
@@ -189,7 +184,7 @@
           <li><span class="swatch cold"></span>Quit today</li>
           <li><span class="swatch event"></span>Exam</li>
         </ul>
-      </article>
+      </section>
     </section>
 
     <!-- ============ Layer 4: alertness (inputs, processing, outputs) ============ -->
@@ -197,20 +192,17 @@
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
         <h1 class="page-label">Alertness</h1>
+        <p class="lede">Today's drinks, your sleep and your tolerance from the earlier pages, combined.</p>
       </header>
 
-      <article class="card">
-        <h2>Alertness over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoAlert" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoAlert" hidden>It combines today's drinks, your sleep and your tolerance from the earlier pages. It opens on right now. Drag along the curve to pick another moment; everything below is for that moment.</p>
+      <section class="block">
+        <h2>Over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoAlert" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoAlert" hidden>It opens on right now. Drag along the curve to pick another moment; everything below is for that moment.</p>
         <div class="readout"><span class="readout-value" id="alertReadout">–</span><span class="muted" id="alertReadoutTime"></span></div>
         <svg class="chart" id="alertChart" role="img" aria-label="Alertness over the day, with drinks marked and sleep shaded"></svg>
-        <ul class="legend">
-          <li><span class="swatch dose"></span>Drink</li>
-          <li><span class="swatch sleep"></span>Asleep</li>
-        </ul>
-      </article>
+      </section>
 
-      <article class="card">
+      <section class="block">
         <h2>What goes in <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoInputs" aria-label="About the inputs"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
         <p class="info-pop" id="infoInputs" hidden>Tolerance is your extra adenosine receptors from the tolerance page: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; it uses the population average until your ratings on the learning page teach it yours.</p>
         <ul class="breakdown given">
@@ -220,95 +212,95 @@
           <li><span>Tolerance <em class="src" id="lvlR"></em></span><strong id="inR">–</strong></li>
           <li><span>Caffeine sensitivity <em class="src mid">Average</em></span><strong id="inKd">–</strong></li>
         </ul>
-      </article>
+      </section>
 
-      <article class="card">
-        <h2>The result</h2>
+      <section class="block">
+        <h2>What comes out</h2>
         <ul class="breakdown">
           <li><span>Receptors blocked by caffeine</span><strong id="outOcc">–</strong></li>
           <li><span>Sleep pressure you feel</span><strong id="outFelt">–</strong></li>
           <li><span>Grogginess from waking up</span><strong id="outInertia">–</strong></li>
           <li><span>Alertness, 0 to 1</span><strong id="outAlert">–</strong></li>
         </ul>
-      </article>
+      </section>
 
-      <article class="card">
+      <section class="block">
         <h2>Why more coffee stops helping <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoOcc" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
         <p class="info-pop" id="infoOcc" hidden>Receptors blocked as caffeine in your blood rises (mg/L). The curve flattens, so doubling the dose blocks far less than double.</p>
         <svg class="chart" id="occChart" role="img" aria-label="Fraction of receptors blocked against caffeine level"></svg>
-      </article>
+      </section>
     </section>
 
     <!-- ============ Layer 5: optimizer (model/optimizer.py) and learning (model/learn.py) ============ -->
     <section class="page" aria-label="Your caffeine plan">
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
-        <h1 class="page-label">Your caffeine plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlan" aria-label="About the plan"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h1>
-        <p class="info-pop" id="infoPlan" hidden>The pages before this one predict your alertness for any coffee schedule. This page tries every schedule on a 15-minute grid, throws out the ones that break a safety limit, and keeps the best. Each extra 50 mg has to raise your alertness by at least 0.25 out of 10, so it never pushes caffeine for a tiny gain.</p>
+        <h1 class="page-label">Plan</h1>
       </header>
 
-      <div class="hero">
-        <div class="ring" id="planRing">
-          <strong id="planScore">…</strong>
-          <span>out of 10<br>at your event</span>
-        </div>
-        <div class="hero-side">
-          <p class="hero-lead" id="planLead">Alertness during your event</p>
-          <p class="equation" id="planEquation">Loading…</p>
-        </div>
-      </div>
-
+      <!-- The form wraps the whole page so the nap inputs lower down belong to it too. -->
       <form id="layer5Inputs">
-        <article class="card">
-          <h2>Your event</h2>
-          <div class="inputs">
-            <div class="row">
-              <label class="field">Day<input type="date" name="eventDate" required></label>
-              <label class="field">Starts<input type="time" name="eventStart" value="09:00"></label>
-            </div>
-            <label class="slider">
-              <span class="slider-top"><span>Lasts</span><output data-for="eventLength"></output></span>
-              <input type="range" name="eventLength" min="0.5" max="6" step="0.5" value="2">
-            </label>
-            <label class="check"><input type="checkbox" name="allowNap" checked> A nap is OK</label>
-            <div class="row nap-slot">
-              <label class="field">Free from<input type="time" name="slotStart"></label>
-              <label class="field">Until<input type="time" name="slotEnd"></label>
-            </div>
-            <span class="hint">Optional. When a nap could fit; leave empty for any time. Naps are only suggested after a short night.</span>
-          </div>
-        </article>
-      </form>
+        <!-- The event, written as a sentence with the phone's own pickers in it. -->
+        <p class="ask">
+          <span class="ask-line">Exam on <label class="pick"><input type="date" name="eventDate" required aria-label="Exam day"></label></span>
+          <span class="ask-line">at <label class="pick"><input type="time" name="eventStart" value="09:00" aria-label="Exam start"></label>
+          for <label class="pick"><select name="eventLength" aria-label="Exam length">
+            <option value="0.5">30 min</option><option value="1">1 h</option><option value="1.5">1.5 h</option>
+            <option value="2" selected>2 h</option><option value="2.5">2.5 h</option><option value="3">3 h</option>
+            <option value="4">4 h</option><option value="5">5 h</option><option value="6">6 h</option>
+          </select></label></span>
+          <output data-for="eventLength" hidden></output>
+        </p>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>The plan</h2>
-          <span class="chip ok" id="planChip">–</span>
+        <!-- The answer: a sentence, then with and without the plan on the same 0 to 10 scale. -->
+        <div class="answer">
+          <h2 class="answer-lead" id="planLead">Working it out…</h2>
+          <p class="answer-sub" id="planEquation">Loading the model. This takes a few seconds the first time.</p>
         </div>
-        <ul class="timeline" id="planList"></ul>
-        <p class="muted small" id="planNote"></p>
-      </article>
-
-      <article class="card">
-        <h2>Alertness with the plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlanChart" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoPlanChart" hidden>Your alertness with today's drinks plus the plan's. Drag along the curve to read any time.</p>
-        <div class="readout"><span class="readout-value" id="planReadout">–</span><span class="muted" id="planReadoutTime"></span></div>
-        <svg class="chart" id="planChart" role="img" aria-label="Alertness from waking up to bedtime with the plan, event and sleep shaded"></svg>
-        <ul class="legend">
-          <li><span class="swatch dose"></span>Drink</li>
-          <li><span class="swatch event-soft"></span>Event</li>
-          <li><span class="swatch sleep"></span>Asleep or nap</li>
+        <ul class="compare">
+          <li><span>Alert during your exam, with the plan</span><strong id="planScore">…</strong><i class="gauge" id="cmpPlan"></i></li>
+          <li class="base"><span>Without more coffee</span><strong id="planBase">…</strong><i class="gauge" id="cmpBase"></i></li>
         </ul>
-      </article>
 
-      <article class="card">
-        <div class="card-head">
-          <h2>Sleep check</h2>
-          <span class="chip ok" id="planSleepChip">–</span>
-        </div>
-        <div class="meter"><div class="meter-fill" id="planMeter"></div><div class="meter-limit" id="planLimit"></div></div>
-        <p class="muted small" id="planSleepNote"></p>
-      </article>
+        <!-- The plan as an itinerary: wake up, drinks, the exam, half-lives, bed. -->
+        <section class="block">
+          <div class="block-head">
+            <h2>Your exam day</h2>
+            <span class="chip plain" id="planChip">–</span>
+          </div>
+          <ul class="timeline" id="planList"></ul>
+          <ul class="timeline tail" id="planTail">
+            <li class="bed">
+              <span class="when" id="planBedtime">–</span>
+              <span class="what"><span>Bed</span><small id="planSleepNote"></small>
+                <div class="meter"><div class="meter-fill" id="planMeter"></div><div class="meter-limit" id="planLimit"></div></div>
+                <span class="chip ok" id="planSleepChip">–</span>
+              </span>
+              <span class="tag nap">Bed</span>
+            </li>
+          </ul>
+          <p class="muted small" id="planNote"></p>
+          <button type="button" class="info-btn text" aria-expanded="false" aria-controls="infoPlan">How the plan is picked</button>
+          <p class="info-pop" id="infoPlan" hidden>The pages before this one predict your alertness for any coffee schedule. This page tries every schedule on a 15-minute grid, throws out the ones that break a safety limit, and keeps the best. Each extra 50 mg has to raise your alertness by at least 0.25 out of 10, so it never pushes caffeine for a tiny gain.</p>
+        </section>
+
+        <section class="block">
+          <h2>Alertness with the plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlanChart" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <p class="info-pop" id="infoPlanChart" hidden>Your alertness with today's drinks plus the plan's. The exam is highlighted, sleep is shaded. Drag along the curve to read any time.</p>
+          <div class="readout"><span class="readout-value" id="planReadout">–</span><span class="muted" id="planReadoutTime"></span></div>
+          <svg class="chart" id="planChart" role="img" aria-label="Alertness from waking up to bedtime with the plan, event and sleep shaded"></svg>
+        </section>
+
+        <section class="block">
+          <h2>Nap</h2>
+          <div class="group inputs">
+            <label class="check"><span>A nap is OK</span><input type="checkbox" name="allowNap" checked></label>
+            <label class="field">Free for a nap from<input type="time" name="slotStart"></label>
+            <label class="field">Until<input type="time" name="slotEnd"></label>
+          </div>
+          <p class="hint">Leave the times empty for any time. A nap is only suggested after a short night.</p>
+        </section>
+      </form>
 
       <p class="footnote">A model for learning, not medical advice.</p>
     </section>
@@ -317,11 +309,13 @@
     <section class="page" aria-label="Learning about you">
       <header class="page-head">
         <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
-        <h1 class="page-label">Learning about you <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoLearn" aria-label="About learning"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h1>
-        <p class="info-pop" id="infoLearn" hidden>Rate how alert you feel, and the model learns your own half-life and sensitivity. Bayes' rule on a grid of 400 guesses: each guess's probability is its prior (close to your settings) times how well it predicts your ratings. Ratings a few hours after coffee teach it the most, because half-life shows in how fast caffeine wears off.</p>
+        <h1 class="page-label">Learn</h1>
+        <p class="lede">Rate how alert you feel, and DeCaf learns your own half-life and sensitivity.</p>
+        <button type="button" class="info-btn text" aria-expanded="false" aria-controls="infoLearn">How it learns</button>
+        <p class="info-pop" id="infoLearn" hidden>Bayes' rule on a grid of 400 guesses: each guess's probability is its prior (close to your settings) times how well it predicts your ratings. Ratings a few hours after coffee teach it the most, because half-life shows in how fast caffeine wears off.</p>
       </header>
 
-      <article class="card">
+      <section class="block">
         <h2>How alert are you right now?</h2>
         <div class="rating" id="ratingButtons">
           <button type="button" data-score="1">1</button>
@@ -333,12 +327,12 @@
         <div class="rating-ends muted small"><span>Exhausted</span><span>Fully alert</span></div>
         <p class="muted small" id="ratingNote"></p>
         <div class="btn-row">
-          <button type="button" class="btn" id="simulateBtn">Try a demo week</button>
+          <button type="button" class="btn ghost" id="simulateBtn">Try a demo week</button>
           <button type="button" class="btn ghost" id="clearRatingsBtn">Clear ratings</button>
         </div>
-      </article>
+      </section>
 
-      <article class="card">
+      <section class="block">
         <h2>What it has learned <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoHeat" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
         <p class="info-pop" id="infoHeat" hidden>Each square is one guess: half-life up the side, sensitivity (Kd, mg/L) along the bottom. Darker means more likely; the ring is the average. A longer half-life and a higher Kd predict similar ratings, so it often learns a diagonal band before it learns a point.</p>
         <p class="muted small" id="learnSource"></p>
@@ -347,10 +341,12 @@
           <p class="stat"><strong id="learnHalfLife">–</strong><br><span id="learnHalfLifeNote">half-life</span></p>
           <p class="stat"><strong id="learnKd">–</strong><br><span id="learnKdNote">sensitivity (Kd)</span></p>
         </div>
-        <label class="check learn-use"><input type="checkbox" id="useLearned"> Plan with my learned half-life and sensitivity</label>
-      </article>
+        <div class="group one">
+          <label class="check learn-use"><span>Plan with my learned numbers</span><input type="checkbox" id="useLearned"></label>
+        </div>
+      </section>
 
-      <article class="card">
+      <section class="block">
         <h2>Your caffeine today, give or take <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoBand" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
         <p class="info-pop" id="infoBand" hidden>Today's drinks, with 200 half-lives drawn from what it has learned. The dashed lines are the 10th and 90th percentile: 8 in 10 of those curves fall between them. More ratings, narrower band.</p>
         <svg class="chart" id="bandChart" role="img" aria-label="Caffeine in your blood today with an uncertainty band"></svg>
@@ -358,16 +354,15 @@
           <li><span class="swatch taper"></span>Most likely (mg/L)</li>
           <li><span class="swatch cold"></span>10th to 90th percentile</li>
         </ul>
-      </article>
+      </section>
 
       <p class="footnote">A model for learning, not medical advice.</p>
     </section>
   </main>
 
-  <!-- Bottom slider: switches pages, and its pill slides as you swipe. -->
+  <!-- Bottom tab bar: switches pages, and its bar slides as you swipe. -->
   <nav class="tabbar" aria-label="Layers">
     <span class="tab-pill" id="tabPill" aria-hidden="true"></span>
-    <!-- Icons only; aria-label and title give each one its name. -->
     <button class="tab" data-page="0" aria-label="Caffeine in your blood">
       <svg viewBox="0 0 24 24"><path d="M12 3c3.5 4.2 6 7.6 6 10.5a6 6 0 0 1-12 0C6 10.6 8.5 7.2 12 3Z" /></svg><span>Caffeine</span>
     </button>
@@ -381,23 +376,22 @@
       <svg viewBox="0 0 24 24"><path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" /></svg><span>Alertness</span>
     </button>
     <button class="tab" data-page="4" aria-label="Your caffeine plan">
-      <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg><span>Plan</span>
+      <svg viewBox="0 0 24 24"><path d="M7 5h2M7 12h2M7 19h2M12 5h7M12 12h7M12 19h7" /></svg><span>Plan</span>
     </button>
     <button class="tab" data-page="5" aria-label="Learning about you">
       <svg viewBox="0 0 24 24"><path d="M4 19h16M5 15l4-4 3 3 7-7M15 7h4v4" /></svg><span>Learn</span>
     </button>
   </nav>
-  <!-- Home page only, above the tab bar: asks for a rating once an hour (ratenudge.js). -->
+  <!-- Caffeine page only, above the tab bar: asks for a rating once an hour (ratenudge.js). -->
   <aside class="rate-nudge" id="rateNudge" aria-label="Rate your alertness" hidden>
     <button type="button" class="rate-nudge-go" id="rateNudgeGo">
-      <span class="welcome-icon"><svg viewBox="0 0 24 24"><path d="M4 19h16M5 15l4-4 3 3 7-7M15 7h4v4" /></svg></span>
       <span><strong>How alert are you right now?</strong><br><span class="muted small">Rate it every hour so DeCaf learns your half-life.</span></span>
       <span class="rate-nudge-cta">Rate</span>
     </button>
     <button type="button" class="rate-nudge-close" id="rateNudgeClose" aria-label="Not now">×</button>
   </aside>
-  <!-- Top right on every layer: opens personal settings. -->
-  <button type="button" class="icon-btn settings-btn" id="settingsOpen" aria-label="Personal settings" title="Personal settings">
+  <!-- Top right on every page: opens personal settings. -->
+  <button type="button" class="settings-btn" id="settingsOpen" aria-label="Personal settings" title="Personal settings">
     <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6Z" /></svg>
   </button>
 
@@ -413,35 +407,24 @@
       <div class="survey-progress" id="surveyProgress" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
       <p class="layer-no" id="surveyStepNo">Welcome</p>
     </div>
-    <h1 class="page-title first" id="settingsTitle" tabindex="-1">Personal settings</h1>
+    <h1 class="page-title first" id="settingsTitle" tabindex="-1">Settings</h1>
     <p class="body" id="settingsIntro" hidden></p>
 
     <form id="settingsForm">
       <!-- Survey step 0: what the app does, before the questions. Settings never shows it. -->
       <div class="welcome" data-step="0" data-survey-only hidden>
-        <!-- A made-up caffeine curve: one drink climbs, peaks for the exam, and has worn off by bed. -->
-        <figure class="card welcome-hero">
+        <!-- A made-up exam day: one drink climbs, peaks inside the exam, and has worn off by bed. -->
+        <figure class="welcome-hero">
           <svg class="welcome-curve" viewBox="0 0 300 120" aria-hidden="true">
-            <defs>
-              <linearGradient id="welcomeFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" style="stop-color:var(--accent);stop-opacity:.45" />
-                <stop offset="100%" style="stop-color:var(--accent);stop-opacity:.02" />
-              </linearGradient>
-            </defs>
-            <rect class="welcome-event" x="96" y="22" width="70" height="96" rx="10" />
-            <rect class="welcome-night" x="244" y="22" width="56" height="96" rx="10" />
+            <rect class="welcome-event" x="96" y="22" width="70" height="96" rx="3" />
+            <rect class="welcome-night" x="244" y="22" width="56" height="96" rx="3" />
             <text x="131" y="12" text-anchor="middle">Exam</text>
             <text x="272" y="12" text-anchor="middle">Bed</text>
-            <path d="M0,112 C30,112 44,40 88,38 C140,36 190,92 300,106 L300,118 L0,118 Z" fill="url(#welcomeFill)" />
-            <path class="welcome-line" d="M0,112 C30,112 44,40 88,38 C140,36 190,92 300,106" />
-            <circle class="welcome-dot" cx="24" cy="103" r="5" />
+            <path class="welcome-line" d="M0,112 C40,112 70,40 120,38 C170,36 200,92 300,106" />
+            <circle class="welcome-dot" cx="56" cy="76" r="5" />
           </svg>
-          <figcaption class="welcome-logo">
-            <span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>
-            <span><strong>DeCaf</strong><br><span class="muted small">Caffeine, planned with math</span></span>
-          </figcaption>
         </figure>
-        <ul class="card welcome-list">
+        <ul class="welcome-list">
           <li><span class="welcome-icon"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2" /></svg></span>
             <span><strong>When to drink, and how much</strong><br><span class="muted small">A plan timed so you peak during your exam.</span></span></li>
           <li><span class="welcome-icon"><svg viewBox="0 0 24 24"><path d="M3 19c3 0 4-12 8-12s6 9 10 10M3 21h18" /></svg></span>
@@ -451,24 +434,24 @@
         </ul>
       </div>
 
-      <article class="card" data-step="1">
-        <div class="card-head">
-          <h2>Your sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleep" aria-label="About your sleep"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-          <span class="chip ok" id="sleepLength">–</span>
+      <section class="block" data-step="1">
+        <div class="block-head">
+          <h2>Your sleep</h2>
+          <span class="chip plain" id="sleepLength">–</span>
         </div>
-        <p class="info-pop" id="infoSleep" hidden>Your usual night. It fills in your sleep calendar and sets tonight's bedtime for the sleep check. Caffeine left at bedtime hurts your sleep, and how much you sleep decides how tired you feel.</p>
-        <!-- 6 PM to noon, the same bar as the night on the sleep page. Drag it, or type
-             the times below. settings.js fills in the tick labels. -->
-        <div class="bar night sleep-bar">
-          <div class="bar-track" id="sleepTrack" aria-label="Your usual night: drag the ends to change bedtime and wake up">
-            <div class="bar-span" id="sleepSpan">
-              <span class="bar-handle" data-edge="bed" aria-hidden="true"></span>
-              <span class="bar-handle" data-edge="wake" aria-hidden="true"></span>
+        <p class="lede small">Caffeine left at bedtime hurts your sleep, and how much you sleep decides how tired you feel.</p>
+        <div class="group inputs">
+          <!-- 6 PM to noon, the same bar as the night on the sleep page. Drag it, or type
+               the times below. settings.js fills in the tick labels. -->
+          <div class="bar night sleep-bar">
+            <div class="bar-track" id="sleepTrack" aria-label="Your usual night: drag the ends to change bedtime and wake up">
+              <div class="bar-span" id="sleepSpan">
+                <span class="bar-handle" data-edge="bed" aria-hidden="true"></span>
+                <span class="bar-handle" data-edge="wake" aria-hidden="true"></span>
+              </div>
             </div>
+            <div class="bar-ticks" id="sleepTicks" aria-hidden="true"></div>
           </div>
-          <div class="bar-ticks" id="sleepTicks" aria-hidden="true"></div>
-        </div>
-        <div class="inputs"><div class="row">
           <label class="field">
             <span class="field-name"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>Bedtime</span>
             <input type="time" name="bedtime" value="23:00">
@@ -477,36 +460,13 @@
             <span class="field-name"><svg viewBox="0 0 24 24"><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>Wake up</span>
             <input type="time" name="wakeTime" value="07:00">
           </label>
-        </div></div>
-      </article>
-
-      <article class="card" data-step="3">
-        <h2>Your body <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoBody" aria-label="About your body"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoBody" hidden>Weight: caffeine spreads through about 0.6 L of body water per kg, so lighter people reach a higher level. Half-life: hours for your liver to clear half of it. DeCaf starts from the average, 5 h, and learns yours from your ratings. Smoking about halves it; birth control pills about double it.</p>
-        <div class="inputs">
-          <label class="slider">
-            <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
-            <input type="range" name="weight" min="40" max="130" step="1" value="70">
-          </label>
-          <label class="check"><input type="checkbox" name="smoker"> I smoke</label>
-          <label class="check"><input type="checkbox" name="oralContraceptives"> I take birth control pills</label>
         </div>
-      </article>
+      </section>
 
-      <article class="card" data-step="4">
-        <h2>Body clock</h2>
-        <p class="muted small">When are you most alert?</p>
-        <div class="segmented" role="radiogroup" aria-label="Chronotype">
-          <label><input type="radio" name="chronotype" value="-2"><span>Early bird</span></label>
-          <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
-          <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
-        </div>
-      </article>
-
-      <article class="card" data-step="2">
-        <h2>Your habit <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoHabit" aria-label="About your habit"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoHabit" hidden>Daily caffeine builds tolerance, so this decides how strong each cup still feels. A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg. Receptors take a few weeks to fully adjust, then stay put.</p>
-        <div class="inputs">
+      <section class="block" data-step="2">
+        <h2>Your habit</h2>
+        <p class="lede small">Daily caffeine builds tolerance, so this decides how strong each cup still feels. A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg.</p>
+        <div class="group inputs">
           <label class="slider">
             <span class="slider-top"><span>Usual caffeine a day</span><output data-for="habitualMg"></output></span>
             <input type="range" name="habitualMg" min="0" max="500" step="10" value="300">
@@ -516,18 +476,43 @@
             <input type="range" name="habitWeeks" min="1" max="52" step="1" value="8">
           </label>
         </div>
-      </article>
+      </section>
 
-      <article class="card" data-step="4">
-        <h2>Theme</h2>
-        <div class="theme-picker" role="radiogroup" aria-label="Theme">
-          <label><input type="radio" name="theme" value="coffee" checked><span class="theme-swatch" data-swatch="coffee"></span><span>Coffee</span></label>
-          <label><input type="radio" name="theme" value="mint"><span class="theme-swatch" data-swatch="mint"></span><span>Mint</span></label>
-          <label><input type="radio" name="theme" value="ocean"><span class="theme-swatch" data-swatch="ocean"></span><span>Ocean</span></label>
-          <label><input type="radio" name="theme" value="berry"><span class="theme-swatch" data-swatch="berry"></span><span>Berry</span></label>
-          <label><input type="radio" name="theme" value="night"><span class="theme-swatch" data-swatch="night"></span><span>Night</span></label>
+      <section class="block" data-step="3">
+        <h2>Your body</h2>
+        <p class="lede small">Caffeine spreads through about 0.6 L of body water per kg, so lighter people reach a higher level. Smoking about halves the half-life; birth control pills about double it.</p>
+        <div class="group inputs">
+          <label class="slider">
+            <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
+            <input type="range" name="weight" min="40" max="130" step="1" value="70">
+          </label>
+          <label class="check"><span>I smoke</span><input type="checkbox" name="smoker"></label>
+          <label class="check"><span>I take birth control pills</span><input type="checkbox" name="oralContraceptives"></label>
         </div>
-      </article>
+      </section>
+
+      <section class="block" data-step="4">
+        <h2>Body clock</h2>
+        <p class="lede small">When are you most alert?</p>
+        <div class="group inputs">
+          <div class="segmented" role="radiogroup" aria-label="Chronotype">
+            <label><input type="radio" name="chronotype" value="-2"><span>Early bird</span></label>
+            <label><input type="radio" name="chronotype" value="0" checked><span>In between</span></label>
+            <label><input type="radio" name="chronotype" value="2"><span>Night owl</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" data-step="4">
+        <h2>Appearance</h2>
+        <div class="group inputs">
+          <div class="segmented" role="radiogroup" aria-label="Appearance">
+            <label><input type="radio" name="theme" value="system" checked><span>Automatic</span></label>
+            <label><input type="radio" name="theme" value="light"><span>Light</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
+          </div>
+        </div>
+      </section>
     </form>
     <div class="settings-actions">
       <button type="button" class="btn ghost" id="surveyBack" hidden>Back</button>
@@ -549,10 +534,8 @@
     <div class="drink-grid" id="drinkGrid"></div>
     <!-- Shown instead of the grid after tapping the "Custom" tile. -->
     <form class="custom-drink inputs" id="customDrink" hidden novalidate>
-      <div class="row">
-        <label class="field">Name<input type="text" name="customName" maxlength="30" placeholder="Custom drink" autocomplete="off"></label>
-        <label class="field">Caffeine (mg)<input type="number" name="customMg" min="1" max="1000" step="1" inputmode="numeric" placeholder="e.g. 150" required></label>
-      </div>
+      <label class="field">Name<input type="text" name="customName" maxlength="30" placeholder="Custom drink" autocomplete="off"></label>
+      <label class="field">Caffeine (mg)<input type="number" name="customMg" min="1" max="1000" step="1" inputmode="numeric" placeholder="e.g. 150" required></label>
       <p class="hint" id="customHint">Check the label or the café's website for the caffeine.</p>
       <div class="btn-row">
         <button type="button" class="btn ghost" id="customBack">Back</button>

@@ -14,10 +14,36 @@ from dataclasses import replace
 import numpy as np
 
 from model.learn import Rating, concentrationBand, posterior, ratingTeaches, simulateDays
-from model.optimizer import bestPlan, lastNightBefore
+from model.optimizer import bedtimeAfter, bestPlan, lastNightBefore
 from model.params import BEDTIME_LIMIT_MG, DAILY_LIMIT_MG, DRINKS, MG_COST
-from model.pk import adjustedHalfLifeH, concentration
+from model.pk import adjustedHalfLifeH, bodyCaffeineMg, concentration
 from model.schema import Dose, EventWindow, FreeSlot, Profile, SleepBlock
+
+
+def _halvings(t, doses, p, bedH):
+    """Where the day's caffeine peaks after the last drink, and the moments it has halved since.
+
+    The plan page draws these as stops on its timeline ("half of it is gone"), so the half-life
+    is something you can see in the list, not only in the chart. Each stop is one half-life after
+    the peak, read off the same mg curve the chart uses, and only stops before bedtime count.
+    Returns (peak, halvings), both as {"timeH", "mg"}; peak is None with no drinks.
+    """
+    if not doses:
+        return None, []
+    mg = bodyCaffeineMg(t, doses, p)
+    lastDrinkH = max(d.timeH for d in doses)
+    after = np.where(t >= lastDrinkH)[0]
+    if len(after) == 0:
+        return None, []
+    i = after[int(np.argmax(mg[after]))]
+    peak = {"timeH": float(t[i]), "mg": float(mg[i])}
+    halvings = []
+    for k in (1, 2):
+        at = peak["timeH"] + k * p.halfLifeH
+        if at >= bedH or at > t[-1]:
+            break
+        halvings.append({"timeH": at, "mg": float(np.interp(at, t, mg))})
+    return peak, halvings
 
 
 def _profile(body, circadianPeakH, learned):
@@ -52,12 +78,16 @@ def plan(requestJson):
 
     coffee = DRINKS["drip coffee (8 oz)"]
     curve = result.curve
+    bedH = bedtimeAfter(event, sleep)
+    peak, halvings = _halvings(curve["t"], drinks + result.doses, p, bedH)
     return {
         "doses": [{"timeH": d.timeH, "mg": d.mg, "cups": d.mg / coffee} for d in result.doses],
         "nap": None if result.nap is None else {"startH": result.nap.startH, "endH": result.nap.endH},
         "score": result.score,
         "baselineScore": result.baselineScore,
         "tried": result.tried,
+        "wakeH": wake, "bedH": bedH,                 # the day's first and last stops on the plan's timeline
+        "peak": peak, "halvings": halvings,          # where caffeine tops out, and when half of it is gone
         "bedtimeMg": result.bedtimeCaffeineMg,
         "bedtimeLimitMg": BEDTIME_LIMIT_MG,
         "dayMg": sum(d.mg for d in drinks + result.doses if d.timeH >= wake),     # what counts toward 400 mg

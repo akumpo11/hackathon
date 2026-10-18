@@ -39,13 +39,14 @@ const markScrolled = () => device.classList.toggle("scrolled", (pages[shownPage]
 pages.forEach((p) => p.addEventListener("scroll", markScrolled, { passive: true }));
 document.addEventListener("pageshown", markScrolled);
 
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 tabs.forEach((tab, i) => tab.addEventListener("click", () => {
-  pager.scrollTo({ left: i * pager.clientWidth, behavior: "smooth" });
+  pager.scrollTo({ left: i * pager.clientWidth, behavior: reducedMotion ? "auto" : "smooth" });
 }));
 
-// Opens on layer 1. index.html#layer4 etc. pick a different page.
+// Opens on the plan (page 5), the reason the app exists. index.html#layer1 etc. pick a different page.
 const fromHash = Number(location.hash.replace("#layer", "")) - 1;
-const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 0;
+const startPage = fromHash >= 0 && fromHash < tabs.length ? fromHash : 4;
 pager.scrollLeft = startPage * pager.clientWidth;
 pager.dispatchEvent(new Event("scroll"));
 
@@ -55,7 +56,7 @@ initInfo();
 // Personal settings first: layers 1 to 3 read them as soon as they start.
 const surveyOpen = initSettings();
 
-// The "How alert are you?" tab on the home page, which jumps to the Learn page's ratings.
+// The "How alert are you?" tab on the caffeine page, which jumps to the Learn page's ratings.
 initRateNudge({ surveyOpen, onHome: startPage === 0, goToLearn: () => tabs[5].click() });
 
 // A thin bar across the top while Python downloads (styles.css .loading). The pages
