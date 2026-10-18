@@ -29,6 +29,8 @@ What ratings can and can't tell us (found by testing, see tests/test_learn.py):
 - One step on the 1-to-5 scale is 0.25 of alertness, while half-life 5 h vs 7 h
   changes predicted alertness by 0.03 to 0.15. So a week of ratings narrows the
   half-life from +-1.5 h to about +-1 h. It learns, but slowly.
+- With no caffeine in you, every guess predicts the same rating, so that rating
+  can't move the estimate at all (ratingSpread is 0). The page says so.
 
 Equations with plain-English readings: equations/layer-5-learning.md.
 """
@@ -38,8 +40,8 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from .alertness import alertnessAt, alertnessFrom, inertia
-from .params import (LEARN_GRID_POINTS, LEARN_HALF_LIVES_H, LEARN_KDS_MG_L, PRIOR_SD_HALF_LIFE_H,
-                     PRIOR_SD_KD_MG_L, RATING_SD)
+from .params import (LEARN_GRID_POINTS, LEARN_HALF_LIVES_H, LEARN_KDS_MG_L, MIN_RATING_SPREAD,
+                     PRIOR_SD_HALF_LIFE_H, PRIOR_SD_KD_MG_L, RATING_SD)
 from .pk import concentration
 from .schema import Dose, SleepBlock
 from .sleep import circadian, sleepPressure
@@ -115,6 +117,25 @@ def posterior(ratings, doses, sleep, p, tolerance):
         "sdHalfLife": float(np.sqrt((byHalfLife * (halfLives - meanHalfLife) ** 2).sum())),
         "sdKd": float(np.sqrt((byKd * (kds - meanKd) ** 2).sum())),
     }
+
+
+def ratingSpread(t, doses, sleep, p, tolerance):
+    """How differently the 400 guesses predict your alertness at time t: highest minus lowest, on 0..1.
+
+    A rating can only move the estimate if the guesses disagree about it. The likelihood
+    adds -0.5 * ((observed - predicted) / 0.15)^2 to every guess; if every guess predicts
+    the same alertness, every guess gets the same penalty, and dividing by the total in
+    posterior() cancels it. That happens when there's no caffeine in you: half-life and Kd
+    only change the caffeine part of alertness, so with 0 mg/L they change nothing.
+    """
+    halfLives, kds = grid()
+    predicted = predictedAlertness(np.array([float(t)]), doses, sleep, p, tolerance, halfLives, kds)
+    return float(predicted.max() - predicted.min())
+
+
+def ratingTeaches(t, doses, sleep, p, tolerance):
+    """True if a rating at time t can move the estimate (the guesses differ by at least MIN_RATING_SPREAD)."""
+    return ratingSpread(t, doses, sleep, p, tolerance) >= MIN_RATING_SPREAD
 
 
 def concentrationBand(t, doses, p, post, n=200, seed=0):

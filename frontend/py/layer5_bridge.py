@@ -13,7 +13,7 @@ from dataclasses import replace
 
 import numpy as np
 
-from model.learn import Rating, concentrationBand, posterior, simulateDays
+from model.learn import Rating, concentrationBand, posterior, ratingTeaches, simulateDays
 from model.optimizer import bestPlan, lastNightBefore
 from model.params import BEDTIME_LIMIT_MG, DAILY_LIMIT_MG, DRINKS, MG_COST
 from model.pk import adjustedHalfLifeH, concentration
@@ -85,12 +85,18 @@ def _learned(post, todayDoses, p):
 
 def learn(requestJson):
     """requestJson: {"ratings": [{"t", "score"}], "doses": [...], "sleep": [...], "todayDoses": [...],
-    "body": {...}, "circadianPeakH", "tolerance"}. The prior is centered on your settings."""
+    "body": {...}, "circadianPeakH", "tolerance"}. The prior is centered on your settings.
+
+    lastRatingTeaches: whether your latest rating could move the estimate (None with no ratings),
+    so the page can say when it couldn't."""
     q = json.loads(requestJson)
     p = _profile(q["body"], q["circadianPeakH"], None)
-    post = posterior([Rating(**r) for r in q["ratings"]], [Dose(**d) for d in q["doses"]],
-                     [SleepBlock(**b) for b in q["sleep"]], p, q["tolerance"])
-    return _learned(post, [Dose(**d) for d in q["todayDoses"]], p)
+    ratings = [Rating(**r) for r in q["ratings"]]
+    doses = [Dose(**d) for d in q["doses"]]
+    sleep = [SleepBlock(**b) for b in q["sleep"]]
+    post = posterior(ratings, doses, sleep, p, q["tolerance"])
+    teaches = ratingTeaches(ratings[-1].t, doses, sleep, p, q["tolerance"]) if ratings else None
+    return {**_learned(post, [Dose(**d) for d in q["todayDoses"]], p), "lastRatingTeaches": teaches}
 
 
 def simulate(requestJson):

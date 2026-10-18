@@ -11,8 +11,8 @@ from dataclasses import replace
 import numpy as np
 
 from model.alertness import alertnessAt
-from model.learn import (concentrationBand, grid, logPrior, posterior, predictedAlertness,
-                         ratingToAlertness, simulateDays)
+from model.learn import (Rating, concentrationBand, grid, logPrior, posterior, predictedAlertness,
+                         ratingSpread, ratingTeaches, ratingToAlertness, simulateDays)
 from model.schema import Profile
 from model.tolerance import receptorRatioNow
 
@@ -78,3 +78,18 @@ def testBandLowIsBelowHigh():
     t = np.linspace(-20, 0, 50)
     low, high = concentrationBand(t, doses, P, posterior(ratings, doses, sleep, P, R))
     assert np.all(low <= high)
+
+
+def testRatingWithNoCaffeineTeachesNothing():
+    # Before any drink, every guess predicts the same alertness, so the rating can't move the estimate.
+    _, doses, sleep = simulateDays(5.0, P, R, days=1, seed=0)   # drinks at -16 h (8 AM) and -11 h (1 PM)
+    beforeCoffee = -17.0                                        # 7 AM, just after waking
+    assert ratingSpread(beforeCoffee, doses, sleep, P, R) == 0
+    assert not ratingTeaches(beforeCoffee, doses, sleep, P, R)
+    post = posterior([Rating(beforeCoffee, 1)], doses, sleep, P, R)
+    assert np.allclose(post["prob"], priorOnly()["prob"])
+
+
+def testRatingAfterCoffeeTeaches():
+    _, doses, sleep = simulateDays(5.0, P, R, days=1, seed=0)
+    assert ratingTeaches(-6.0, doses, sleep, P, R)              # 6 PM, five hours after the 1 PM coffee

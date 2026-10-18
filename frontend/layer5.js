@@ -277,10 +277,16 @@ function updateLearn() {
     ...you(), ratings, doses, sleep: layer2.blocks, todayDoses: layer1.doses,
   })));
 
+  // r.lastRatingTeaches is false when every guess predicted the same alertness at your
+  // last rating (no caffeine in you), so the estimate couldn't move. Say so, or the
+  // button looks broken.
   const last = store.ratings.at(-1);
+  const advice = r.lastRatingTeaches === false
+    ? " There was almost no caffeine in you then. Rate again a few hours after coffee."
+    : " Rate a few hours after coffee too.";
   $("ratingNote").textContent = store.ratings.length
     ? `${store.ratings.length} rating${store.ratings.length === 1 ? "" : "s"} saved on this device. ` +
-      `Last: ${last.score} at ${hoursToClock(toH(last.atMs))}. Rate a few hours after coffee too.`
+      `Last: ${last.score} at ${hoursToClock(toH(last.atMs))}.${advice}`
     : "No ratings yet. Rate a few hours after coffee.";
   showLearn(r, ratings.length
     ? `From ${ratings.length} rating${ratings.length === 1 ? "" : "s"} in the last two days (the ones on your sleep calendar).`

@@ -50,6 +50,7 @@ LEARN_GRID_POINTS = 20              # 20 x 20 = 400 guesses
 PRIOR_SD_HALF_LIFE_H = 1.5          # how far from your settings we think your real half-life could be
 PRIOR_SD_KD_MG_L = 1.5
 RATING_SD = 0.15                    # how noisy one rating is, on the 0..1 alertness scale
+MIN_RATING_SPREAD = 0.01            # below this, the 400 guesses predict the same alertness, so a rating teaches nothing
 
 # Caffeine per drink in mg
 DRINKS = {
