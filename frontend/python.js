@@ -27,9 +27,10 @@ async function load() {
   const pyodide = await loadPyodide();
   await pyodide.loadPackage("numpy");
   pyodide.FS.mkdirTree(`${HOME}/model`);
-  for (const [dest, src] of Object.entries(FILES)) {
-    pyodide.FS.writeFile(`${HOME}/${dest}`, await (await fetch(src)).text());
-  }
+  // Fetch all the files at once rather than one after another: over slow Wi-Fi each
+  // request is a round trip, so 14 in a row adds up to seconds.
+  const texts = await Promise.all(Object.values(FILES).map(async (src) => (await fetch(src)).text()));
+  Object.keys(FILES).forEach((dest, i) => pyodide.FS.writeFile(`${HOME}/${dest}`, texts[i]));
   return pyodide;
 }
 

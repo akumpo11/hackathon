@@ -1,0 +1,7 @@
+{
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": ".",
+  "redirects": [{ "source": "/", "destination": "/frontend/", "permanent": false }]
+}

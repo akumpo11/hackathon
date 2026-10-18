@@ -1,0 +1,10 @@
+# The app is a static site: the browser runs model/*.py with Pyodide.
+# requirements.txt is only for running pytest locally; if Vercel sees it, it tries to
+# deploy a Python server and fails, so leave it out of the upload.
+requirements.txt
+serve.py
+tests/
+.venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
