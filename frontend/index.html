@@ -81,6 +81,12 @@
         <div class="meter"><div class="meter-fill" id="pkMeter"></div><div class="meter-limit" id="pkLimit"></div></div>
         <p class="muted small" id="pkSleepNote"></p>
       </article>
+
+      <article class="card">
+        <h2>Previous days <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkHistory" aria-label="About previous days"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+        <p class="info-pop" id="infoPkHistory" hidden>Each day's drinks are saved on this device, and the last week shows here, newest first. Drag along a curve to read any time.</p>
+        <div id="pkHistory"></div>
+      </article>
     </section>
 
     <section class="page" aria-label="Sleep pressure">
@@ -391,20 +397,6 @@
     <h1 class="page-title first" id="settingsTitle" tabindex="-1">Personal settings</h1>
     <p class="body" id="settingsIntro">Set once, used on every page.</p>
 
-    <!-- Step 0 of the survey: what the app does and what it will ask. Not shown in settings. -->
-    <div data-step="0" data-survey-only hidden>
-      <div class="hero">
-        <div class="ring">
-          <strong>4</strong>
-          <span>quick<br>questions</span>
-        </div>
-        <div class="hero-side">
-          <p class="hero-lead">About a minute</p>
-          <p class="equation">Saved on this device only.</p>
-        </div>
-      </div>
-    </div>
-
     <form id="settingsForm">
       <article class="card" data-step="1">
         <div class="card-head">
@@ -412,9 +404,17 @@
           <span class="chip ok" id="sleepLength">–</span>
         </div>
         <p class="info-pop" id="infoSleep" hidden>Your usual night. It fills in your sleep calendar and sets tonight's bedtime for the sleep check. Caffeine left at bedtime hurts your sleep, and how much you sleep decides how tired you feel.</p>
-        <!-- Noon to noon, so a night is one unbroken stretch in the middle. -->
-        <div class="sleep-bar" aria-hidden="true"><span class="sleep-span" id="sleepSpan"></span></div>
-        <div class="sleep-ticks" aria-hidden="true"><span>12p</span><span>6p</span><span>12a</span><span>6a</span><span>12p</span></div>
+        <!-- Noon to noon, so a night is one unbroken stretch in the middle. Drag it like the
+             night on the sleep page, or type the times below. -->
+        <div class="bar night sleep-bar">
+          <div class="bar-track" id="sleepTrack" aria-label="Your usual night: drag the ends to change bedtime and wake up">
+            <div class="bar-span" id="sleepSpan">
+              <span class="bar-handle" data-edge="bed" aria-hidden="true"></span>
+              <span class="bar-handle" data-edge="wake" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="bar-ticks" aria-hidden="true"><span>12p</span><span>6p</span><span>12a</span><span>6a</span><span>12p</span></div>
+        </div>
         <div class="inputs"><div class="row">
           <label class="field">
             <span class="field-name"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>Bedtime</span>
@@ -429,7 +429,7 @@
 
       <article class="card" data-step="3">
         <h2>Your body <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoBody" aria-label="About your body"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoBody" hidden>Weight: caffeine spreads through about 0.6 L of body water per kg, so lighter people reach a higher level. Half-life: hours for your liver to clear half of it, about 5 h on average and 2.5 to 10 h across people. Smoking about halves it; the pill about doubles it.</p>
+        <p class="info-pop" id="infoBody" hidden>Weight: caffeine spreads through about 0.6 L of body water per kg, so lighter people reach a higher level. Half-life: hours for your liver to clear half of it, about 5 h on average and 2.5 to 10 h across people. Smoking about halves it; birth control pills about double it.</p>
         <div class="inputs">
           <label class="slider">
             <span class="slider-top"><span>Weight</span><output data-for="weight"></output></span>
@@ -440,7 +440,7 @@
             <input type="range" name="halfLife" min="2" max="10" step="0.5" value="5">
           </label>
           <label class="check"><input type="checkbox" name="smoker"> I smoke</label>
-          <label class="check"><input type="checkbox" name="oralContraceptives"> I take the pill</label>
+          <label class="check"><input type="checkbox" name="oralContraceptives"> I take birth control pills</label>
         </div>
       </article>
 

@@ -36,7 +36,8 @@ Layer 5 reads the same three pages plus your event and runs the optimizer on the
 - `styles.css`: colors and layout. Colors are variables at the top; each theme (`:root[data-theme="..."]`) only changes those variables.
 - `app.js`: page switching, then starts each page.
 - `python.js`: loads Pyodide once and puts the model files on its disk.
-- `layer1.js`, `py/layer1_bridge.py`: layer 1 drinks and body inputs, the call into `model/pk.py`, the caffeine curve and the sleep check.
+- `layer1.js`, `py/layer1_bridge.py`: layer 1 drinks and body inputs, the call into `model/pk.py`, the caffeine curve, the sleep check and the previous days' curves.
+- `history.js`: saves each day's drinks, bedtime and body in local storage (`caffeineHistory`, the last week), so today's drinks survive a reload and layer 1 can redraw earlier days.
 - `layer2.js`, `sleepcal.js`, `py/layer2_bridge.py`: layer 2 sleep calendar, the call into `model/sleep.py`, and the sleep pressure chart.
 - `settings.js`: personal settings (frame 6), opened from the gear in the top right. Saves your body, body clock, habit and color theme on this device and publishes them for layers 1 to 3.
 - `shared.js`: what personal settings and layers 1, 2 and 3 publish for later pages to read.

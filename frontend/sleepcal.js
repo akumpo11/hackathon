@@ -127,48 +127,12 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   });
   card.addEventListener("pointercancel", () => { swipe = null; });
 
-  // ---- drag a bar: the ends move its start or end, the middle slides the whole thing
+  // ---- drag a bar (see dragBar below)
   body.addEventListener("pointerdown", (e) => {
     const track = e.target.closest(".bar-track");
     if (!track) return;
-    const kind = track.closest(".bar").dataset.kind, lim = limits[kind], span = spanOf(kind);
-    if (!span) return;
-    const rect = track.getBoundingClientRect();
-    const windowH = lim.endH - lim.startH;
-    const snap = (h) => Math.round(h / lim.stepH) * lim.stepH;
-    const hourAt = (x) => lim.startH + ((x - rect.left) / rect.width) * windowH;
-    const edge = e.target.closest(".bar-handle")?.dataset.edge;
-    const inSpan = Boolean(e.target.closest(".bar-span"));
-    // Tapping an empty part of the track moves the nearest end there.
-    const h0 = hourAt(e.clientX);
-    const grab = edge ?? (inSpan ? "move" : Math.abs(h0 - span.bed) < Math.abs(h0 - span.wake) ? "bed" : "wake");
-    const start = { x: e.clientX, bed: span.bed, wake: span.wake };
-    track.setPointerCapture(e.pointerId);
-    track.classList.add("dragging");
-
-    const move = (ev) => {
-      const h = snap(hourAt(ev.clientX));
-      if (grab === "bed") span.bed = clamp(h, lim.startH, span.wake - lim.minH);
-      else if (grab === "wake") span.wake = clamp(h, span.bed + lim.minH, lim.endH);
-      else {
-        const length = start.wake - start.bed;
-        const dh = snap(((ev.clientX - start.x) / rect.width) * windowH);
-        span.bed = clamp(start.bed + dh, lim.startH, lim.endH - length);
-        span.wake = span.bed + length;
-      }
-      paintBar(kind);
-    };
-    if (grab !== "move") move(e);
-    const end = () => {
-      track.classList.remove("dragging");
-      track.removeEventListener("pointermove", move);
-      track.removeEventListener("pointerup", end);
-      track.removeEventListener("pointercancel", end);
-      onChange(getBlocks());
-    };
-    track.addEventListener("pointermove", move);
-    track.addEventListener("pointerup", end);
-    track.addEventListener("pointercancel", end);
+    const kind = track.closest(".bar").dataset.kind, span = spanOf(kind);
+    if (span) dragBar(e, track, limits[kind], span, () => paintBar(kind), () => onChange(getBlocks()));
   });
 
   // ---- add or remove the day's nap
@@ -206,4 +170,46 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   paint();
   onChange(getBlocks());
   return { getBlocks, setEvent, setUsual };
+}
+
+// Drags one bar: the ends move its start or end, the middle slides the whole thing,
+// and tapping an empty part of the track moves the nearest end there. span is
+// { bed, wake } in the hours lim covers, and is changed in place. onMove repaints
+// after every step; onEnd runs once when you let go. Settings uses this too.
+export function dragBar(e, track, lim, span, onMove, onEnd) {
+  const rect = track.getBoundingClientRect();
+  const windowH = lim.endH - lim.startH;
+  const snap = (h) => Math.round(h / lim.stepH) * lim.stepH;
+  const hourAt = (x) => lim.startH + ((x - rect.left) / rect.width) * windowH;
+  const edge = e.target.closest(".bar-handle")?.dataset.edge;
+  const inSpan = Boolean(e.target.closest(".bar-span"));
+  const h0 = hourAt(e.clientX);
+  const grab = edge ?? (inSpan ? "move" : Math.abs(h0 - span.bed) < Math.abs(h0 - span.wake) ? "bed" : "wake");
+  const start = { x: e.clientX, bed: span.bed, wake: span.wake };
+  track.setPointerCapture(e.pointerId);
+  track.classList.add("dragging");
+
+  const move = (ev) => {
+    const h = snap(hourAt(ev.clientX));
+    if (grab === "bed") span.bed = clamp(h, lim.startH, span.wake - lim.minH);
+    else if (grab === "wake") span.wake = clamp(h, span.bed + lim.minH, lim.endH);
+    else {
+      const length = start.wake - start.bed;
+      const dh = snap(((ev.clientX - start.x) / rect.width) * windowH);
+      span.bed = clamp(start.bed + dh, lim.startH, lim.endH - length);
+      span.wake = span.bed + length;
+    }
+    onMove();
+  };
+  if (grab !== "move") move(e);
+  const end = () => {
+    track.classList.remove("dragging");
+    track.removeEventListener("pointermove", move);
+    track.removeEventListener("pointerup", end);
+    track.removeEventListener("pointercancel", end);
+    onEnd();
+  };
+  track.addEventListener("pointermove", move);
+  track.addEventListener("pointerup", end);
+  track.addEventListener("pointercancel", end);
 }

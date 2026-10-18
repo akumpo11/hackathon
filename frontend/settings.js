@@ -9,6 +9,7 @@
 
 import { clockToHours, hoursToClock } from "./time.js";
 import { publish } from "./shared.js";
+import { dragBar } from "./sleepcal.js";
 
 const $ = (id) => document.getElementById(id);
 const KEY = "caffeineSettings";
@@ -22,14 +23,15 @@ const DEFAULTS = {
   theme: "coffee",
 };
 
-// Each survey step's title and one-line intro. Step 0 is the welcome; steps 1 to 4 are
-// questions. The longer "why we ask" sits behind each card's (i) button.
+// Each survey step's title and one-line intro (an empty intro hides the line). Step 0 is
+// the welcome; steps 1 to 4 are questions. The longer "why we ask" sits behind each
+// card's (i) button.
 const STEPS = [
   { title: "Welcome to DeCaf", intro: "Time your coffee for exam day without losing sleep." },
   { title: "When do you sleep?", intro: "Your usual night." },
   { title: "How much coffee do you drink?", intro: "On a normal day." },
   { title: "Tell us about your body", intro: "How fast you clear caffeine." },
-  { title: "Last thing", intro: "Change any answer later with the gear." },
+  { title: "Last thing", intro: "" },
 ];
 
 // The themes styles.css defines with :root[data-theme="..."]. Coffee is the default.
@@ -59,6 +61,21 @@ const SHOW = {
 
 // Hours from bedtime to wake time, going past midnight: 23:00 to 07:00 is 8 h.
 const nightHours = (s) => (clockToHours(s.wakeTime) - clockToHours(s.bedtime) + 24) % 24;
+
+// The sleep bar runs noon to noon (12 to 36 hours), in 15-minute steps, at least 1 h long.
+const SLEEP_BAR = { startH: 12, endH: 36, stepH: 0.25, minH: 1 };
+// Your night as { bed, wake } hours on that bar: a bedtime before noon, like 1 AM, is
+// after midnight (25). A night too long to fit is cut off at noon.
+function nightSpan(s) {
+  const bedClock = clockToHours(s.bedtime);
+  const bed = bedClock < 12 ? bedClock + 24 : bedClock;
+  return { bed, wake: Math.min(bed + nightHours(s), SLEEP_BAR.endH) };
+}
+// Back to the "HH:MM" the time inputs use, e.g. 31.5 -> "07:30".
+function toInputTime(h) {
+  const mins = Math.round(h * 60) % (24 * 60);
+  return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+}
 
 // Local storage can be missing or blocked (private windows), so every use is guarded.
 function load() {
@@ -90,6 +107,15 @@ function resetIfAsked() {
   try { localStorage.removeItem(KEY); localStorage.removeItem(SURVEY_KEY); } catch { /* nothing saved anyway */ }
   url.searchParams.delete("reset");
   history.replaceState(null, "", url);      // so a refresh doesn't reset again
+}
+
+// Opening the app with ?survey shows the survey again but keeps your answers filled in.
+function surveyAsked() {
+  const url = new URL(location.href);
+  if (!url.searchParams.has("survey")) return false;
+  url.searchParams.delete("survey");
+  history.replaceState(null, "", url);      // so a refresh doesn't reopen it
+  return true;
 }
 
 function fillForm(form, s) {
@@ -124,6 +150,17 @@ function readForm(form) {
 
 // Writes the current values into the settings form's slider labels and every
 // [data-setting] row on the layer pages.
+// Places the night on the noon-to-noon bar and updates the hours chip.
+function paintSleep(s) {
+  const { bed, wake } = nightSpan(s);
+  const pct = (h) => `${(h / (SLEEP_BAR.endH - SLEEP_BAR.startH)) * 100}%`;
+  $("sleepSpan").style.left = pct(bed - SLEEP_BAR.startH);
+  $("sleepSpan").style.width = pct(wake - bed);
+  const night = nightHours(s);
+  $("sleepLength").textContent = `${+night.toFixed(1)} h a night`;
+  $("sleepLength").className = `chip ${night >= 7 ? "ok" : "bad"}`;     // adults need about 7 h or more
+}
+
 function show(form, s) {
   const out = (name, text) => { form.querySelector(`output[data-for="${name}"]`).textContent = text; };
   out("weight", SHOW.weightKg(s.weightKg));
@@ -131,13 +168,7 @@ function show(form, s) {
   out("habitualMg", SHOW.habitualMgPerDay(s.habitualMgPerDay));
   out("habitWeeks", SHOW.habitWeeks(s.habitWeeks));
 
-  // The sleep bar runs noon to noon, so place the night by hours after noon.
-  const night = nightHours(s);
-  const startAfterNoon = (clockToHours(s.bedtime) - 12 + 24) % 24;
-  $("sleepSpan").style.left = `${(startAfterNoon / 24) * 100}%`;
-  $("sleepSpan").style.width = `${(Math.min(night, 24 - startAfterNoon) / 24) * 100}%`;
-  $("sleepLength").textContent = `${+night.toFixed(1)} h a night`;
-  $("sleepLength").className = `chip ${night >= 7 ? "ok" : "bad"}`;     // adults need about 7 h or more
+  paintSleep(s);
   document.querySelectorAll("[data-setting]").forEach((node) => {
     node.textContent = SHOW[node.dataset.setting](s[node.dataset.setting]);
   });
@@ -158,6 +189,18 @@ export function initSettings() {
     save(settings);
     show(form, settings);
     publish("settings", settings);
+  });
+
+  // Dragging the sleep bar fills in the time boxes as you go, and saves once you let go
+  // (the same input event as typing), so the pages don't all redraw on every step.
+  $("sleepTrack").addEventListener("pointerdown", (e) => {
+    const span = nightSpan(settings);
+    const fill = () => {
+      form.elements.bedtime.value = toInputTime(span.bed);
+      form.elements.wakeTime.value = toInputTime(span.wake);
+      paintSleep(readForm(form));
+    };
+    dragBar(e, $("sleepTrack"), SLEEP_BAR, span, fill, () => form.dispatchEvent(new Event("input")));
   });
 
   let opener = gear;                  // where focus goes back to when the frame closes
@@ -187,6 +230,7 @@ export function initSettings() {
     $("surveyStepNo").textContent = n === 0 ? "Welcome" : `Question ${n} of ${last}`;
     $("settingsTitle").textContent = STEPS[n].title;
     $("settingsIntro").textContent = STEPS[n].intro;
+    $("settingsIntro").hidden = !STEPS[n].intro;
     $("surveyBack").hidden = n === 0;
     $("settingsDone").textContent = n === 0 ? "Let's go" : n === last ? "Start" : "Next";
     frame.scrollTop = 0;
@@ -208,6 +252,7 @@ export function initSettings() {
     stepCards.forEach((card) => { card.hidden = "surveyOnly" in card.dataset; });   // settings shows every card but the welcome
     $("settingsTitle").textContent = normal.title;
     $("settingsIntro").textContent = normal.intro;
+    $("settingsIntro").hidden = false;
     $("settingsDone").textContent = normal.done;
     close();
   };
@@ -223,5 +268,5 @@ export function initSettings() {
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !frame.hidden && step === null) close(); });
 
-  if (!surveyDone()) openSurvey();
+  if (surveyAsked() || !surveyDone()) openSurvey();
 }

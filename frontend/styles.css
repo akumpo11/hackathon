@@ -205,6 +205,13 @@ button { cursor: pointer; border: 0; background: none; }
 .chart text { font-size: 10.5px; fill: var(--muted); font-family: inherit; }
 .chart.heat { height: 230px; margin: 10px 0 8px; }
 
+/* Previous days (layer 1): one small chart per earlier day, with a hairline between days. */
+.history-day { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--line); }
+.history-day:first-child { border-top: 0; margin-top: 4px; padding-top: 0; }
+.history-day h3 { font-size: 14px; font-weight: 700; }
+.history-day .card-head { margin-bottom: 2px; }
+.chart.mini { height: 140px; margin-top: 4px; }
+
 .legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; padding: 0; margin-top: 12px; font-size: 12px; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 6px; }
 .swatch { width: 10px; height: 10px; border-radius: 3px; }
@@ -375,7 +382,6 @@ button { cursor: pointer; border: 0; background: none; }
 .survey-progress span.on { background: var(--accent); }
 .first-run [data-step]:not([hidden]) { animation: step-in .28s ease-out; }
 @keyframes step-in { from { opacity: 0; transform: translateY(10px); } }
-.first-run .hero { margin-bottom: 16px; }
 
 /* Back and Next/Done. In the survey they stay at the bottom of the screen. */
 .settings-actions { display: flex; gap: 8px; margin-top: 24px; }
@@ -391,13 +397,8 @@ button { cursor: pointer; border: 0; background: none; }
   background: linear-gradient(transparent, var(--canvas) 18px);
 }
 
-/* Your sleep: a noon-to-noon bar with the night shaded, like the night on the charts. */
-.sleep-bar { position: relative; height: 26px; margin-top: 14px; border-radius: 10px; background: var(--canvas); overflow: hidden; }
-.sleep-span { position: absolute; top: 0; bottom: 0; border-radius: 10px; background: var(--night); transition: left .2s, width .2s; }
-.sleep-ticks { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
-.sleep-ticks span { width: 0; display: flex; justify-content: center; }   /* each label centred on its tick */
-.sleep-ticks span:first-child { justify-content: flex-start; }
-.sleep-ticks span:last-child { justify-content: flex-end; }
+/* Your sleep: a noon-to-noon bar you drag like the night on the sleep page (.bar below). */
+.bar.sleep-bar { padding-top: 0; margin-top: 14px; }
 .field-name { display: flex; align-items: center; gap: 6px; }
 .field-name svg { width: 16px; height: 16px; color: var(--night-ink); }
 

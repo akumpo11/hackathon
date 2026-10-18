@@ -6,6 +6,7 @@ import { areaChart } from "./charts.js";
 import { initDrinkPicker, drinkMg } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
 import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
+import { dateKey, saveDay, loadDay, earlierDays, dayName } from "./history.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -14,6 +15,8 @@ const form = $("layer1Inputs");
 const START_DRINKS = [{ time: "08:00", drink: "drip coffee (8 oz)" }, { time: "13:00", drink: "drip coffee (8 oz)" }];
 let nextSlot = 0;          // each row gets a new number (time3, drink3), never reused after a remove
 let series = "bodyMg";     // which curve the chart shows: "bodyMg" or "conc"
+const todayKey = dateKey();   // fixed when the page opens, so drinks after midnight still count as tonight's
+let pastDays = [];         // earlier days from history.js, each with its recomputed curve
 
 function readInputs(drinks) {
   const el = form.elements;
@@ -37,23 +40,33 @@ function readInputs(drinks) {
 }
 
 // One drink row: a time, the drink button (drinkpicker.js fills it in), and × to remove it.
-function drinkRow(time, drink) {
+// customMg is set for a custom drink, which carries its own caffeine (drinkpicker.js).
+function drinkRow(time, drink, customMg) {
   const i = nextSlot++;
   const row = document.createElement("div");
   row.className = "row drink-row";
   row.dataset.slot = i;
   row.innerHTML = `
     <label class="field">Time<input type="time" name="time${i}" value="${time}"></label>
-    <div class="field"><span id="drinkLabel${i}">Drink</span><input type="hidden" name="drink${i}" value="${drink}"><button type="button" class="drink-pick" data-slot="${i}" aria-haspopup="dialog" aria-labelledby="drinkLabel${i} drinkPick${i}" id="drinkPick${i}"></button></div>
+    <div class="field"><span id="drinkLabel${i}">Drink</span><input type="hidden" name="drink${i}"><button type="button" class="drink-pick" data-slot="${i}" aria-haspopup="dialog" aria-labelledby="drinkLabel${i} drinkPick${i}" id="drinkPick${i}"></button></div>
     <button type="button" class="drink-remove" aria-label="Remove this drink">×</button>`;
+  // Set as properties, not in the HTML above, because a custom name can contain quotes.
+  const input = row.querySelector(`[name="drink${i}"]`);
+  input.value = drink;
+  if (customMg !== undefined) input.dataset.mg = customMg;
   return row;
+}
+
+// Model hours to the "HH:MM" a time input wants. 25.5 (1:30 AM tomorrow) -> "01:30".
+function toTimeInput(hours) {
+  const minutes = Math.round(hours * 60) % (24 * 60);
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
 // A new drink starts as a drip coffee now (to the nearest 15 minutes), since
 // "I just had another one" is the usual reason to add a row.
 function newDrinkTime() {
-  const quarters = Math.round(nowHours() * 4) % 96;
-  return `${String(Math.floor(quarters / 4)).padStart(2, "0")}:${String((quarters % 4) * 15).padStart(2, "0")}`;
+  return toTimeInput(Math.round(nowHours() * 4) / 4);
 }
 
 // The peak tag follows the clock. Every drink peaks the same time after it
@@ -110,6 +123,47 @@ function drawChart(x, r) {
   });
 }
 
+// Previous days: one small chart per earlier day, newest first. The curves were
+// computed once (in startLayer1); this only draws them, in the unit the toggle shows.
+function drawHistory() {
+  const box = $("pkHistory");
+  if (!pastDays.length) {
+    box.innerHTML = `<p class="muted small">No earlier days yet. Tomorrow, today's curve shows up here.</p>`;
+    return;
+  }
+  box.replaceChildren();
+  pastDays.forEach(({ key, x, r }, n) => {
+    const totalMg = x.doses.reduce((sum, d) => sum + d.mg, 0);
+    const ok = r.bedtimeMg <= r.limitMg;
+    const day = document.createElement("div");
+    day.className = "history-day";
+    day.innerHTML = `
+      <div class="card-head">
+        <h3>${dayName(key, todayKey)}</h3>
+        <span class="chip ${ok ? "ok" : "bad"}">${Math.round(r.bedtimeMg)} mg at bedtime</span>
+      </div>
+      <p class="muted small">${x.doses.length} ${x.doses.length === 1 ? "drink" : "drinks"}, ${Math.round(totalMg)} mg in all.
+        <span class="history-readout"></span></p>
+      <svg class="chart mini" id="pkHistory${n}" role="img" aria-label="Caffeine level over ${dayName(key, todayKey)}"></svg>`;
+    box.append(day);
+    const readout = day.querySelector(".history-readout");
+    const ys = r[series];
+    const step = series === "bodyMg" ? 25 : 0.5;
+    areaChart(day.querySelector("svg"), {
+      xs: r.t, ys,
+      yMax: Math.max(step, Math.ceil((Math.max(...ys) * 1.15) / step) * step),
+      bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night") }],
+      markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
+      formatTick: (h) => hoursToClock(h).replace(":00", ""),
+      startX: x.doses[0].timeH + r.peakMin / 60,     // no "now" on a past day, so rest on the first peak
+      onScrub: (i) => {
+        const value = series === "bodyMg" ? `${Math.round(ys[i])} mg` : `${ys[i].toFixed(2)} mg/L`;
+        readout.textContent = `${value} at ${hoursToClock(r.t[i])}.`;
+      },
+    });
+  });
+}
+
 export async function startLayer1() {
   // Tonight's bedtime starts as your usual one from personal settings. You can
   // change it here for tonight; a new usual bedtime in settings resets it.
@@ -125,6 +179,14 @@ export async function startLayer1() {
   const bridge = pyodide.pyimport("layer1_bridge");
   const drinks = toObject(bridge.drinkOptions());
 
+  // Earlier days: recompute each saved day's curve once. Those days are over, so their
+  // inputs (and so their curves) never change. Each uses the body saved with it.
+  pastDays = earlierDays(todayKey).map(([key, x]) => ({
+    key, x,
+    r: toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
+                               x.smoker, x.oralContraceptives, x.bedtimeH)),
+  }));
+
   let last = null;
   const update = () => {
     const x = readInputs(drinks);
@@ -133,6 +195,7 @@ export async function startLayer1() {
     const r = toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
                                       x.smoker, x.oralContraceptives, x.bedtimeH));
     last = { x, r };
+    saveDay(todayKey, x);
     showOutputs(x, r);
   };
   const showPick = initDrinkPicker(form, drinks, update);     // the drink list comes from model/params.py, so it waits for Python
@@ -143,7 +206,14 @@ export async function startLayer1() {
     showPick(row.querySelector(".drink-pick"));
     return row;
   };
-  START_DRINKS.forEach((d) => addRow(d.time, d.drink));
+  // Today's drinks pick up where you left off; a new day starts from START_DRINKS.
+  const saved = loadDay(todayKey);
+  if (saved) {
+    saved.doses.forEach((d) => addRow(toTimeInput(d.timeH), d.label, d.label in drinks ? undefined : d.mg));
+    form.elements.bedtime.value = toTimeInput(saved.bedtimeH);
+  } else {
+    START_DRINKS.forEach((d) => addRow(d.time, d.drink));
+  }
   $("addDrink").addEventListener("click", () => {
     addRow(newDrinkTime(), "drip coffee (8 oz)").querySelector(".drink-pick").focus();
     update();
@@ -162,10 +232,11 @@ export async function startLayer1() {
     $("pkToggle").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
+    drawHistory();
   });
   const redo = perFrame(update);
   form.addEventListener("input", redo);
-  onWidthChange(update);
+  onWidthChange(() => { update(); drawHistory(); });
   // Redo it when personal settings change. Only then: this page publishes too, and
   // reacting to its own publish would loop forever.
   let seenSettings = shared.settings;
@@ -175,6 +246,7 @@ export async function startLayer1() {
     redo();
   });
   update();
+  drawHistory();
   // Keep the peak countdown current even when nothing is edited.
   setInterval(() => { if (last) $("pkPeakTag").textContent = peakTag(last.x.doses, last.r.peakMin); }, 60_000);
 }
