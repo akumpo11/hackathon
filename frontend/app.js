@@ -38,19 +38,6 @@ const markScrolled = () => device.classList.toggle("scrolled", (pages[shownPage]
 pages.forEach((p) => p.addEventListener("scroll", markScrolled, { passive: true }));
 document.addEventListener("pageshown", markScrolled);
 
-// Every page's header band is as tall as the tallest one, so the band stays the same
-// size as you swipe between pages. Measured, not a fixed height, because how the titles
-// wrap depends on the phone's width.
-const heads = [...document.querySelectorAll(".page-head")];
-function matchHeadHeights() {
-  heads.forEach((h) => { h.style.minHeight = ""; });
-  const tallest = Math.max(...heads.map((h) => h.offsetHeight));
-  heads.forEach((h) => { h.style.minHeight = `${tallest}px`; });
-}
-matchHeadHeights();
-document.fonts.ready.then(matchHeadHeights);   // again once the web font loads, since it changes how text wraps
-window.addEventListener("resize", matchHeadHeights);
-
 tabs.forEach((tab, i) => tab.addEventListener("click", () => {
   pager.scrollTo({ left: i * pager.clientWidth, behavior: "smooth" });
 }));

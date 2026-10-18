@@ -22,7 +22,7 @@
   --backdrop: #DDD6CF;   /* behind the phone frame on a laptop */
   --frame: #2A211B;      /* the phone frame's bezel */
   --scrim: rgba(22, 32, 28, .35);
-  --head: var(--accent);   /* the band behind each page title (follows the theme's accent) */
+  --head: var(--accent);   /* the band behind each page header (follows the theme's accent) */
   --on-head: #FFFFFF;    /* text on that band */
   --radius-lg: 28px;
   --radius-md: 18px;
@@ -93,7 +93,7 @@ button { cursor: pointer; border: 0; background: none; }
   flex: 0 0 100%; min-width: 0; height: 100%; overflow-y: auto; overflow-x: hidden;
   scroll-snap-align: start;
   overscroll-behavior-y: contain;  /* at the end of a page, stop instead of scrolling the whole app */
-  padding: 0 16px calc(var(--tabbar-h) + 36px);   /* no top padding: the dark header band (.page-head) runs to the top edge */
+  padding: 0 16px calc(var(--tabbar-h) + 36px);   /* no top padding: the header band (.page-head) runs to the top edge */
 }
 
 .loading .device::after {
@@ -127,18 +127,27 @@ button { cursor: pointer; border: 0; background: none; }
 .page-title.first { margin-top: 0; }
 .page > .body, .settings-frame > .body { margin-bottom: 20px; }   /* the subtitle belongs to the title, not to the first card */
 
-/* ---------- Page header: a band in the theme color behind the title and subtitle ---------- */
+/* ---------- Page header: a short band in the theme color with the app's logo and name, then which page you're on ---------- */
 .page-head {
   position: relative;
   margin: 0 -16px;                                                  /* bleed past the page gutter to both edges */
-  padding: calc(max(18px, env(safe-area-inset-top)) + 5px) 20px 68px;   /* top: the title's first line lines up with the gear; bottom: room for the first card to tuck in */
-  border-radius: 0 0 36px 36px;
+  padding: calc(max(18px, env(safe-area-inset-top)) + 2px) 20px 46px;   /* top: the logo lines up with the gear; bottom: room for the first card to tuck in */
+  border-radius: 0 0 32px 32px;
   color: var(--on-head);
   background: linear-gradient(150deg, var(--head), color-mix(in srgb, var(--head) 55%, var(--canvas)));   /* the theme color fading lighter, so it sits softly on the page */
 }
-.page-head + * { position: relative; margin-top: -44px; }          /* the first card or ring covers the band's rounded bottom */
-.page-head .page-title { padding-right: 56px; }                    /* clear of the gear */
-.page-head .body { margin: 6px 0 0; color: color-mix(in srgb, var(--on-head) 75%, transparent); }
+.page-head + * { position: relative; margin-top: -26px; }          /* the first card or ring covers the band's rounded bottom */
+.brand {
+  display: flex; align-items: center; gap: 12px; margin: 0; padding-right: 56px;   /* right: clear of the gear */
+  font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+}
+.brand-logo {
+  width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .18);                             /* frosted, like the gear */
+}
+.brand-logo svg { width: 24px; }
+.brand-logo svg path { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.page-label { display: flex; align-items: center; margin: 8px 0 0; font-size: 16px; font-weight: 700; color: color-mix(in srgb, var(--on-head) 75%, transparent); }
 .page-head .info-btn { color: color-mix(in srgb, var(--on-head) 70%, transparent); }
 .page-head .info-btn[aria-expanded="true"] { color: var(--on-head); }
 .page-head .info-pop { margin: 12px 0 0; background: rgba(255, 255, 255, .14); color: var(--on-head); }
@@ -338,7 +347,7 @@ button { cursor: pointer; border: 0; background: none; }
   position: absolute; z-index: 6; transition: opacity .2s, transform .2s;
   top: max(18px, env(safe-area-inset-top)); right: 16px;
   border-radius: 50%;            /* round, unlike the other icon buttons */
-  background: rgba(255, 255, 255, .14); color: var(--on-head);   /* frosted, on the dark header band */
+  background: rgba(255, 255, 255, .14); color: var(--on-head);   /* frosted, on the header band */
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
 }
 .device.scrolled .settings-btn { opacity: 0; transform: translateY(-6px); pointer-events: none; }   /* app.js adds .scrolled past 40px, so the gear never covers content */
