@@ -84,7 +84,7 @@ function drawChart(x, r) {
       { xs: rec.day, ys: ys(rec), color: cssVar("--accent") },
     ],
     yMin, yMax,
-    vline: { x: examDay, label: "Exam" },
+    vline: { x: examDay, label: "Big day" },
     points,
     tickStep: rec.day.length > 14 ? 4 : 2,
     formatTick: (d) => (d === 0 ? "Today" : dayToDate(d).split(", ")[1]),

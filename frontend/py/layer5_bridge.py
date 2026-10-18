@@ -51,7 +51,7 @@ def plan(requestJson):
     except ValueError as err:          # no night before or after the event on the sleep calendar
         return {"error": str(err)}
 
-    coffee = DRINKS["drip coffee (8 oz)"]
+    coffee = DRINKS["coffee (8 oz)"]
     curve = result.curve
     return {
         "doses": [{"timeH": d.timeH, "mg": d.mg, "cups": d.mg / coffee} for d in result.doses],

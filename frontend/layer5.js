@@ -105,7 +105,7 @@ function readEvent() {
 
 const cupsText = (cups) => {
   const halves = Math.max(1, Math.round(cups * 2));
-  return `about ${halves / 2} cup${halves === 2 ? "" : "s"} of drip coffee`;
+  return `about ${halves / 2} cup${halves === 2 ? "" : "s"} of coffee`;
 };
 
 function timelineRow(when, what, detail, tag, tagClass = "") {

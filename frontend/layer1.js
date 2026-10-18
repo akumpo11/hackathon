@@ -6,7 +6,7 @@ import { areaChart } from "./charts.js";
 import { initDrinkPicker, drinkMg } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
 import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
-import { dateKey, saveDay, loadDay, earlierDays, dayName, dayTitle, dateName, shiftKey, KEEP_DAYS } from "./history.js";
+import { dateKey, saveDay, loadDay, dayTitle, dateName, shiftKey, KEEP_DAYS } from "./history.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -16,7 +16,6 @@ let series = "bodyMg";     // which curve the chart shows: "bodyMg" or "conc"
 const todayKey = dateKey();   // fixed when the page opens, so drinks after midnight still count as tonight's
 let viewKey = todayKey;    // the day the page shows: today, or an earlier day from the switcher
 let viewBody = null;       // a past day's saved body (weight, half-life ...); null means use settings
-let pastDays = [];         // earlier days from history.js, each with its recomputed curve
 
 function readInputs(drinks) {
   const el = form.elements;
@@ -64,7 +63,10 @@ function toTimeInput(hours) {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
-// A new drink starts as a drip coffee now (to the nearest 15 minutes), since
+// Drinks saved under an old name in params.DRINKS, so earlier days still find them.
+const RENAMED = { "drip coffee (8 oz)": "coffee (8 oz)" };
+
+// A new drink starts as a coffee now (to the nearest 15 minutes), since
 // "I just had another one" is the usual reason to add a row.
 function newDrinkTime() {
   return toTimeInput(Math.round(nowHours() * 4) / 4);
@@ -127,47 +129,6 @@ function drawChart(x, r) {
   });
 }
 
-// Previous days: one small chart per earlier day, newest first. The curves were
-// computed once (in startLayer1); this only draws them, in the unit the toggle shows.
-function drawHistory() {
-  const box = $("pkHistory");
-  if (!pastDays.length) {
-    box.innerHTML = `<p class="muted small">No earlier days yet.</p>`;
-    return;
-  }
-  box.replaceChildren();
-  pastDays.forEach(({ key, x, r }, n) => {
-    const totalMg = x.doses.reduce((sum, d) => sum + d.mg, 0);
-    const ok = r.bedtimeMg <= r.limitMg;
-    const day = document.createElement("div");
-    day.className = "history-day";
-    day.innerHTML = `
-      <div class="card-head">
-        <h3><button type="button" class="history-open" data-key="${key}">${dayName(key, todayKey)}</button></h3>
-        <span class="chip ${ok ? "ok" : "bad"}">${Math.round(r.bedtimeMg)} mg at bedtime</span>
-      </div>
-      <p class="muted small">${x.doses.length} ${x.doses.length === 1 ? "drink" : "drinks"}, ${Math.round(totalMg)} mg in all.
-        <span class="history-readout"></span></p>
-      <svg class="chart mini" id="pkHistory${n}" role="img" aria-label="Caffeine level over ${dayName(key, todayKey)}"></svg>`;
-    box.append(day);
-    const readout = day.querySelector(".history-readout");
-    const ys = r[series];
-    const step = series === "bodyMg" ? 25 : 0.5;
-    areaChart(day.querySelector("svg"), {
-      xs: r.t, ys,
-      yMax: Math.max(step, Math.ceil((Math.max(...ys) * 1.15) / step) * step),
-      bands: [{ from: x.bedtimeH, to: x.bedtimeH + 8, color: cssVar("--night") }],
-      markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
-      formatTick: (h) => hoursToClock(h).replace(":00", ""),
-      startX: x.doses[0].timeH + r.peakMin / 60,     // no "now" on a past day, so rest on the first peak
-      onScrub: (i) => {
-        const value = series === "bodyMg" ? `${Math.round(ys[i])} mg` : `${ys[i].toFixed(2)} mg/L`;
-        readout.textContent = `${value} at ${hoursToClock(r.t[i])}.`;
-      },
-    });
-  });
-}
-
 export async function startLayer1() {
   // Tonight's bedtime starts as your usual one from personal settings. You can
   // change it here for tonight; a new usual bedtime in settings resets it.
@@ -182,18 +143,6 @@ export async function startLayer1() {
   const pyodide = await loadPython();
   const bridge = pyodide.pyimport("layer1_bridge");
   const drinks = toObject(bridge.drinkOptions());
-
-  // Earlier days: recompute each saved day's curve. Each uses the body saved with it.
-  // Those days only change if you open one and edit it, so this runs on each day switch,
-  // not on every edit.
-  const loadHistory = () => {
-    pastDays = earlierDays(todayKey).map(([key, x]) => ({
-      key, x,
-      r: toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
-                                 x.smoker, x.oralContraceptives, x.bedtimeH)),
-    }));
-  };
-  loadHistory();
 
   let last = null;
   const update = () => {
@@ -227,7 +176,10 @@ export async function startLayer1() {
     const isToday = viewKey === todayKey;
     viewBody = !isToday && saved ? saved : null;
     if (saved) {
-      saved.doses.forEach((d) => addRow(toTimeInput(d.timeH), d.label, d.label in drinks ? undefined : d.mg));
+      saved.doses.forEach((d) => {
+        const label = RENAMED[d.label] ?? d.label;
+        addRow(toTimeInput(d.timeH), label, label in drinks ? undefined : d.mg);
+      });
       form.elements.bedtime.value = toTimeInput(saved.bedtimeH);
     } else {
       form.elements.bedtime.value = shared.settings.bedtime;
@@ -247,22 +199,14 @@ export async function startLayer1() {
     viewKey = key;
     fillDay();
     update();
-    loadHistory();      // a past day you just edited shows its new curve below
-    drawHistory();
   };
   fillDay();
   $("pkDayNav").addEventListener("click", (e) => {
     const arrow = e.target.closest(".day-arrow");
     if (arrow && !arrow.disabled) showDay(shiftKey(viewKey, Number(arrow.dataset.dir)));
   });
-  $("pkHistory").addEventListener("click", (e) => {
-    const open = e.target.closest(".history-open");
-    if (!open) return;
-    showDay(open.dataset.key);
-    open.closest(".page").scrollTo({ top: 0, behavior: "smooth" });
-  });
   $("addDrink").addEventListener("click", () => {
-    addRow(newDrinkTime(), "drip coffee (8 oz)").querySelector(".drink-pick").focus();
+    addRow(newDrinkTime(), "coffee (8 oz)").querySelector(".drink-pick").focus();
     update();
   });
   rows.addEventListener("click", (e) => {
@@ -279,11 +223,10 @@ export async function startLayer1() {
     $("pkToggle").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === btn));
     series = btn.dataset.series;
     if (last) drawChart(last.x, last.r);
-    drawHistory();
   });
   const redo = perFrame(update);
   form.addEventListener("input", redo);
-  onWidthChange(() => { update(); drawHistory(); });
+  onWidthChange(update);
   // Redo it when personal settings change. Only then: this page publishes too, and
   // reacting to its own publish would loop forever.
   let seenSettings = shared.settings;
@@ -293,7 +236,6 @@ export async function startLayer1() {
     redo();
   });
   update();
-  drawHistory();
   // Keep the peak countdown current even when nothing is edited.
   setInterval(() => { if (last) $("pkPeakTag").textContent = peakTag(last.x.doses, last.r.peakMin); }, 60_000);
 }

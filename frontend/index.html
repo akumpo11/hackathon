@@ -98,12 +98,6 @@
         <div class="meter"><div class="meter-fill" id="pkMeter"></div><div class="meter-limit" id="pkLimit"></div></div>
         <p class="muted small" id="pkSleepNote"></p>
       </article>
-
-      <article class="card">
-        <h2>Previous days <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkHistory" aria-label="About previous days"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoPkHistory" hidden>Each day's drinks are saved on this device, and the last week shows here, newest first. Drag along a curve to read any time, or tap a day to open it above.</p>
-        <div id="pkHistory"></div>
-      </article>
     </section>
 
     <section class="page" aria-label="Sleep pressure">
@@ -169,10 +163,10 @@
 
       <form id="layer3Inputs">
         <article class="card">
-          <h2>Your exam</h2>
+          <h2>Your big day</h2>
           <div class="inputs">
             <label class="slider">
-              <span class="slider-top"><span>Exam in</span><output data-for="examInDays"></output></span>
+              <span class="slider-top"><span>Big day in</span><output data-for="examInDays"></output></span>
               <input type="range" name="examInDays" min="0" max="21" step="1" value="14">
             </label>
           </div>
@@ -187,8 +181,8 @@
         <p class="body" id="resetReason"></p>
         <ul class="breakdown">
           <li><span>Days to reset</span><strong id="outDaysNeeded">–</strong></li>
-          <li><span>Receptors on exam day</span><strong id="outExamR">–</strong></li>
-          <li><span>Strength on exam day</span><strong id="outStrengthExam">–</strong></li>
+          <li><span>Receptors on the day</span><strong id="outExamR">–</strong></li>
+          <li><span>Strength on the day</span><strong id="outStrengthExam">–</strong></li>
         </ul>
       </article>
 
@@ -201,11 +195,11 @@
           </div>
         </div>
         <p class="info-pop" id="resetChartNote" hidden></p>
-        <svg class="chart" id="resetChart" role="img" aria-label="Receptor level and withdrawal over the days before the exam"></svg>
+        <svg class="chart" id="resetChart" role="img" aria-label="Receptor level and withdrawal over the days before your big day"></svg>
         <ul class="legend">
           <li><span class="swatch taper"></span>The plan</li>
           <li><span class="swatch cold"></span>Quit today</li>
-          <li><span class="swatch event"></span>Exam</li>
+          <li><span class="swatch event"></span>Big day</li>
         </ul>
       </article>
     </section>
@@ -519,7 +513,7 @@
 
       <article class="card" data-step="2">
         <h2>Your habit <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoHabit" aria-label="About your habit"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoHabit" hidden>Daily caffeine builds tolerance, so this decides how strong each cup still feels. A drip coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg. Receptors take a few weeks to fully adjust, then stay put.</p>
+        <p class="info-pop" id="infoHabit" hidden>Daily caffeine builds tolerance, so this decides how strong each cup still feels. A coffee is about 95 mg, an espresso 63 mg, a Red Bull 80 mg. Receptors take a few weeks to fully adjust, then stay put.</p>
         <div class="inputs">
           <label class="slider">
             <span class="slider-top"><span>Usual caffeine a day</span><output data-for="habitualMg"></output></span>

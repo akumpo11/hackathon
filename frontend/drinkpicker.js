@@ -28,6 +28,7 @@ function look(name, custom = false) {
   const n = name.toLowerCase();
   if (custom) return { shape: "custom", ink: "#7A6A5C", tint: "#F1EEEB" };
   if (n.includes("espresso")) return { shape: "espresso", ink: "#6B4226", tint: "#F3E7DA" };
+  if (n.includes("black coffee")) return { shape: "mug", ink: "#3B2A20", tint: "#ECE4DD" };
   if (n.includes("coffee")) return { shape: "mug", ink: "#8B5A2B", tint: "#F3E7DA" };
   if (n.includes("green tea")) return { shape: "teacup", ink: "#5E9E4B", tint: "#E6F2DF" };
   if (n.includes("tea")) return { shape: "teacup", ink: "#C0812B", tint: "#FBF0DC" };
@@ -44,7 +45,7 @@ const icon = (name, custom = false) => {
   return `<svg viewBox="0 0 48 48" aria-hidden="true">${SHAPES[shape](ink)}</svg>`;
 };
 
-// "drip coffee (8 oz)" -> name "Drip coffee", size "8 oz"
+// "black coffee (8 oz)" -> name "Black coffee", size "8 oz"
 function split(name) {
   const m = name.match(/^(.*?)\s*\((.*)\)$/);
   const main = m ? m[1] : name;

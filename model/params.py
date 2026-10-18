@@ -55,7 +55,8 @@ MIN_RATING_SPREAD = 0.01            # below this, the 400 guesses predict the sa
 # Caffeine per drink in mg
 DRINKS = {
     "espresso": 63,
-    "drip coffee (8 oz)": 95,
+    "coffee (8 oz)": 95,
+    "black coffee (8 oz)": 95,
     "black tea": 47,
     "green tea": 28,
     "Diet Coke": 46,

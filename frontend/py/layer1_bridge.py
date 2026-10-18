@@ -21,7 +21,7 @@ def drinkOptions():
 
 
 def compute(drinksJson, weightKg, baseHalfLifeH, smoker, oralContraceptives, bedtimeH):
-    """drinksJson: '[{"timeH": 8, "mg": 95, "label": "drip coffee (8 oz)"}, ...]' (JSON, so lists cross cleanly)."""
+    """drinksJson: '[{"timeH": 8, "mg": 95, "label": "coffee (8 oz)"}, ...]' (JSON, so lists cross cleanly)."""
     doses = [Dose(**d) for d in json.loads(drinksJson)]
     p = Profile(weightKg=weightKg, halfLifeH=adjustedHalfLifeH(baseHalfLifeH, smoker, oralContraceptives))
 

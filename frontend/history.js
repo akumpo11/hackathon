@@ -1,10 +1,10 @@
 // Your drinks log: each day's drinks, bedtime and body are saved on this device
 // (local storage, "caffeineHistory"), keyed by date. Layer 1 saves today's on every
-// change and draws the earlier days as small charts. Only the inputs are saved:
+// change, and its day switcher reopens an earlier day. Only the inputs are saved:
 // the curves are recomputed from them by model/pk.py, like every other answer.
 
 const KEY = "caffeineHistory";
-export const KEEP_DAYS = 7;   // earlier days kept and shown; anything older is dropped
+export const KEEP_DAYS = 7;   // earlier days kept; anything older is dropped
 
 // The date as "2026-10-17" in local time, so a day starts at your midnight, not UTC's.
 export function dateKey(date = new Date()) {
@@ -29,14 +29,6 @@ export function saveDay(key, day) {
 
 export function loadDay(key) {
   return load()[key] ?? null;
-}
-
-// Days before `key` that have at least one drink, newest first, as [dateKey, day].
-export function earlierDays(key) {
-  return Object.entries(load())
-    .filter(([k, day]) => k < key && day.doses?.length)
-    .sort(([a], [b]) => (a < b ? 1 : -1))
-    .slice(0, KEEP_DAYS);
 }
 
 // "2026-10-17" -> a Date at local midnight that day.
