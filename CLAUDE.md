@@ -62,6 +62,7 @@ Prefer simple ideas executed well over complex ones. Judges reward understanding
 ## Working on code
 
 - Keep the code readable and explainable. Judges may ask anyone on the team to walk through any part of it.
+- Before any UI change in `frontend/` (layout, styling, components, charts, copy placement), invoke the `frontend-design` skill (installed at project scope in `.claude/settings.json`) and follow it. For small tweaks, keep to the existing look rather than redesigning it.
 - When you write something non-obvious, especially math, explain what it does and why so the team can present it.
 - The project must be built during the event. Don't pull in pre-existing project code. Open-source libraries, frameworks, and APIs are fine.
 - Use camelCase for every name in Python and JavaScript: variables, functions, parameters, dataclass fields, and JSON keys (`halfLifeH`, `sleepPressure`, `meanHalfLife`). This goes against Python's usual snake_case on purpose, so one name works unchanged from the model through the JSON to the frontend. Exceptions:
