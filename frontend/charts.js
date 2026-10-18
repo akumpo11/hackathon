@@ -33,7 +33,8 @@ function xTicks(svg, s, xMin, xMax, step, format) {
 /**
  * Area chart with a draggable readout dot (the main caffeine curve).
  * opts: xs, ys, yMax, bands [{from, to, color}], markers [{x, label}],
- *       peaks [x] (optional amber dots), formatTick(x), onScrub(index, atNow),
+ *       peaks [x] (optional amber dots), flag {x, label, ok} (optional pill above the chart),
+ *       formatTick(x), onScrub(index, atNow),
  *       nowX() (the time now; the dot rests there when you aren't touching the chart),
  *       startX (where the dot rests instead if now is off the chart)
  */
@@ -79,6 +80,22 @@ export function areaChart(svg, opts) {
   for (const px of opts.peaks ?? []) {
     if (px > xMax) continue;
     el("circle", { cx: s.x(px), cy: s.y(valueAt(px)), r: 4.5, fill: css("--peak"), stroke: css("--card"), "stroke-width": 2 }, svg);
+  }
+
+  // Flag: a pill in the label row, like the page's chips (accent when fine, coral when not).
+  // The plan chart puts the caffeine left at bedtime here, over the start of the night.
+  if (opts.flag) {
+    const f = opts.flag, fx = s.x(f.x);
+    const pill = el("rect", { y: 2, height: 20, rx: 10, fill: css(f.ok ? "--accent-soft" : "--coral-soft") }, svg);
+    const text = el("text", { y: 15.5, "text-anchor": "middle", "font-weight": 700,
+                              style: `fill:${css(f.ok ? "--accent-ink" : "--coral-ink")}` }, svg);
+    text.textContent = f.label;
+    // Centered on the bedtime line, slid inward if it would hang off the edge.
+    const w = text.getComputedTextLength() + 16;
+    const cx = Math.min(Math.max(fx, w / 2), s.W - w / 2);
+    pill.setAttribute("x", cx - w / 2); pill.setAttribute("width", w);
+    text.setAttribute("x", cx);
+    el("line", { x1: fx, x2: fx, y1: 22, y2: s.top, stroke: css(f.ok ? "--accent-ink" : "--coral-ink"), "stroke-width": 1.5 }, svg);
   }
 
   xTicks(svg, s, xMin, xMax, 3, opts.formatTick);

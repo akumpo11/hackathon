@@ -14,7 +14,7 @@ from dataclasses import replace
 import numpy as np
 
 from model.learn import Rating, concentrationBand, posterior, ratingTeaches, simulateDays
-from model.optimizer import bestPlan, lastNightBefore
+from model.optimizer import bedtimeAfter, bestPlan, lastNightBefore
 from model.params import BEDTIME_LIMIT_MG, DAILY_LIMIT_MG, DRINKS, MG_COST
 from model.pk import adjustedHalfLifeH, concentration
 from model.schema import Dose, EventWindow, FreeSlot, Profile, SleepBlock
@@ -44,6 +44,7 @@ def plan(requestJson):
     event = EventWindow(**q["event"])
     try:
         wake = lastNightBefore(event, sleep).endH
+        bedtime = bedtimeAfter(event, sleep)
         result = bestPlan(event, sleep, p, q["tolerance"], allowNap=q["allowNap"],
                           freeSlots=[FreeSlot(**s) for s in q["freeSlots"]], fixedDoses=drinks,
                           earliestH=q["nowH"])
@@ -58,6 +59,7 @@ def plan(requestJson):
         "score": result.score,
         "baselineScore": result.baselineScore,
         "tried": result.tried,
+        "bedtimeH": bedtime,
         "bedtimeMg": result.bedtimeCaffeineMg,
         "bedtimeLimitMg": BEDTIME_LIMIT_MG,
         "dayMg": sum(d.mg for d in drinks + result.doses if d.timeH >= wake),     # what counts toward 400 mg

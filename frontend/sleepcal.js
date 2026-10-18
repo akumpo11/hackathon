@@ -5,6 +5,8 @@
 
 import { hoursToClock } from "./time.js";
 
+// The model always gets two days ago through tomorrow. The back arrow goes as far as you
+// like; an older day only joins the model once you change it (see getBlocks).
 const FIRST_DAY = -2;                 // two days ago ...
 const LAST_DAY = 1;                   // ... through tomorrow
 // Each bar is a window of hours into its day. The night runs from 6 PM to noon the
@@ -40,15 +42,14 @@ export function usualNight({ bedtimeH, wakeH }) {
 export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH: 23, wakeH: 7 }) {
   // One entry per day. Times are hours into that day (bedtime 23 = 11 PM, wake 31 =
   // 7 AM the next morning), so one day's math doesn't depend on which day it is.
+  // A day you haven't changed has no entry and shows your usual night.
   const nights = new Map();           // day -> { bed, wake }
   const naps = new Map();             // day -> { bed, wake } or nothing
+  let usualSpan = usualNight(usual);  // { bed, wake } for a night you haven't changed
   let shown = 0;                      // the day on screen
   let event = null;                   // { startH, endH } shaded on the bars
 
-  function fillUsual(u) {
-    for (let d = FIRST_DAY; d <= LAST_DAY; d++) nights.set(d, { ...usualNight(u) });
-  }
-  fillUsual(usual);
+  const nightOf = (day) => nights.get(day) ?? usualSpan;
 
   // ---- build the one card
   const bar = (kind, name) => `
@@ -82,7 +83,7 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   const body = root.querySelector(".day-body");
   const bars = { night: root.querySelector(".bar.night"), nap: root.querySelector(".bar.nap") };
   const limits = { night: NIGHT, nap: NAP };
-  const spanOf = (kind) => (kind === "night" ? nights : naps).get(shown);
+  const spanOf = (kind) => (kind === "night" ? nightOf(shown) : naps.get(shown));
 
   function paintBar(kind) {
     const el = bars[kind], lim = limits[kind], span = spanOf(kind);
@@ -104,7 +105,8 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   function paint() {
     root.querySelector(".day-name strong").textContent = dayLabel(shown);
     root.querySelector(".day-name small").textContent = dateLabel(shown);
-    root.querySelectorAll(".day-arrow").forEach((b) => { b.disabled = shown + Number(b.dataset.dir) < FIRST_DAY || shown + Number(b.dataset.dir) > LAST_DAY; });
+    root.querySelectorAll(".day-arrow").forEach((b) => { b.disabled = shown + Number(b.dataset.dir) > LAST_DAY; });
+    // The dots cover two days ago through tomorrow; on an older day none is lit.
     root.querySelectorAll(".day-dots span").forEach((dot, i) => dot.classList.toggle("on", i === shown - FIRST_DAY));
     paintBar("night");
     paintBar("nap");
@@ -112,7 +114,7 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
 
   // ---- switch days: arrows, or a sideways swipe anywhere on the card but the bars
   function show(day, dir) {
-    if (day < FIRST_DAY || day > LAST_DAY) return;
+    if (day > LAST_DAY) return;   // no limit going back
     shown = day;
     paint();
     body.classList.remove("from-left", "from-right");
@@ -137,7 +139,10 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   body.addEventListener("pointerdown", (e) => {
     const track = e.target.closest(".bar-track");
     if (!track) return;
-    const kind = track.closest(".bar").dataset.kind, span = spanOf(kind);
+    const kind = track.closest(".bar").dataset.kind;
+    // Dragging a usual night makes it this day's own, so the change sticks.
+    if (kind === "night" && !nights.has(shown)) nights.set(shown, { ...usualSpan });
+    const span = spanOf(kind);
     if (span) dragBar(e, track, limits[kind], span, () => paintBar(kind), () => onChange(getBlocks()));
   });
 
@@ -154,9 +159,15 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
   });
 
   // ---- read everything back as sleep blocks for the model
+  // Every night from the oldest day you changed (or two days ago) through tomorrow,
+  // with no gaps: a missing night would read to the model as a night spent awake.
   function getBlocks() {
     const blocks = [];
-    for (const [d, s] of nights) blocks.push({ startH: d * 24 + s.bed, endH: d * 24 + s.wake, isNap: false });
+    const oldest = Math.min(FIRST_DAY, ...nights.keys(), ...naps.keys());
+    for (let d = oldest; d <= LAST_DAY; d++) {
+      const s = nightOf(d);
+      blocks.push({ startH: d * 24 + s.bed, endH: d * 24 + s.wake, isNap: false });
+    }
     for (const [d, s] of naps) blocks.push({ startH: d * 24 + s.bed, endH: d * 24 + s.wake, isNap: true });
     return blocks.sort((a, b) => a.startH - b.startH);
   }
@@ -169,7 +180,8 @@ export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH:
 
   // Your usual sleep changed in settings: start every night over from it.
   function setUsual(newUsual) {
-    fillUsual(newUsual);
+    usualSpan = usualNight(newUsual);
+    nights.clear();
     paint();
   }
 

@@ -148,20 +148,19 @@ function showPlan(x, r) {
     ? "Caffeine peaks about 50 minutes after a drink, so doses come shortly before you need them."
     : "No extra caffeine is worth it: it wouldn't add 0.25 out of 10 per 50 mg, or it would break a limit.") + drinksNote;
 
-  // Sleep check: the meter runs to twice the limit, so the limit mark sits in the middle.
-  const ok = r.bedtimeMg <= r.bedtimeLimitMg + 0.5;
-  const meterMax = r.bedtimeLimitMg * 2;
+  // Sleep check: the verdict sits in the chart's header, the mg on the chart at bedtime.
+  const ok = sleepOk(r);
   $("planSleepChip").textContent = ok ? "Fine for sleep" : "Too much";
   $("planSleepChip").className = `chip ${ok ? "ok" : "bad"}`;
-  $("planMeter").style.width = `${Math.min(100, (r.bedtimeMg / meterMax) * 100)}%`;
-  $("planMeter").classList.toggle("bad", !ok);
-  $("planLimit").style.left = "50%";
   $("planSleepNote").textContent = ok
     ? `${Math.round(r.bedtimeMg)} mg left at bedtime, under the ${r.bedtimeLimitMg} mg cutoff.`
     : `${Math.round(r.bedtimeMg)} mg left at bedtime from the drinks you already have. The plan adds nothing that makes it worse.`;
 
   drawPlanChart(x, r);
 }
+
+// The + 0.5 lets a plan that lands right on the limit (49.7 mg, shown as 50) count as fine.
+const sleepOk = (r) => r.bedtimeMg <= r.bedtimeLimitMg + 0.5;
 
 function drawPlanChart(x, r) {
   const sleepBands = x.sleep.concat(r.nap ? [r.nap] : []);
@@ -175,6 +174,7 @@ function drawPlanChart(x, r) {
       { from: x.event.startH, to: Math.max(x.event.endH, x.event.startH + 0.1), color: cssVar("--coral-soft") },
     ],
     markers: drinks.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
+    flag: { x: r.bedtimeH, label: `${Math.round(r.bedtimeMg)} mg at bed`, ok: sleepOk(r) },
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
     nowX: nowH,
     startX: x.event.startH,

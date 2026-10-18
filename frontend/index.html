@@ -290,24 +290,19 @@
       </article>
 
       <article class="card">
-        <h2>Alertness with the plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlanChart" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoPlanChart" hidden>Your alertness with today's drinks plus the plan's. Drag along the curve to read any time.</p>
+        <div class="card-head">
+          <h2>Alertness with the plan <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPlanChart" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <span class="chip ok" id="planSleepChip">–</span>
+        </div>
+        <p class="info-pop" id="infoPlanChart" hidden>Your alertness with today's drinks plus the plan's. Drag along the curve to read any time. The tag at bedtime is the caffeine still in your body when you go to sleep.</p>
         <div class="readout"><span class="readout-value" id="planReadout">–</span><span class="muted" id="planReadoutTime"></span></div>
-        <svg class="chart" id="planChart" role="img" aria-label="Alertness from waking up to bedtime with the plan, event and sleep shaded"></svg>
+        <svg class="chart" id="planChart" role="img" aria-label="Alertness from waking up to bedtime with the plan, event and sleep shaded, and the caffeine left at bedtime"></svg>
         <ul class="legend">
           <li><span class="swatch dose"></span>Drink</li>
           <li><span class="swatch event-soft"></span>Event</li>
           <li><span class="swatch sleep"></span>Asleep or nap</li>
         </ul>
-      </article>
-
-      <article class="card">
-        <div class="card-head">
-          <h2>Sleep check</h2>
-          <span class="chip ok" id="planSleepChip">–</span>
-        </div>
-        <div class="meter"><div class="meter-fill" id="planMeter"></div><div class="meter-limit" id="planLimit"></div></div>
-        <p class="muted small" id="planSleepNote"></p>
+        <p class="muted small sleep-note" id="planSleepNote"></p>
       </article>
 
       <p class="footnote">A model for learning, not medical advice.</p>

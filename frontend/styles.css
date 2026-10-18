@@ -216,6 +216,7 @@ button { cursor: pointer; border: 0; background: none; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; padding: 0; margin-top: 12px; font-size: 12px; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 6px; }
+.sleep-note { margin-top: 10px; }   /* the plan chart's sleep check, under its legend */
 .swatch { width: 10px; height: 10px; border-radius: 3px; }
 .swatch.event { background: var(--coral); }
 .swatch.sleep { background: var(--night); }
