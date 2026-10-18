@@ -69,16 +69,13 @@ export function areaChart(svg, opts) {
     const i = xs.findIndex((v) => v >= t);
     return ys[Math.max(0, (i < 0 ? xs.length : i) - 1)];
   };
-  // Flag: drawn like a drink, in slate (the sleep color) when fine and coral when not.
-  // The plan chart puts the caffeine left at bedtime here, on the edge of the night.
-  const flag = opts.flag && { x: opts.flag.x, label: opts.flag.label, color: css(opts.flag.ok ? "--night-ink" : "--coral-ink"), atEnd: true };
   let lastLabelX = -Infinity, row = 0;
-  for (const m of [...opts.markers, ...(flag ? [flag] : [])].sort((a, b) => a.x - b.x)) {
-    const mx = s.x(m.x), color = m.color ?? css("--ink");
+  for (const m of [...opts.markers].sort((a, b) => a.x - b.x)) {
+    const mx = s.x(m.x);
     row = mx - lastLabelX < 48 ? 1 - row : 0;     // drop a label one row if it would overlap the last one
     lastLabelX = mx;
-    el("circle", { cx: mx, cy: s.y(m.atEnd ? valueBefore(m.x) : valueAt(m.x)), r: 4.5, fill: color, stroke: css("--card"), "stroke-width": 2 }, svg);
-    const label = el("text", { x: mx, y: row ? 23 : 11, "text-anchor": "middle", "font-weight": 700, style: `fill:${color}` }, svg);
+    el("circle", { cx: mx, cy: s.y(valueAt(m.x)), r: 4.5, fill: css("--ink"), stroke: css("--card"), "stroke-width": 2 }, svg);
+    const label = el("text", { x: mx, y: row ? 23 : 11, "text-anchor": "middle", "font-weight": 700, style: `fill:${css("--ink")}` }, svg);
     label.textContent = m.label;
     // A drink near either edge would have half its label cut off, so slide the label inward.
     const half = label.getComputedTextLength() / 2;
@@ -89,6 +86,32 @@ export function areaChart(svg, opts) {
   for (const px of opts.peaks ?? []) {
     if (px > xMax) continue;
     el("circle", { cx: s.x(px), cy: s.y(valueAt(px)), r: 4.5, fill: css("--peak"), stroke: css("--card"), "stroke-width": 2 }, svg);
+  }
+
+  // Flag: a dot where the day ends (the plan chart's bedtime) with its label right beside
+  // it, in slate (the sleep color) when fine and coral when not.
+  if (opts.flag && opts.flag.x > xMin && opts.flag.x <= xMax) {
+    const f = opts.flag, fx = s.x(f.x), fy = s.y(valueBefore(f.x));
+    const color = css(f.ok ? "--night-ink" : "--coral-ink");
+    el("circle", { cx: fx, cy: fy, r: 4.5, fill: color, stroke: css("--card"), "stroke-width": 2 }, svg);
+    const label = el("text", { x: fx - 9, "text-anchor": "end", "font-weight": 700, style: `fill:${color}` }, svg);
+    label.textContent = f.label;
+    // The label sits to the left of the dot, just above the curve or, if the curve is in
+    // the way there, just below it. Check the curve's height (in pixels) under the label.
+    const x0 = fx - 9 - label.getComputedTextLength();
+    let highest = Infinity, lowest = -Infinity;     // smallest and largest curve y under the label
+    for (let px = x0; px < fx - 1; px += 2) {     // stop short of the dot: at bedtime itself you're asleep
+      const cy = s.y(valueBefore(xMin + ((px - s.left) / (s.right - s.left)) * (xMax - xMin)));
+      highest = Math.min(highest, cy); lowest = Math.max(lowest, cy);
+    }
+    const above = fy - 8, below = fy + 16;          // text baselines; the letters are about 8 px tall
+    if (above + 3 < highest && above - 8 > s.top) label.setAttribute("y", above);
+    else if (below - 11 > lowest && below < s.bottom - 2) label.setAttribute("y", below);
+    else {   // no room by the curve: the label row, like a drink, slid inward from the edge
+      const half = (fx - 9 - x0) / 2;
+      label.setAttribute("y", 11); label.setAttribute("text-anchor", "middle");
+      label.setAttribute("x", Math.min(Math.max(fx, half), s.W - half));
+    }
   }
 
   xTicks(svg, s, xMin, xMax, 3, opts.formatTick);
