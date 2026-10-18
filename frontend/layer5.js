@@ -259,8 +259,9 @@ function updateLearn() {
   if (simulated) {
     const r = toObject(bridge.simulate(JSON.stringify({ ...you(), ...simulated, todayDoses: layer1.doses })));
     $("ratingNote").textContent = "Showing a simulated week. Rate yourself to go back to your own ratings.";
-    showLearn(r, `${r.ratingCount} simulated ratings from a hidden half-life of ${r.trueHalfLife.toFixed(1)} h. ` +
-                 `It guessed ${r.meanHalfLife.toFixed(1)} ± ${r.sdHalfLife.toFixed(1)} h.`);
+    showLearn(r, `Test run: a pretend person's caffeine wears off by half every ` +
+                 `${r.trueHalfLife.toFixed(1)} hours. Just from how alert they felt, ` +
+                 `DeCaf guessed about ${r.meanHalfLife.toFixed(1)} hours.`);
     return;
   }
 
@@ -277,7 +278,7 @@ function updateLearn() {
   $("ratingNote").textContent = store.ratings.length
     ? `${store.ratings.length} rating${store.ratings.length === 1 ? "" : "s"} saved on this device. ` +
       `Last: ${last.score} at ${hoursToClock(toH(last.atMs))}. Rate a few hours after coffee too.`
-    : "No ratings yet. Rate a few hours after coffee: that's when your half-life shows.";
+    : "No ratings yet. Rate a few hours after coffee.";
   showLearn(r, ratings.length
     ? `From ${ratings.length} rating${ratings.length === 1 ? "" : "s"} in the last two days (the ones on your sleep calendar).`
     : "No ratings yet, so this is the prior: your settings, give or take.");
