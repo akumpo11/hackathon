@@ -128,7 +128,7 @@ function drawChart(x, r) {
 function drawHistory() {
   const box = $("pkHistory");
   if (!pastDays.length) {
-    box.innerHTML = `<p class="muted small">No earlier days yet. Tomorrow, today's curve shows up here.</p>`;
+    box.innerHTML = `<p class="muted small">No earlier days yet.</p>`;
     return;
   }
   box.replaceChildren();
