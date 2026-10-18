@@ -373,8 +373,6 @@ button { cursor: pointer; border: 0; background: none; }
 .settings-top { display: flex; margin-bottom: 16px; }
 .settings-frame.first-run .settings-top { display: none; }        /* no back arrow: the first-run survey can't be skipped */
 .settings-frame.first-run { animation: none; }                     /* it's already there when the app opens */
-/* Settings-only fields, like the half-life slider: most people don't know theirs on day one. */
-.settings-frame.first-run .settings-only { display: none; }
 #settingsTitle:focus { outline: none; }                          /* focused only so screen readers start there */
 .settings-frame .page-title.first { margin-top: 0; }
 .settings-frame .layer-no + .page-title { margin-top: 2px; }

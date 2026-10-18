@@ -49,7 +49,6 @@ function applyTheme(theme) {
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const SHOW = {
   weightKg: (v) => `${v} kg`,
-  halfLifeH: (v) => `${v.toFixed(1)} h`,
   smoker: (v) => (v ? "Yes" : "No"),
   oralContraceptives: (v) => (v ? "Yes" : "No"),
   chronotypeShiftH: (v) => ({ "-2": "Early bird", 0: "In between", 2: "Night owl" })[v],
@@ -72,7 +71,9 @@ function toInputTime(h) {
 // Local storage can be missing or blocked (private windows), so every use is guarded.
 function load() {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    // Half-life isn't a setting any more: everyone starts at the 5 h average, and the
+    // learning page fits your own from your ratings.
+    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}"), halfLifeH: DEFAULTS.halfLifeH };
   } catch {
     return { ...DEFAULTS };
   }
@@ -113,7 +114,6 @@ function surveyAsked() {
 function fillForm(form, s) {
   const el = form.elements;
   el.weight.value = s.weightKg;
-  el.halfLife.value = s.halfLifeH;
   el.smoker.checked = s.smoker;
   el.oralContraceptives.checked = s.oralContraceptives;
   el.chronotype.value = String(s.chronotypeShiftH);
@@ -128,7 +128,7 @@ function readForm(form) {
   const el = form.elements;
   return {
     weightKg: Number(el.weight.value),
-    halfLifeH: Number(el.halfLife.value),
+    halfLifeH: DEFAULTS.halfLifeH,
     smoker: el.smoker.checked,
     oralContraceptives: el.oralContraceptives.checked,
     chronotypeShiftH: Number(el.chronotype.value),
@@ -157,7 +157,6 @@ function paintSleep(s) {
 function show(form, s) {
   const out = (name, text) => { form.querySelector(`output[data-for="${name}"]`).textContent = text; };
   out("weight", SHOW.weightKg(s.weightKg));
-  out("halfLife", SHOW.halfLifeH(s.halfLifeH));
   out("habitualMg", SHOW.habitualMgPerDay(s.habitualMgPerDay));
   out("habitWeeks", SHOW.habitWeeks(s.habitWeeks));
 
@@ -214,7 +213,7 @@ export function initSettings() {
   // through, so the layers always start with your answers.
   const stepCards = [...frame.querySelectorAll("[data-step]")];
   const progress = [...$("surveyProgress").children];
-  const normal = { title: $("settingsTitle").textContent, intro: $("settingsIntro").textContent, done: $("settingsDone").textContent };
+  const normal = { title: $("settingsTitle").textContent, done: $("settingsDone").textContent };
   const last = STEPS.length - 1;
   let step = null;                    // the survey step on screen, or null when it's the normal settings
   const showStep = (n) => {
@@ -245,8 +244,7 @@ export function initSettings() {
     $("surveyBack").hidden = true;
     stepCards.forEach((card) => { card.hidden = "surveyOnly" in card.dataset; });   // settings shows every card but the welcome
     $("settingsTitle").textContent = normal.title;
-    $("settingsIntro").textContent = normal.intro;
-    $("settingsIntro").hidden = false;
+    $("settingsIntro").hidden = true;            // only the survey steps have an intro line
     $("settingsDone").textContent = normal.done;
     close();
     document.dispatchEvent(new Event("surveydone"));   // the home page's rating tab waits for this
