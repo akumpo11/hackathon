@@ -17,7 +17,7 @@ const LEARNED_KEY = "caffeineLearned";   // learned half-life and Kd, and whethe
 const CALENDAR_START_H = -48;            // the sleep calendar starts two days ago; older ratings have no sleep to go with them
 
 let bridge = null;         // layer5_bridge, once Pyodide has loaded
-let learned = null;        // the latest learning result, for the "plan with my learned numbers" box
+let learned = null;        // the latest learning result, for the "plan with my learned half-life and sensitivity" box
 let simulated = null;      // {trueHalfLife, seed} while showing the "simulate a week" demo
 
 // ---------- Time ----------
