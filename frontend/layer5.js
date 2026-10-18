@@ -314,7 +314,28 @@ export async function startLayer5() {
     simulated = { trueHalfLife: Math.round((3 + Math.random() * 5) * 10) / 10, seed: Math.floor(Math.random() * 1e6) };
     updateLearn();
   });
-  $("clearRatingsBtn").addEventListener("click", () => {
+  // Clearing can't be undone, so the first tap only warns and the second tap clears.
+  // The warning goes away on its own after a few seconds or when focus leaves the button.
+  const clearBtn = $("clearRatingsBtn"), clearWarn = $("clearWarn");
+  let clearTimer = null;
+  const disarmClear = () => {
+    clearTimeout(clearTimer);
+    clearBtn.classList.remove("armed");
+    clearBtn.textContent = "Clear ratings";
+    clearWarn.hidden = true;
+  };
+  clearBtn.addEventListener("click", () => {
+    const count = loadRatings().ratings.length;
+    if (count && !clearBtn.classList.contains("armed")) {
+      clearBtn.classList.add("armed");
+      clearBtn.textContent = "Tap again to clear";
+      clearWarn.textContent = `This deletes your ${count} rating${count === 1 ? "" : "s"} and what ` +
+        `DeCaf learned from them. It can't be undone.`;
+      clearWarn.hidden = false;
+      clearTimer = setTimeout(disarmClear, 5000);
+      return;
+    }
+    disarmClear();
     localStorage.removeItem(RATINGS_KEY);
     save(LEARNED_KEY, { use: false });
     $("useLearned").checked = false;
@@ -322,6 +343,7 @@ export async function startLayer5() {
     updateLearn();
     updatePlan();
   });
+  clearBtn.addEventListener("blur", disarmClear);
   $("useLearned").checked = loadLearned().use;
   $("useLearned").addEventListener("change", (e) => {
     save(LEARNED_KEY, e.target.checked && learned

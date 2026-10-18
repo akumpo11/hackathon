@@ -277,6 +277,8 @@ button { cursor: pointer; border: 0; background: none; }
 .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
 .btn { padding: 13px 14px; border-radius: 16px; background: var(--ink); color: var(--on-ink); font-weight: 700; font-size: 14px; }
 .btn.ghost { background: var(--canvas); color: var(--ink); }
+.btn.ghost.armed { background: var(--bad-soft); color: var(--bad-ink); }   /* "Clear ratings" waiting for a second tap */
+.clear-warn { margin-top: 10px; color: var(--bad-ink); }
 .btn.wide { width: 100%; margin-top: 16px; padding: 15px; background: var(--accent); }
 
 /* ---------- Bottom slider (tab bar): floating, with a thin accent line over the page you're on ---------- */
