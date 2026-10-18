@@ -181,12 +181,13 @@ function addTouchScrub(svg) {
  * opts: series [{xs, ys, color, dash}], yMin, yMax, vline {x, label}, points [{x, y, label}],
  *       formatTick(x), tickStep,
  *       yTicks [{y, label}] (optional: grid lines with labels down the left side),
+ *       yTitle (optional: what the left labels measure, written above them, like "↑ More tired"),
  *       bands [{from, to, color}] (optional: shaded windows, like sleep)
  */
 export function lineChart(svg, opts) {
   const all = opts.series.flatMap((ser) => ser.xs);
   const xMin = Math.min(...all), xMax = Math.max(...all);
-  const s = frame(svg, { xMin, xMax, yMin: opts.yMin, yMax: opts.yMax, pad: { l: opts.yTicks ? 32 : 4, r: 4, t: 18, b: 22 } });
+  const s = frame(svg, { xMin, xMax, yMin: opts.yMin, yMax: opts.yMax, pad: { l: opts.yTicks ? 32 : 4, r: 4, t: opts.yTitle ? 26 : 18, b: 22 } });
 
   for (const b of opts.bands ?? []) {
     const x1 = s.x(Math.max(b.from, xMin)), x2 = s.x(Math.min(b.to, xMax));
@@ -198,6 +199,10 @@ export function lineChart(svg, opts) {
     const yy = s.y(g.y);
     el("line", { x1: s.left, x2: s.right, y1: yy, y2: yy, stroke: css("--line") }, svg);
     if (g.label) el("text", { x: s.left - 6, y: yy + 3.5, "text-anchor": "end" }, svg).textContent = g.label;
+  }
+  // Above the labels, in the top row the "Now" label also uses. Now sits mid-chart, so they don't meet.
+  if (opts.yTitle) {
+    el("text", { x: 0, y: 11, "font-weight": 700 }, svg).textContent = opts.yTitle;
   }
   if (opts.vline) {
     const vx = s.x(opts.vline.x);

@@ -30,15 +30,23 @@ function draw(blocks) {
   const r = toObject(compute(JSON.stringify(blocks), shiftH, nowH));
   $("pressureNow").textContent = `${Math.round(r.pressureNow * 100)}% now`;
 
+  // The body clock C is an alerting signal (+ = pushing you awake), the opposite way round
+  // from tiredness S. So the chart draws -C: up means sleepier for both lines. C also has no
+  // scale here (it only swings ±0.15), so it's stretched to span the same band as S. Only its
+  // shape and timing mean anything. This is drawing only; the model still uses C as it is.
+  const sLo = Math.min(...r.pressure), sHi = Math.max(...r.pressure);
+  const cMax = Math.max(...r.circadian.map(Math.abs));
+  const stretched = r.circadian.map((c) => (sLo + sHi) / 2 - (c / cMax) * (sHi - sLo) / 2);
+
   lineChart($("pressureChart"), {
     series: [
-      // C swings ±0.15; drawn around 0.5 so it shares the 0..1 axis with S.
-      { xs: r.t, ys: r.circadian.map((c) => 0.5 + c), color: cssVar("--muted"), dash: "5 4" },
+      { xs: r.t, ys: stretched, color: cssVar("--muted"), dash: "5 4" },
       { xs: r.t, ys: r.pressure, color: cssVar("--accent") },
     ],
     yMin: 0, yMax: 1,
     // The same percent as the "24% now" chip: 0% is fully rested, 100% is exhausted.
     yTicks: [0, 0.25, 0.5, 0.75, 1].map((y) => ({ y, label: `${y * 100}%` })),
+    yTitle: "↑ More tired",
     // Your sleep, shaded, so you can see pressure drain while you're asleep.
     bands: blocks.map((b) => ({ from: b.startH, to: b.endH, color: cssVar("--night") })),
     vline: { x: nowH, label: "Now" },
