@@ -4,7 +4,7 @@
 
 import { lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
-import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange, fillRing } from "./shared.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -42,6 +42,7 @@ function showSliderValues(x) {
 function showOutputs(x, r) {
   const plan = r.plan;
   $("strengthNow").textContent = `${Math.round(r.strengthNow)}%`;
+  fillRing($("strengthRing"), r.strengthNow / 100);
   $("feelsLike").textContent = `Your ${r.doseMg} mg feels like ${Math.round(r.feelsLikeMg)} mg`;
   $("tolEquation").textContent = `${r.nowR.toFixed(2)}x a non-drinker's receptors`;
 

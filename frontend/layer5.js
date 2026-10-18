@@ -5,7 +5,7 @@
 import { clockToHours, hoursToClock } from "./time.js";
 import { areaChart, heatmap, lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
-import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
+import { publish, shared, onShared, perFrame, onWidthChange, fillRing } from "./shared.js";
 import { CALENDAR_END_H } from "./sleepcal.js";
 
 const $ = (id) => document.getElementById(id);
@@ -123,6 +123,7 @@ function showPlan(x, r) {
   list.replaceChildren();
   if (r.error) {
     $("planScore").textContent = "–";
+    fillRing($("planRing"), null);
     $("planEquation").textContent = "Your sleep calendar needs the night before and the night after your event.";
     $("planChip").textContent = "Needs sleep";
     $("planNote").textContent = "";
@@ -131,6 +132,7 @@ function showPlan(x, r) {
 
   const added = r.doses.reduce((sum, d) => sum + d.mg, 0);
   $("planScore").textContent = (r.score * 10).toFixed(1);
+  fillRing($("planRing"), r.score);
   $("planEquation").textContent = `${(r.baselineScore * 10).toFixed(1)} → ${(r.score * 10).toFixed(1)} out of 10.`;
   $("planChip").textContent = added ? `${added} mg added` : "Nothing to add";
 
@@ -195,6 +197,7 @@ function updatePlan() {
   if (x.event.endH <= nowH()) {
     $("planList").replaceChildren();
     $("planScore").textContent = "–";
+    fillRing($("planRing"), null);
     $("planEquation").textContent = "That's already over. Pick a later time.";
     $("planChip").textContent = "–";
     return;

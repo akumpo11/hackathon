@@ -40,3 +40,11 @@ export function onWidthChange(fn) {
     fn();
   });
 }
+
+// Fills the band round a hero ring (index.html, .ring-arc in styles.css) to a share
+// from 0 to 1. Anything else, like a missing score, empties it.
+export function fillRing(ring, fraction) {
+  const f = Number.isFinite(fraction) ? Math.min(Math.max(fraction, 0), 1) : 0;
+  ring.style.setProperty("--fill", f);
+  ring.classList.toggle("ring-empty", f === 0);
+}
