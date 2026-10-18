@@ -249,6 +249,7 @@ export function initSettings() {
     $("settingsIntro").hidden = false;
     $("settingsDone").textContent = normal.done;
     close();
+    document.dispatchEvent(new Event("surveydone"));   // the home page's rating tab waits for this
   };
 
   gear.addEventListener("click", () => open(gear));
@@ -262,5 +263,8 @@ export function initSettings() {
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !frame.hidden && step === null) close(); });
 
-  if (surveyAsked() || !surveyDone()) openSurvey();
+  // Tells app.js whether the survey is on screen, so the rating tab waits until it's done.
+  const surveyOpen = surveyAsked() || !surveyDone();
+  if (surveyOpen) openSurvey();
+  return surveyOpen;
 }

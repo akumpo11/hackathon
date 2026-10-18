@@ -387,6 +387,15 @@
       <svg viewBox="0 0 24 24"><path d="M4 19h16M5 15l4-4 3 3 7-7M15 7h4v4" /></svg><span>Learn</span>
     </button>
   </nav>
+  <!-- Home page only, above the tab bar: asks for a rating once an hour (ratenudge.js). -->
+  <aside class="rate-nudge" id="rateNudge" aria-label="Rate your alertness" hidden>
+    <button type="button" class="rate-nudge-go" id="rateNudgeGo">
+      <span class="welcome-icon"><svg viewBox="0 0 24 24"><path d="M4 19h16M5 15l4-4 3 3 7-7M15 7h4v4" /></svg></span>
+      <span><strong>How alert are you right now?</strong><br><span class="muted small">Rate it every hour so DeCaf learns your half-life.</span></span>
+      <span class="rate-nudge-cta">Rate</span>
+    </button>
+    <button type="button" class="rate-nudge-close" id="rateNudgeClose" aria-label="Not now">×</button>
+  </aside>
   <!-- Top right on every layer: opens personal settings. -->
   <button type="button" class="icon-btn settings-btn" id="settingsOpen" aria-label="Personal settings" title="Personal settings">
     <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" /><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6Z" /></svg>

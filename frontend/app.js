@@ -3,6 +3,7 @@
 import { loadPython } from "./python.js";
 import { initSettings } from "./settings.js";
 import { initInfo } from "./info.js";
+import { initRateNudge } from "./ratenudge.js";
 import { startLayer1 } from "./layer1.js";
 import { startLayer2 } from "./layer2.js";
 import { startLayer3 } from "./layer3.js";
@@ -52,7 +53,10 @@ pager.dispatchEvent(new Event("scroll"));
 initInfo();
 
 // Personal settings first: layers 1 to 3 read them as soon as they start.
-initSettings();
+const surveyOpen = initSettings();
+
+// The "How alert are you?" tab on the home page, which jumps to the Learn page's ratings.
+initRateNudge({ surveyOpen, onHome: startPage === 0, goToLearn: () => tabs[5].click() });
 
 // A thin bar across the top while Python downloads (styles.css .loading). The pages
 // start the download themselves; this only watches for it to finish.

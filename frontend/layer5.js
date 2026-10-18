@@ -49,6 +49,9 @@ const loadRatings = () => loadJson(RATINGS_KEY, { ratings: [], drinks: [] });
 const loadLearned = () => loadJson(LEARNED_KEY, { use: false });
 const save = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
+// When you last rated, or null if never. The home page's rating tab (ratenudge.js) asks.
+export const lastRatingMs = () => loadRatings().ratings.at(-1)?.atMs ?? null;
+
 // What every model call needs about you: settings for the body, layer 2 for the clock, layer 3 for R.
 function you() {
   const s = shared.settings;

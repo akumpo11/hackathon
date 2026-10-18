@@ -587,3 +587,27 @@ button { cursor: pointer; border: 0; background: none; }
 .nap-slot { margin: 12px 0 6px; }
 .card > .check { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-top: 16px; }
 .card > .check input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* ---------- Rating tab on the home page (ratenudge.js) ---------- */
+/* Floats just above the tab bar, and pops up like a notification. */
+.rate-nudge {
+  position: absolute; left: 16px; right: 16px; z-index: 5;
+  bottom: calc(max(16px, env(safe-area-inset-bottom)) + 64px + 10px);   /* the tab bar's bottom + its height + a gap */
+  display: flex; align-items: center;
+  background: var(--card); border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(22, 32, 28, .18);
+  animation: nudge-pop .45s cubic-bezier(.2, 1.4, .4, 1);              /* overshoots a little, so it catches the eye */
+}
+.rate-nudge[hidden] { display: none; }
+:root[data-theme="night"] .rate-nudge { box-shadow: none; border: 1px solid var(--line); }
+@keyframes nudge-pop { from { opacity: 0; transform: translateY(24px) scale(.94); } }
+.rate-nudge-go {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px;
+  padding: 12px 6px 12px 12px; text-align: left; line-height: 1.3; font-size: 14px;
+}
+.rate-nudge-go strong { font-weight: 800; }
+.rate-nudge-cta {
+  flex: none; margin-left: auto; padding: 8px 14px; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 13px;
+}
+.rate-nudge-close { flex: none; width: 36px; align-self: stretch; font-size: 20px; color: var(--muted); }
