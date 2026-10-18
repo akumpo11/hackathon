@@ -1,4 +1,4 @@
-// Page navigation for the five layer pages, then each page's own code.
+// Page navigation for the five layer pages and the learning page, then each page's own code.
 
 import { loadPython } from "./python.js";
 import { initSettings } from "./settings.js";

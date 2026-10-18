@@ -212,7 +212,7 @@
 
       <article class="card">
         <h2>What goes in <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoInputs" aria-label="About the inputs"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoInputs" hidden>Tolerance is your extra adenosine receptors from the tolerance page: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; it uses the population average until your ratings on the plan page teach it yours.</p>
+        <p class="info-pop" id="infoInputs" hidden>Tolerance is your extra adenosine receptors from the tolerance page: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; it uses the population average until your ratings on the learning page teach it yours.</p>
         <ul class="breakdown given">
           <li><span>Caffeine in your blood <em class="src" id="lvlConc"></em></span><strong id="inConc">–</strong></li>
           <li><span>Sleep pressure <em class="src" id="lvlS"></em></span><strong id="inS">–</strong></li>
@@ -310,9 +310,16 @@
         <p class="muted small" id="planSleepNote"></p>
       </article>
 
-      <h1 class="page-title">Learning about you</h1>
-      <p class="body">Rate how alert you feel, and the model learns your own half-life and sensitivity. <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoLearn" aria-label="About learning"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></p>
-      <p class="info-pop" id="infoLearn" hidden>Bayes' rule on a grid of 400 guesses: each guess's probability is its prior (close to your settings) times how well it predicts your ratings. Ratings a few hours after coffee teach it the most, because half-life shows in how fast caffeine wears off.</p>
+      <p class="footnote">A model for learning, not medical advice.</p>
+    </section>
+
+    <!-- ============ Learning about you (model/learn.py, drawn by layer5.js) ============ -->
+    <section class="page" aria-label="Learning about you">
+      <header class="page-head">
+        <p class="brand"><span class="brand-logo"><svg viewBox="0 0 24 24"><path d="M5 10h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 14.5V10Z" /><path d="M16 11.5h1a2.5 2.5 0 0 1 0 5h-1.3M8.5 3.5v3M12.5 3.5v3" /></svg></span>DeCaf</p>
+        <h1 class="page-label">Learning about you <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoLearn" aria-label="About learning"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h1>
+        <p class="info-pop" id="infoLearn" hidden>Rate how alert you feel, and the model learns your own half-life and sensitivity. Bayes' rule on a grid of 400 guesses: each guess's probability is its prior (close to your settings) times how well it predicts your ratings. Ratings a few hours after coffee teach it the most, because half-life shows in how fast caffeine wears off.</p>
+      </header>
 
       <article class="card">
         <h2>How alert are you right now?</h2>
@@ -375,6 +382,9 @@
     </button>
     <button class="tab" data-page="4" aria-label="Your caffeine plan">
       <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" /></svg><span>Plan</span>
+    </button>
+    <button class="tab" data-page="5" aria-label="Learning about you">
+      <svg viewBox="0 0 24 24"><path d="M4 19h16M5 15l4-4 3 3 7-7M15 7h4v4" /></svg><span>Learn</span>
     </button>
   </nav>
   <!-- Top right on every layer: opens personal settings. -->

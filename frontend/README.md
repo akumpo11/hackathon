@@ -32,7 +32,7 @@ Layer 5 reads the same three pages plus your event and runs the optimizer on the
 
 ## Files
 
-- `index.html`: the five layer pages and the bottom slider.
+- `index.html`: the five layer pages, the learning page (layer 5's ratings) and the bottom slider.
 - `styles.css`: colors and layout. Colors are variables at the top; each theme (`:root[data-theme="..."]`) only changes those variables.
 - `app.js`: page switching, then starts each page.
 - `python.js`: loads Pyodide once and puts the model files on its disk.
