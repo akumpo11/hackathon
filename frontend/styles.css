@@ -1,23 +1,26 @@
 /* ---------- Tokens (taken from the reference mockup) ---------- */
 :root {
-  --canvas: #EEF1F0;     /* app background */
+  --canvas: #F1EEEB;     /* app background */
   --card: #FFFFFF;
   --ink: #16201C;        /* main text, dark ring */
-  --muted: #7D8A85;
-  --line: #E3E8E6;
-  --accent: #17B890;       /* primary: plan, good news (changes with the theme) */
-  --accent-soft: #DDF4EC;  /* light tint of the accent, behind tags and chips */
-  --accent-ink: #0E7A5F;   /* accent-colored text that stays readable on the soft tint */
+  --muted: #8B8178;
+  --line: #E7E0D9;
+  --accent: #A0673A;       /* primary: plan, good news (changes with the theme) */
+  --accent-soft: #F3E7DA;  /* light tint of the accent, behind tags and chips */
+  --accent-ink: #77461F;   /* accent-colored text that stays readable on the soft tint */
   --on-accent: #FFFFFF;    /* text on a solid accent background */
   --on-ink: #FFFFFF;       /* text on a solid ink background (dark ring, tab bar) */
   --coral: #F0645F;      /* event marker, warnings */
   --coral-soft: #FDE4E2;
   --coral-ink: #B83A35;
   --peak: #E9A23B;       /* where each drink tops out (kept apart from the coral readout dot) */
+  --good-soft: #E2F0E3; --good-ink: #3D7448;   /* pastel level tags: good for alertness ... */
+  --mid-soft: #FAEFD2;  --mid-ink: #876A22;    /* ... middling ... */
+  --bad-soft: #F8E0DE;  --bad-ink: #A24840;    /* ... bad. Same in every theme but night. */
   --night: #DCE3EF;      /* sleep shading */
   --night-ink: #3E4E6B;
-  --backdrop: #D7DDDA;   /* behind the phone frame on a laptop */
-  --frame: #1C2320;      /* the phone frame's bezel */
+  --backdrop: #DDD6CF;   /* behind the phone frame on a laptop */
+  --frame: #2A211B;      /* the phone frame's bezel */
   --scrim: rgba(22, 32, 28, .35);
   --radius-lg: 28px;
   --radius-md: 18px;
@@ -28,18 +31,18 @@
 }
 
 /* ---------- Themes: each one only changes the color tokens above ---------- */
-/* Picked in personal settings; settings.js sets <html data-theme="...">. */
+/* Picked in personal settings; settings.js sets <html data-theme="...">. Coffee is the default (the :root values). */
+:root[data-theme="mint"] {
+  --accent: #17B890; --accent-soft: #DDF4EC; --accent-ink: #0E7A5F;
+  --canvas: #EEF1F0; --line: #E3E8E6; --muted: #7D8A85; --backdrop: #D7DDDA; --frame: #1C2320;
+}
 :root[data-theme="ocean"] {
   --accent: #2F7FE0; --accent-soft: #E1ECFB; --accent-ink: #1C5AA8;
-  --canvas: #EDF1F5; --line: #DFE6EE; --muted: #7A8796; --backdrop: #D5DDE6;
-}
-:root[data-theme="coffee"] {
-  --accent: #A0673A; --accent-soft: #F3E7DA; --accent-ink: #77461F;
-  --canvas: #F1EEEB; --line: #E7E0D9; --muted: #8B8178; --backdrop: #DDD6CF; --frame: #2A211B;
+  --canvas: #EDF1F5; --line: #DFE6EE; --muted: #7A8796; --backdrop: #D5DDE6; --frame: #1C2320;
 }
 :root[data-theme="berry"] {
   --accent: #C2457A; --accent-soft: #F8E1EC; --accent-ink: #922F5A;
-  --canvas: #F3EEF1; --line: #EADFE5; --muted: #8C7C85; --backdrop: #E0D5DB;
+  --canvas: #F3EEF1; --line: #EADFE5; --muted: #8C7C85; --backdrop: #E0D5DB; --frame: #1C2320;
 }
 :root[data-theme="night"] {
   color-scheme: dark;
@@ -49,6 +52,9 @@
   --coral: #FF7A73; --coral-soft: #3D2221; --coral-ink: #FFB1AC;
   --night: #253246; --night-ink: #B9C6DE;
   --peak: #F5B94F;
+  --good-soft: #1F3326; --good-ink: #A7D7AF;
+  --mid-soft: #39311F;  --mid-ink: #E6CD8C;
+  --bad-soft: #3B2524;  --bad-ink: #EFB0A9;
   --backdrop: #070A09; --frame: #000000; --scrim: rgba(0, 0, 0, .55);
 }
 
@@ -277,8 +283,8 @@ button { cursor: pointer; border: 0; background: none; }
 }
 /* iPhone Safari gives time pickers a fixed built-in width that ignores width: 100%,
    so they spilled into the drink buttons. appearance: none lets them shrink to fit. */
-.field input[type="time"] { -webkit-appearance: none; appearance: none; min-width: 0; min-height: 46px; }
-.field input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+.field input[type="time"], .field input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; min-height: 46px; }
+.field input[type="time"]::-webkit-date-and-time-value, .field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 
 /* ---------- Personal settings (frame 6) ---------- */
 .settings-btn {
@@ -391,27 +397,80 @@ button { cursor: pointer; border: 0; background: none; }
 }
 .tile-name { font-size: 13px; font-weight: 700; line-height: 1.2; padding: 0 4px; }
 .tile-size { font-size: 11.5px; color: var(--muted); font-weight: 600; padding: 2px 4px 0; }
+.drink-grid[hidden], .custom-drink[hidden] { display: none; }
+.custom-drink { margin-top: 0; }
+.custom-drink .hint { margin-top: 10px; }
+.custom-drink .hint.bad { color: var(--bad-ink); }
 
 .breakdown { list-style: none; padding: 0; margin-top: 8px; }
 .breakdown li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .breakdown strong { white-space: nowrap; }   /* values stay on one line; the label wraps instead */
 .breakdown li:first-child { border-top: 0; }
 .src { font-style: normal; font-size: 11.5px; font-weight: 700; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); }
+.src:empty { display: none; }   /* before the model has run */
+.src.good { background: var(--good-soft); color: var(--good-ink); }
+.src.mid { background: var(--mid-soft); color: var(--mid-ink); }
+.src.bad { background: var(--bad-soft); color: var(--bad-ink); }
 .breakdown li:last-child strong { color: var(--accent); }
 .breakdown.given li:last-child strong { color: var(--ink); }   /* a list of inputs has no result row to highlight */
 
-/* ---------- Layer 2: sleep calendar and body clock ---------- */
-.cal-wrap { margin-top: 12px; }
-.cal { display: grid; grid-template-columns: 34px repeat(var(--days), 1fr); gap: 0 2px; user-select: none; -webkit-user-select: none; }
-.cal-head { display: flex; flex-direction: column; align-items: center; padding: 2px 0 6px; font-size: 11px; color: var(--muted); }
-.cal-head strong { font-size: 15px; color: var(--ink); width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; }
-.cal-head.today strong { background: var(--ink); color: var(--on-ink); }
-.cal-hour { height: 14px; font-size: 10px; font-weight: 700; color: var(--muted); transform: translateY(-6px); touch-action: pan-y; }
-.cal-cell { height: 14px; touch-action: none; background: var(--canvas); border-top: 1px solid transparent; }
-.cal-cell.on-hour { border-top-color: var(--line); }
-.cal-cell.event { background: var(--coral-soft); }
-.cal-cell.sleep { background: var(--night); }
-.cal-cell.sleep.event { background: var(--night); box-shadow: inset 4px 0 0 var(--coral); }   /* asleep during the event: a coral bar down the edge, continuous across cells */
+/* ---------- Layer 2: your sleep, one day at a time ---------- */
+/* One card for the day on screen: arrows (or a sideways swipe) move between days.
+   Each bar is a window of hours with the sleep as a pill you drag: the ends set
+   when it starts and ends, the middle slides the whole thing. */
+.day-card { margin-top: 8px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.day-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.day-arrow { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--canvas); color: var(--ink); }
+.day-arrow svg { width: 20px; height: 20px; }
+.day-arrow svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.day-arrow:disabled { opacity: .3; cursor: default; }
+.day-name { text-align: center; line-height: 1.2; }
+.day-name strong { display: block; font-size: 17px; font-weight: 800; }
+.day-name small { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.day-body.from-right { animation: day-in-right .22s ease-out; }
+.day-body.from-left { animation: day-in-left .22s ease-out; }
+@keyframes day-in-right { from { opacity: 0; transform: translateX(24px); } }
+@keyframes day-in-left { from { opacity: 0; transform: translateX(-24px); } }
+.day-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+.day-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.day-dots span.on { background: var(--ink); }
+
+.bar { padding-top: 14px; }
+.bar-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13.5px; min-height: 30px; }
+.bar-head strong { font-weight: 700; }
+.bar-times { flex: 1; color: var(--muted); font-weight: 600; font-size: 12.5px; white-space: nowrap; }
+.bar-remove { width: 30px; height: 30px; border-radius: 50%; font-size: 18px; color: var(--muted); background: var(--canvas); }
+.bar.empty .bar-remove, .bar.empty .bar-len, .bar.empty .bar-track, .bar.empty .bar-ticks, .bar:not(.empty) .bar-add { display: none; }
+.bar-add { margin-left: auto; }
+.bar-track {
+  position: relative; height: 34px; border-radius: 12px; background: var(--canvas);
+  touch-action: none; cursor: pointer;
+}
+.bar-event { position: absolute; top: 0; bottom: 0; background: var(--coral-soft); }
+.bar-event[hidden] { display: none; }
+.bar-span {
+  position: absolute; top: 0; bottom: 0; border-radius: 12px; background: var(--night);
+  cursor: grab; transition: left .08s, width .08s;
+}
+.bar.empty .bar-span { display: none; }
+.bar.empty .bar-track { cursor: default; }
+.bar-track.dragging .bar-span { transition: none; cursor: grabbing; }
+.bar.clash .bar-span { box-shadow: inset 0 0 0 2px var(--coral); }   /* asleep during the event */
+/* The grab handles: a short bar at each end of the pill, with a wide hit area around it. */
+.bar-handle { position: absolute; top: 0; bottom: 0; width: 28px; display: grid; place-items: center; }
+.bar-handle::after { content: ""; width: 4px; height: 14px; border-radius: 2px; background: var(--night-ink); opacity: .55; }
+.bar-handle[data-edge="bed"] { left: -8px; }
+.bar-handle[data-edge="wake"] { right: -8px; }
+/* A nap pill is narrow, so its handles sit just outside the ends and the pill itself is the slide area. */
+.bar.nap .bar-handle[data-edge="bed"] { left: -26px; }
+.bar.nap .bar-handle[data-edge="wake"] { right: -26px; }
+.bar.nap .bar-span { background: var(--night-ink); opacity: .75; }
+.bar.nap .bar-handle::after { background: var(--night-ink); opacity: 1; }
+.bar-ticks { display: flex; justify-content: space-between; margin-top: 6px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.bar-ticks span { width: 0; display: flex; justify-content: center; }
+.bar-ticks span:first-child { justify-content: flex-start; }
+.bar-ticks span:last-child { justify-content: flex-end; }
+
 .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
 .segmented label { cursor: pointer; }
 .segmented input { position: absolute; opacity: 0; pointer-events: none; }

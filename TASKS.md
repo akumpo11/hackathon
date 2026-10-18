@@ -129,7 +129,7 @@ echo ".venv/" >> .gitignore
 ```
 
 3. Andrew creates `model/schema.py` and `model/params.py` and pushes. Nobody edits these without telling the group.
-4. C creates a one-line `app.py` (`import streamlit as st; st.title("Caffeine Optimizer")`), pushes, and deploys on Streamlit Community Cloud (share.streamlit.io, sign in with GitHub, pick the repo, main file `app.py`). Get the public URL now, not Sunday. The repo must be public.
+4. C creates a one-line `app.py` (`import streamlit as st; st.title("DeCaf")`), pushes, and deploys on Streamlit Community Cloud (share.streamlit.io, sign in with GitHub, pick the repo, main file `app.py`). Get the public URL now, not Sunday. The repo must be public.
 5. Everyone pulls, activates the venv, runs `streamlit run app.py` and `pytest`. Agree: commit small, pull before push, never force-push main.
 
 ### Shared contract

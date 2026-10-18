@@ -1,1 +1,1 @@
-"""Caffeine optimizer model: pure math, no web or UI code."""
+"""DeCaf caffeine optimizer model: pure math, no web or UI code."""

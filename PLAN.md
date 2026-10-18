@@ -1,4 +1,4 @@
-# Caffeine Optimizer: Build Plan
+# DeCaf: Build Plan
 
 Deadline: Sunday Oct 18, 1:00 PM. Judging 1:45 to 4:55 PM (two judges, 8 min each, every member gets a question).
 

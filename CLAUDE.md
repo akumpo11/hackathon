@@ -2,7 +2,7 @@
 
 Our team's project for MathHacks (submission deadline: 1:00 PM, Sunday, October 18, 2026).
 
-## Project idea: Caffeine optimizer
+## Project idea: DeCaf, a caffeine optimizer
 
 A pharmacokinetic model of caffeine that accounts for half-life and tolerance. It plans when to drink coffee and how much so you're alert for an event like an exam, without wrecking your sleep. Everyone in the room will try it.
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#F1EEEB">
-  <title>Caffeine Optimizer</title>
+  <title>DeCaf</title>
   <!-- "Add to Home Screen" opens the app full screen, with no browser bars, like a native app.
        manifest.json covers Android/Chrome; the apple-* tags cover iPhone Safari. -->
   <link rel="manifest" href="manifest.json">
@@ -53,7 +53,7 @@
       <form id="layer1Inputs">
         <article class="card">
           <h2>Your drinks today <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoDrinks" aria-label="About your drinks"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-          <p class="info-pop" id="infoDrinks" hidden>Tap a drink to change it. Pick "No drink" to skip a row.</p>
+          <p class="info-pop" id="infoDrinks" hidden>Tap a drink to change it. Pick "No drink" to skip a row, or "Custom" for a drink that isn't listed.</p>
           <div class="inputs">
             <div class="row drink-row">
               <label class="field">Time<input type="time" name="time0" value="08:00"></label>
@@ -102,7 +102,7 @@
           <h2>When you sleep <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoSleepCal" aria-label="About the sleep calendar"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <span class="chip ok" id="sleepSummary">–</span>
         </div>
-        <p class="info-pop" id="infoSleepCal" hidden>It starts from your usual sleep in Settings. Press and drag over a day to mark sleep, or over marked time to erase it. Short blocks count as naps. Scroll with the hour labels.</p>
+        <p class="info-pop" id="infoSleepCal" hidden>One day at a time: use the arrows or swipe sideways to change day. Each night starts from your usual sleep in Settings. Drag the ends of a bar to change when it starts and ends, or drag the middle to slide it. Add a nap the same way.</p>
         <div id="sleepCal" class="cal-wrap"></div>
       </article>
 
@@ -214,16 +214,16 @@
         <h2>What goes in <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoInputs" aria-label="About the inputs"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
         <p class="info-pop" id="infoInputs" hidden>Tolerance is your extra adenosine receptors from layer 3: 1.00x for a non-drinker. Sensitivity (Kd) is the caffeine level that blocks half your receptors; this uses the population average until layer 5 learns yours.</p>
         <ul class="breakdown given">
-          <li><span>Caffeine in your blood <em class="src">Layer 1</em></span><strong id="inConc">–</strong></li>
-          <li><span>Sleep pressure <em class="src">Layer 2</em></span><strong id="inS">–</strong></li>
-          <li><span>Body clock <em class="src">Layer 2</em></span><strong id="inCirc">–</strong></li>
-          <li><span>Tolerance <em class="src">Layer 3</em></span><strong id="inR">–</strong></li>
-          <li><span>Caffeine sensitivity <em class="src">Average</em></span><strong id="inKd">–</strong></li>
+          <li><span>Caffeine in your blood <em class="src" id="lvlConc"></em></span><strong id="inConc">–</strong></li>
+          <li><span>Sleep pressure <em class="src" id="lvlS"></em></span><strong id="inS">–</strong></li>
+          <li><span>Body clock <em class="src" id="lvlCirc"></em></span><strong id="inCirc">–</strong></li>
+          <li><span>Tolerance <em class="src" id="lvlR"></em></span><strong id="inR">–</strong></li>
+          <li><span>Caffeine sensitivity <em class="src mid">Average</em></span><strong id="inKd">–</strong></li>
         </ul>
       </article>
 
       <article class="card">
-        <h2>What comes out</h2>
+        <h2>The result</h2>
         <ul class="breakdown">
           <li><span>Receptors blocked by caffeine</span><strong id="outOcc">–</strong></li>
           <li><span>Sleep pressure you feel</span><strong id="outFelt">–</strong></li>
@@ -262,12 +262,7 @@
           <h2>Your event</h2>
           <div class="inputs">
             <div class="row">
-              <label class="field">Day
-                <select name="eventDay">
-                  <option value="0">Today</option>
-                  <option value="1" selected>Tomorrow</option>
-                </select>
-              </label>
+              <label class="field">Day<input type="date" name="eventDate" required></label>
               <label class="field">Starts<input type="time" name="eventStart" value="09:00"></label>
             </div>
             <label class="slider">
@@ -312,19 +307,6 @@
         </div>
         <div class="meter"><div class="meter-fill" id="planMeter"></div><div class="meter-limit" id="planLimit"></div></div>
         <p class="muted small" id="planSleepNote"></p>
-      </article>
-
-      <article class="card">
-        <h2>How it chose <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoChose" aria-label="About the search"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoChose" hidden>It scores every single dose and every pair of doses at least an hour apart, then tries adding a third to the best pair. Sleep pressure doesn't depend on the doses, so it's worked out once; only the caffeine curve changes between schedules.</p>
-        <ul class="breakdown">
-          <li><span>Schedules tried</span><strong id="outTried">–</strong></li>
-          <li><span>Caffeine that day</span><strong id="outDayMg">–</strong></li>
-          <li><span>Each 50 mg must add at least</span><strong id="outMgCost">–</strong></li>
-          <li><span>Half-life and sensitivity used</span><strong id="outParams">–</strong></li>
-          <li><span>Without extra coffee</span><strong id="outBaseline">–</strong></li>
-          <li><span>With the plan</span><strong id="outWithPlan">–</strong></li>
-        </ul>
       </article>
 
       <h1 class="page-title">Learning about you</h1>
@@ -521,6 +503,18 @@
     </div>
     <p class="muted small" id="drinkSheetNote"></p>
     <div class="drink-grid" id="drinkGrid"></div>
+    <!-- Shown instead of the grid after tapping the "Custom" tile. -->
+    <form class="custom-drink inputs" id="customDrink" hidden novalidate>
+      <div class="row">
+        <label class="field">Name<input type="text" name="customName" maxlength="30" placeholder="Custom drink" autocomplete="off"></label>
+        <label class="field">Caffeine (mg)<input type="number" name="customMg" min="1" max="1000" step="1" inputmode="numeric" placeholder="e.g. 150" required></label>
+      </div>
+      <p class="hint" id="customHint">Check the label or the café's website for the caffeine.</p>
+      <div class="btn-row">
+        <button type="button" class="btn ghost" id="customBack">Back</button>
+        <button type="submit" class="btn">Add drink</button>
+      </div>
+    </form>
   </section>
 </div>
 

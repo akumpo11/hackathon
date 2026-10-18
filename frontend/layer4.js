@@ -21,6 +21,17 @@ let last = null;           // the latest results, for redrawing and scrubbing
 const pct = (v) => `${Math.round(v * 100)}%`;
 const signed = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
 
+// Tags each input Low, Average or High, colored by what that means for alertness:
+// green helps, yellow is in between, red hurts. For caffeine and the body clock
+// higher helps; for sleep pressure and tolerance lower helps.
+function tagLevel(id, value, low, high, higherHelps) {
+  const word = value < low ? "Low" : value > high ? "High" : "Average";
+  const helps = word === (higherHelps ? "High" : "Low");
+  const hurts = word === (higherHelps ? "Low" : "High");
+  $(id).textContent = word;
+  $(id).className = `src ${helps ? "good" : hurts ? "bad" : "mid"}`;
+}
+
 // Everything for one moment: the readout, the inputs and the four outputs.
 function showMoment(i, atNow) {
   const { r } = last;
@@ -35,6 +46,14 @@ function showMoment(i, atNow) {
   $("inCirc").textContent = signed(circ);
   $("inR").textContent = `${last.R.toFixed(2)}x`;
   $("inKd").textContent = `${r.kd.toFixed(1)} mg/L`;
+
+  // Cut points: caffeine by the share of receptors it blocks (under 20%, over 50%);
+  // sleep pressure and the body clock split their ranges (0 to 1, ±0.15) about in thirds;
+  // tolerance 1.2x is a light drinker, 1.6x a heavy one (1.0x is none).
+  tagLevel("lvlConc", r.occupancy[i], 0.2, 0.5, true);
+  tagLevel("lvlS", S, 0.4, 0.7, false);
+  tagLevel("lvlCirc", circ, -0.05, 0.05, true);
+  tagLevel("lvlR", last.R, 1.2, 1.6, false);
 
   $("outOcc").textContent = pct(r.occupancy[i]);
   $("outFelt").textContent = `${felt.toFixed(2)} of ${S.toFixed(2)}`;

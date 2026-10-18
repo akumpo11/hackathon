@@ -6,6 +6,7 @@ import { clockToHours, hoursToClock } from "./time.js";
 import { areaChart, heatmap, lineChart } from "./charts.js";
 import { loadPython, toObject } from "./python.js";
 import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
+import { CALENDAR_END_H } from "./sleepcal.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -27,6 +28,19 @@ const toH = (ms) => (ms - midnightMs()) / 3.6e6;
 const toMs = (h) => midnightMs() + h * 3.6e6;
 const nowH = () => toH(Date.now());
 
+// The event's date box holds "2026-10-24". Built from its parts, the Date is local
+// midnight (a bare string would be read as UTC). Rounding absorbs the hour a
+// daylight-saving change adds or removes.
+function daysFromToday(isoDate) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return Math.round((new Date(y, m - 1, d) - midnightMs()) / 864e5);
+}
+function isoDateIn(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // ---------- Storage ----------
 function loadJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -47,9 +61,32 @@ function you() {
 
 // ---------- The plan ----------
 
+// The optimizer needs the night before and the night after the event, but layer 2's
+// night list stops at noon two days from now. Past that edge we assume your usual
+// night from settings, the same guess the night list starts out filled with. If a
+// night runs up to the edge, it carries on to your usual wake time.
+function sleepThrough(event, blocks, settings) {
+  const bed = clockToHours(settings.bedtime), wake = clockToHours(settings.wakeTime);
+  const bedH = bed < 12 ? bed + 24 : bed;             // a bedtime like 1 AM is after midnight
+  const lengthH = (wake - bed + 24) % 24;
+  const out = blocks.map((b) => ({ ...b }));
+  // Nights through the one after the event's last day, in case the event runs past bedtime.
+  const lastNight = Math.floor(event.endH / 24) + 1;
+  for (let day = Math.floor(CALENDAR_END_H / 24) - 1; day <= lastNight; day++) {
+    const startH = day * 24 + bedH, endH = startH + lengthH;
+    if (endH <= CALENDAR_END_H) continue;             // the calendar shows all of this night
+    if (startH < CALENDAR_END_H) {
+      const evening = out.find((b) => !b.isNap && b.endH === CALENDAR_END_H);
+      if (evening) { evening.endH = endH; continue; }
+    }
+    out.push({ startH, endH, isNap: false });
+  }
+  return out;
+}
+
 function readEvent() {
   const el = form.elements;
-  const day = Number(el.eventDay.value);
+  const day = daysFromToday(el.eventDate.value || isoDateIn(1));   // a cleared box means tomorrow
   const startH = clockToHours(el.eventStart.value || "09:00", day);
   const lengthH = Number(el.eventLength.value);
   // One optional free slot for a nap, on the event day. An end before the start means past midnight.
@@ -101,7 +138,8 @@ function showPlan(x, r) {
   if (r.nap) {
     rows.push({ t: r.nap.startH, li: timelineRow(r.nap.startH, "20-minute nap", `until ${hoursToClock(r.nap.endH)}`, "Nap", "nap") });
   }
-  rows.push({ t: x.event.startH, li: timelineRow(x.event.startH, "Your event", `${x.lengthH} h, until ${hoursToClock(x.event.endH)}`, "Event", "event") });
+  const eventDay = new Date(toMs(x.event.startH)).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  rows.push({ t: x.event.startH, li: timelineRow(x.event.startH, "Your event", `${eventDay}, ${x.lengthH} h, until ${hoursToClock(x.event.endH)}`, "Event", "event") });
   rows.sort((a, b) => a.t - b.t).forEach((row) => list.append(row.li));
 
   const drinksNote = shared.layer1.doses.length ? " It counts the drinks you entered on layer 1." : "";
@@ -121,18 +159,11 @@ function showPlan(x, r) {
     ? `${Math.round(r.bedtimeMg)} mg left at bedtime, under the ${r.bedtimeLimitMg} mg cutoff.`
     : `${Math.round(r.bedtimeMg)} mg left at bedtime from the drinks you already have. The plan adds nothing that makes it worse.`;
 
-  $("outTried").textContent = r.tried.toLocaleString();
-  $("outDayMg").textContent = `${Math.round(r.dayMg)} of ${r.dailyLimitMg} mg`;
-  $("outMgCost").textContent = `${r.mgCostPer50.toFixed(2)} out of 10`;
-  $("outParams").textContent = `${r.halfLifeH.toFixed(1)} h, ${r.kdMgL.toFixed(1)} mg/L${loadLearned().use ? " (learned)" : ""}`;
-  $("outBaseline").textContent = `${(r.baselineScore * 10).toFixed(1)} / 10`;
-  $("outWithPlan").textContent = `${(r.score * 10).toFixed(1)} / 10`;
-
   drawPlanChart(x, r);
 }
 
 function drawPlanChart(x, r) {
-  const sleepBands = shared.layer2.blocks.concat(r.nap ? [r.nap] : []);
+  const sleepBands = x.sleep.concat(r.nap ? [r.nap] : []);
   const asleep = (t) => sleepBands.some((b) => t >= b.startH && t < b.endH);
   const inRange = (t) => t >= r.t[0] && t <= r.t[r.t.length - 1];
   const drinks = shared.layer1.doses.concat(r.doses).filter((d) => inRange(d.timeH));
@@ -167,10 +198,11 @@ function updatePlan() {
     $("planChip").textContent = "–";
     return;
   }
+  x.sleep = sleepThrough(x.event, layer2.blocks, settings);
   const saved = loadLearned();
   const r = toObject(bridge.plan(JSON.stringify({
     ...you(),
-    event: x.event, sleep: layer2.blocks, drinks: layer1.doses,
+    event: x.event, sleep: x.sleep, drinks: layer1.doses,
     learned: saved.use ? saved : null,
     allowNap: x.allowNap, freeSlots: x.freeSlots, nowH: nowH(),
   })));
@@ -254,6 +286,8 @@ function updateLearn() {
 }
 
 export async function startLayer5() {
+  form.elements.eventDate.value = isoDateIn(1);       // tomorrow, the usual case
+  form.elements.eventDate.min = isoDateIn(0);
   const pyodide = await loadPython();
   bridge = pyodide.pyimport("layer5_bridge");
 

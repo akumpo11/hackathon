@@ -3,7 +3,7 @@
 
 import { clockToHours, hoursToClock, nowHours } from "./time.js";
 import { areaChart } from "./charts.js";
-import { initDrinkPicker } from "./drinkpicker.js";
+import { initDrinkPicker, drinkMg } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
 import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
 
@@ -19,8 +19,8 @@ function readInputs(drinks) {
   if (bedtimeH < 12) bedtimeH += 24;                     // 1 AM bedtime means tonight, not this morning
   const doses = [];
   for (let i = 0; i < DRINK_ROWS; i++) {
-    const label = el[`drink${i}`].value;
-    if (label) doses.push({ timeH: clockToHours(el[`time${i}`].value), mg: drinks[label], label });
+    const input = el[`drink${i}`];
+    if (input.value) doses.push({ timeH: clockToHours(el[`time${i}`].value), mg: drinkMg(input, drinks), label: input.value });
   }
   doses.sort((a, b) => a.timeH - b.timeH);
   // Your body comes from personal settings (settings.js), not this page.

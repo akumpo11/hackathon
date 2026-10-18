@@ -1,129 +1,203 @@
-// Calendar-style sleep input: one column per day, one row per half hour.
-// Press and drag over cells to mark sleep; drag over marked cells to erase.
+// Your sleep, one day at a time. Arrows (or a sideways swipe) move between days.
+// Each day has a night bar and an optional nap bar; you drag the ends of a bar to
+// change when it starts and ends, or drag the middle to slide the whole thing.
 // Time uses the model convention: hours since midnight at the start of today.
 
-const SLOT_H = 0.5;
-const SLOTS_PER_DAY = 24 / SLOT_H;
-const FIRST_DAY = -2;                 // columns run from two days ago ...
-const LAST_DAY = 2;                   // ... to two days ahead
-const DAYS = LAST_DAY - FIRST_DAY + 1;
-const NAP_MAX_H = 3;
+import { hoursToClock } from "./time.js";
 
-const slotOf = (day, row) => (day - FIRST_DAY) * SLOTS_PER_DAY + row;
-const hoursOf = (slot) => FIRST_DAY * 24 + slot * SLOT_H;
+const FIRST_DAY = -2;                 // two days ago ...
+const LAST_DAY = 1;                   // ... through tomorrow
+// Each bar is a window of hours into its day. The night runs from 6 PM to noon the
+// next day (36 = noon tomorrow), the nap window covers the afternoon.
+const NIGHT = { startH: 18, endH: 36, stepH: 0.25, minH: 1, ticks: [18, 21, 24, 27, 30, 33, 36] };
+const NAP = { startH: 11, endH: 19, stepH: 1 / 12, minH: 1 / 6, ticks: [11, 13, 15, 17, 19] };   // 5-minute steps, 10 minutes at least
+const DEFAULT_NAP = { bed: 14, wake: 14 + 1 / 3 };   // a new nap starts as 2:00 to 2:20 PM
+export const CALENDAR_END_H = (LAST_DAY + 1) * 24 + 12;   // noon after the last night: the last time this page covers
+
+const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+const dateOf = (day) => { const d = new Date(); d.setDate(d.getDate() + day); return d; };
+const dayLabel = (day) => ({ "-1": "Yesterday", 0: "Today", 1: "Tomorrow" })[day] ?? dateOf(day).toLocaleDateString(undefined, { weekday: "long" });
+const dateLabel = (day) => dateOf(day).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+const tickLabel = (h) => { const c = h % 24; return c === 0 ? "12a" : c === 12 ? "12p" : c < 12 ? `${c}a` : `${c - 12}p`; };
+// "8 h", "7 h 30 m" or "20 min", whichever reads best for the length.
+const lengthLabel = (h) => {
+  const mins = Math.round(h * 60);
+  if (mins < 60) return `${mins} min`;
+  return mins % 60 ? `${Math.floor(mins / 60)} h ${mins % 60} m` : `${mins / 60} h`;
+};
 
 export function initSleepCalendar(root, onChange = () => {}, usual = { bedtimeH: 23, wakeH: 7 }) {
-  const asleep = new Set();
-  const cells = [];
-  const SLOTS = DAYS * SLOTS_PER_DAY;
+  // One entry per day. Times are hours into that day (bedtime 23 = 11 PM, wake 31 =
+  // 7 AM the next morning), so one day's math doesn't depend on which day it is.
+  const nights = new Map();           // day -> { bed, wake }
+  const naps = new Map();             // day -> { bed, wake } or nothing
+  let shown = 0;                      // the day on screen
+  let event = null;                   // { startH, endH } shaded on the bars
 
-  // Fills every night with your usual sleep, so the grid starts out filled in.
-  // Night d starts on day d at bedtime (a bedtime before noon, like 1 AM, means
-  // after midnight) and lasts until wake time the next morning. Nights run from
-  // the one ending on the first morning to the one starting the day before the
-  // last, since the last night's morning is off the grid.
-  function fillUsual({ bedtimeH, wakeH }) {
-    asleep.clear();
+  // A bedtime before noon, like 1 AM, means after midnight.
+  function usualNight({ bedtimeH, wakeH }) {
     const bed = bedtimeH < 12 ? bedtimeH + 24 : bedtimeH;
-    const length = (wakeH - bedtimeH + 24) % 24;
-    for (let day = FIRST_DAY - 1; day < LAST_DAY; day++) {
-      const start = day * 24 + bed, end = start + length;
-      for (let slot = 0; slot < SLOTS; slot++) {
-        if (hoursOf(slot) >= start && hoursOf(slot) < end) asleep.add(slot);
-      }
-    }
+    return { bed, wake: bed + ((wakeH - bedtimeH + 24) % 24) };
+  }
+  function fillUsual(u) {
+    for (let d = FIRST_DAY; d <= LAST_DAY; d++) nights.set(d, { ...usualNight(u) });
   }
   fillUsual(usual);
 
-  // ---- build the grid
-  const grid = document.createElement("div");
-  grid.className = "cal";
-  grid.style.setProperty("--days", DAYS);
+  // ---- build the one card
+  const bar = (kind, name) => `
+    <div class="bar ${kind}" data-kind="${kind}">
+      <div class="bar-head">
+        <strong>${name}</strong>
+        <span class="bar-times"></span>
+        <span class="chip plain bar-len"></span>
+        ${kind === "nap" ? '<button type="button" class="link-btn bar-add">+ Add a nap</button><button type="button" class="bar-remove" aria-label="Remove the nap">×</button>' : ""}
+      </div>
+      <div class="bar-track" aria-label="${name}: drag the ends to change the start and end">
+        <div class="bar-event" hidden></div>
+        <div class="bar-span">
+          <span class="bar-handle" data-edge="bed" aria-hidden="true"></span>
+          <span class="bar-handle" data-edge="wake" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="bar-ticks">${(kind === "night" ? NIGHT : NAP).ticks.map((h) => `<span>${tickLabel(h)}</span>`).join("")}</div>
+    </div>`;
+  root.innerHTML = `
+    <div class="day-card">
+      <div class="day-nav">
+        <button type="button" class="day-arrow" data-dir="-1" aria-label="Previous day"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button>
+        <div class="day-name"><strong></strong><small></small></div>
+        <button type="button" class="day-arrow" data-dir="1" aria-label="Next day"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg></button>
+      </div>
+      <div class="day-body">${bar("night", "Night")}${bar("nap", "Nap")}</div>
+      <div class="day-dots">${Array.from({ length: LAST_DAY - FIRST_DAY + 1 }, () => "<span></span>").join("")}</div>
+    </div>`;
+  const card = root.querySelector(".day-card");
+  const body = root.querySelector(".day-body");
+  const bars = { night: root.querySelector(".bar.night"), nap: root.querySelector(".bar.nap") };
+  const limits = { night: NIGHT, nap: NAP };
+  const spanOf = (kind) => (kind === "night" ? nights : naps).get(shown);
 
-  const corner = document.createElement("div");
-  corner.className = "cal-corner";
-  grid.append(corner);
-  const today = new Date();
-  for (let day = FIRST_DAY; day <= LAST_DAY; day++) {
-    const d = new Date(today); d.setDate(d.getDate() + day);
-    const head = document.createElement("div");
-    head.className = "cal-head" + (day === 0 ? " today" : "");
-    head.innerHTML = `<small>${d.toLocaleDateString(undefined, { weekday: "short" })}</small><strong>${d.getDate()}</strong>`;
-    grid.append(head);
+  function paintBar(kind) {
+    const el = bars[kind], lim = limits[kind], span = spanOf(kind);
+    const pct = (h) => `${((h - lim.startH) / (lim.endH - lim.startH)) * 100}%`;
+    el.classList.toggle("empty", !span);   // an empty nap shows only its "Add a nap" line
+    el.querySelector(".bar-times").textContent = span ? `${hoursToClock(span.bed)} – ${hoursToClock(span.wake)}` : "";
+    el.querySelector(".bar-len").textContent = span ? lengthLabel(span.wake - span.bed) : "";
+    const pill = el.querySelector(".bar-span");
+    if (span) { pill.style.left = pct(span.bed); pill.style.width = pct(span.wake - span.bed + lim.startH); }
+    // The event, if it falls inside this bar's window.
+    const ev = el.querySelector(".bar-event");
+    const a = event ? clamp(event.startH - shown * 24, lim.startH, lim.endH) : 0;
+    const b = event ? clamp(event.endH - shown * 24, lim.startH, lim.endH) : 0;
+    ev.hidden = !(event && b > a);
+    if (!ev.hidden) { ev.style.left = pct(a); ev.style.width = pct(b - a + lim.startH); }
+    el.classList.toggle("clash", Boolean(span) && !ev.hidden && span.wake > a && span.bed < b);   // asleep during the event
   }
-
-  for (let row = 0; row < SLOTS_PER_DAY; row++) {
-    const label = document.createElement("div");
-    label.className = "cal-hour";
-    if (row % 6 === 0) {
-      const h = row * SLOT_H;
-      label.textContent = h === 0 ? "12a" : h === 12 ? "12p" : h < 12 ? `${h}a` : `${h - 12}p`;
-    }
-    grid.append(label);
-    for (let day = FIRST_DAY; day <= LAST_DAY; day++) {
-      const cell = document.createElement("div");
-      cell.className = "cal-cell" + (row % 2 === 0 ? " on-hour" : "");
-      cell.dataset.slot = slotOf(day, row);
-      cells[slotOf(day, row)] = cell;
-      grid.append(cell);
-    }
-  }
-  root.replaceChildren(grid);
 
   function paint() {
-    cells.forEach((c, i) => c.classList.toggle("sleep", asleep.has(i)));
+    root.querySelector(".day-name strong").textContent = dayLabel(shown);
+    root.querySelector(".day-name small").textContent = dateLabel(shown);
+    root.querySelectorAll(".day-arrow").forEach((b) => { b.disabled = shown + Number(b.dataset.dir) < FIRST_DAY || shown + Number(b.dataset.dir) > LAST_DAY; });
+    root.querySelectorAll(".day-dots span").forEach((dot, i) => dot.classList.toggle("on", i === shown - FIRST_DAY));
+    paintBar("night");
+    paintBar("nap");
   }
 
-  // ---- press and drag to paint
-  let mode = null;                    // "add" or "remove" for the current drag
-  const slotAt = (x, y) => {
-    const el = document.elementFromPoint(x, y);
-    return el?.classList.contains("cal-cell") ? Number(el.dataset.slot) : null;
-  };
-  const apply = (slot) => {
-    if (slot === null) return;
-    if (mode === "add") asleep.add(slot); else asleep.delete(slot);
-    cells[slot].classList.toggle("sleep", mode === "add");
-  };
-
-  grid.addEventListener("pointerdown", (e) => {
-    const slot = slotAt(e.clientX, e.clientY);
-    if (slot === null) return;
-    mode = asleep.has(slot) ? "remove" : "add";
-    grid.setPointerCapture(e.pointerId);
-    apply(slot);
+  // ---- switch days: arrows, or a sideways swipe anywhere on the card but the bars
+  function show(day, dir) {
+    if (day < FIRST_DAY || day > LAST_DAY) return;
+    shown = day;
+    paint();
+    body.classList.remove("from-left", "from-right");
+    void body.offsetWidth;   // restart the slide animation
+    body.classList.add(dir > 0 ? "from-right" : "from-left");
+  }
+  root.querySelectorAll(".day-arrow").forEach((b) => b.addEventListener("click", () => show(shown + Number(b.dataset.dir), Number(b.dataset.dir))));
+  let swipe = null;
+  card.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".bar-track, button")) return;
+    swipe = { x: e.clientX, y: e.clientY };
   });
-  grid.addEventListener("pointermove", (e) => {
-    if (mode) apply(slotAt(e.clientX, e.clientY));
+  card.addEventListener("pointerup", (e) => {
+    if (!swipe) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(shown - Math.sign(dx), -Math.sign(dx));
   });
-  const end = () => { if (mode) { mode = null; onChange(getBlocks()); } };
-  grid.addEventListener("pointerup", end);
-  grid.addEventListener("pointercancel", end);
+  card.addEventListener("pointercancel", () => { swipe = null; });
 
-  // ---- read the grid back as sleep blocks
+  // ---- drag a bar: the ends move its start or end, the middle slides the whole thing
+  body.addEventListener("pointerdown", (e) => {
+    const track = e.target.closest(".bar-track");
+    if (!track) return;
+    const kind = track.closest(".bar").dataset.kind, lim = limits[kind], span = spanOf(kind);
+    if (!span) return;
+    const rect = track.getBoundingClientRect();
+    const windowH = lim.endH - lim.startH;
+    const snap = (h) => Math.round(h / lim.stepH) * lim.stepH;
+    const hourAt = (x) => lim.startH + ((x - rect.left) / rect.width) * windowH;
+    const edge = e.target.closest(".bar-handle")?.dataset.edge;
+    const inSpan = Boolean(e.target.closest(".bar-span"));
+    // Tapping an empty part of the track moves the nearest end there.
+    const h0 = hourAt(e.clientX);
+    const grab = edge ?? (inSpan ? "move" : Math.abs(h0 - span.bed) < Math.abs(h0 - span.wake) ? "bed" : "wake");
+    const start = { x: e.clientX, bed: span.bed, wake: span.wake };
+    track.setPointerCapture(e.pointerId);
+    track.classList.add("dragging");
+
+    const move = (ev) => {
+      const h = snap(hourAt(ev.clientX));
+      if (grab === "bed") span.bed = clamp(h, lim.startH, span.wake - lim.minH);
+      else if (grab === "wake") span.wake = clamp(h, span.bed + lim.minH, lim.endH);
+      else {
+        const length = start.wake - start.bed;
+        const dh = snap(((ev.clientX - start.x) / rect.width) * windowH);
+        span.bed = clamp(start.bed + dh, lim.startH, lim.endH - length);
+        span.wake = span.bed + length;
+      }
+      paintBar(kind);
+    };
+    if (grab !== "move") move(e);
+    const end = () => {
+      track.classList.remove("dragging");
+      track.removeEventListener("pointermove", move);
+      track.removeEventListener("pointerup", end);
+      track.removeEventListener("pointercancel", end);
+      onChange(getBlocks());
+    };
+    track.addEventListener("pointermove", move);
+    track.addEventListener("pointerup", end);
+    track.addEventListener("pointercancel", end);
+  });
+
+  // ---- add or remove the day's nap
+  bars.nap.querySelector(".bar-add").addEventListener("click", () => {
+    naps.set(shown, { ...DEFAULT_NAP });
+    paintBar("nap");
+    onChange(getBlocks());
+  });
+  bars.nap.querySelector(".bar-remove").addEventListener("click", () => {
+    naps.delete(shown);
+    paintBar("nap");
+    onChange(getBlocks());
+  });
+
+  // ---- read everything back as sleep blocks for the model
   function getBlocks() {
-    const sorted = [...asleep].sort((a, b) => a - b);
     const blocks = [];
-    for (const s of sorted) {
-      const last = blocks.at(-1);
-      if (last && last.endSlot === s) last.endSlot = s + 1;   // touching cells merge, even across midnight
-      else blocks.push({ startSlot: s, endSlot: s + 1 });
-    }
-    return blocks.map((b) => {
-      const startH = hoursOf(b.startSlot), endH = hoursOf(b.endSlot);
-      return { startH, endH, isNap: endH - startH <= NAP_MAX_H };
-    });
+    for (const [d, s] of nights) blocks.push({ startH: d * 24 + s.bed, endH: d * 24 + s.wake, isNap: false });
+    for (const [d, s] of naps) blocks.push({ startH: d * 24 + s.bed, endH: d * 24 + s.wake, isNap: true });
+    return blocks.sort((a, b) => a.startH - b.startH);
   }
 
   // Shade the event so you can see where sleep sits relative to it.
   function setEvent(startH, endH) {
-    cells.forEach((c, i) => {
-      const t = hoursOf(i);
-      c.classList.toggle("event", t >= startH && t < endH);
-    });
+    event = { startH, endH };
+    paint();
   }
 
-  // Your usual sleep changed in settings: start the grid over from it.
+  // Your usual sleep changed in settings: start every night over from it.
   function setUsual(newUsual) {
     fillUsual(newUsual);
     paint();

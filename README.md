@@ -1,6 +1,8 @@
-# Caffeine Optimizer
+<img src="frontend/icons/logo.svg" alt="DeCaf logo: a coffee cup whose steam is a caffeine decay curve" width="96" align="left">
 
-MathHacks 2026. Tell it when your exam is, how you slept and how much coffee you usually drink. It solves a pharmacokinetic model of caffeine and tells you when to drink, how much, whether to nap, and whether to take a break from caffeine so it works again, without wrecking your sleep.
+# DeCaf
+
+DeCaf is a caffeine optimizer built at MathHacks 2026. Tell it when your exam is, how you slept and how much coffee you usually drink. It solves a pharmacokinetic model of caffeine and tells you when to drink, how much, whether to nap, and whether to take a break from caffeine so it works again, without wrecking your sleep.
 
 Everything is computed from formulas: no login, no database, and no data leaves your phone.
 

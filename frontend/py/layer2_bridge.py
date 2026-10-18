@@ -18,7 +18,7 @@ def compute(blocksJson, chronotypeShiftH, nowH):
     sleep = [SleepBlock(**b) for b in json.loads(blocksJson)]
     p = Profile(circadianPeakH=17 + chronotypeShiftH)
 
-    # Same five days as the calendar (two days ago to two days ahead), in quarter hours.
+    # Two days back to two days ahead, in quarter hours, which covers every night on the page.
     t = np.arange(-48, 72 + 1e-9, 0.25)
     return {
         "t": t.tolist(),

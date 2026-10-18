@@ -1,4 +1,4 @@
-// Layer 2 page: paint your sleep on the calendar, pick a body clock, and see
+// Layer 2 page: set your nights and naps, pick a body clock, and see
 // sleep pressure (S) and the circadian wave (C) over the five days.
 // The math runs in model/sleep.py (in the browser via Pyodide); this file only draws.
 
@@ -14,8 +14,10 @@ const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyV
 let compute = null;   // layer2_bridge.compute, once Python has loaded
 
 function draw(blocks) {
+  // Average hours a night, naps included, so the chip reads as "how much sleep am I getting".
+  const nights = blocks.filter((b) => !b.isNap).length || 1;
   const hours = blocks.reduce((sum, b) => sum + (b.endH - b.startH), 0);
-  $("sleepSummary").textContent = `${blocks.length} block${blocks.length === 1 ? "" : "s"}, ${hours.toFixed(1)} h`;
+  $("sleepSummary").textContent = `${(hours / nights).toFixed(1)} h a night`;
   // Tell later pages (layer 4) what your sleep and body clock are.
   // The body clock comes from personal settings (settings.js), not this page.
   const shiftH = shared.settings.chronotypeShiftH;
