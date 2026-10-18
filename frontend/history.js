@@ -4,7 +4,7 @@
 // the curves are recomputed from them by model/pk.py, like every other answer.
 
 const KEY = "caffeineHistory";
-const KEEP_DAYS = 7;        // earlier days shown; anything older is dropped
+export const KEEP_DAYS = 7;   // earlier days kept and shown; anything older is dropped
 
 // The date as "2026-10-17" in local time, so a day starts at your midnight, not UTC's.
 export function dateKey(date = new Date()) {
@@ -39,15 +39,34 @@ export function earlierDays(key) {
     .slice(0, KEEP_DAYS);
 }
 
-// "2026-10-16" -> "Yesterday" (the day before todayKey), or "Wed, Oct 14" for older days.
+// "2026-10-17" -> a Date at local midnight that day.
 const toDate = (key) => {
   const [y, m, d] = key.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
 
+// The date key `days` days after `key` (negative goes back). "2026-10-18", -1 -> "2026-10-17".
+export function shiftKey(key, days) {
+  const date = toDate(key);
+  date.setDate(date.getDate() + days);
+  return dateKey(date);
+}
+
+// "Today", "Yesterday", or "Wed, Oct 14" for older days.
 export function dayName(key, todayKey) {
-  const yesterday = toDate(todayKey);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (key === dateKey(yesterday)) return "Yesterday";
+  if (key === todayKey) return "Today";
+  if (key === shiftKey(todayKey, -1)) return "Yesterday";
+  return dateName(key);
+}
+
+// The day switcher's big name: "Today", "Yesterday", or the weekday ("Friday"), since
+// the date sits under it and the switcher only goes back a week.
+export function dayTitle(key, todayKey) {
+  if (key === todayKey || key === shiftKey(todayKey, -1)) return dayName(key, todayKey);
+  return toDate(key).toLocaleDateString(undefined, { weekday: "long" });
+}
+
+// "Sun, Oct 18", the date under the day name in the day switcher.
+export function dateName(key) {
   return toDate(key).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }

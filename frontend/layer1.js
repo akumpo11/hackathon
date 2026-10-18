@@ -6,7 +6,7 @@ import { areaChart } from "./charts.js";
 import { initDrinkPicker, drinkMg } from "./drinkpicker.js";
 import { loadPython, toObject } from "./python.js";
 import { publish, shared, onShared, perFrame, onWidthChange } from "./shared.js";
-import { dateKey, saveDay, loadDay, earlierDays, dayName } from "./history.js";
+import { dateKey, saveDay, loadDay, earlierDays, dayName, dayTitle, dateName, shiftKey, KEEP_DAYS } from "./history.js";
 
 const $ = (id) => document.getElementById(id);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -16,6 +16,8 @@ const START_DRINKS = [{ time: "08:00", drink: "drip coffee (8 oz)" }];
 let nextSlot = 0;          // each row gets a new number (time3, drink3), never reused after a remove
 let series = "bodyMg";     // which curve the chart shows: "bodyMg" or "conc"
 const todayKey = dateKey();   // fixed when the page opens, so drinks after midnight still count as tonight's
+let viewKey = todayKey;    // the day the page shows: today, or an earlier day from the switcher
+let viewBody = null;       // a past day's saved body (weight, half-life ...); null means use settings
 let pastDays = [];         // earlier days from history.js, each with its recomputed curve
 
 function readInputs(drinks) {
@@ -28,8 +30,9 @@ function readInputs(drinks) {
     return { timeH: clockToHours(el[`time${i}`].value), mg: drinkMg(input, drinks), label: input.value };
   });
   doses.sort((a, b) => a.timeH - b.timeH);
-  // Your body comes from personal settings (settings.js), not this page.
-  const s = shared.settings;
+  // Your body comes from personal settings (settings.js), not this page. An earlier
+  // day keeps the body saved with it, so its curve stays the one you saw that day.
+  const s = viewBody ?? shared.settings;
   return {
     doses, bedtimeH,
     weightKg: s.weightKg,
@@ -73,6 +76,9 @@ function newDrinkTime() {
 // (pk.py peakTimeH), so it counts down to a drink that's still climbing, or
 // else says when your last drink topped out.
 function peakTag(doses, peakMin) {
+  if (viewKey !== todayKey) {     // a past day is over, so only when the last drink peaked
+    return doses.length ? `Peaked at ${hoursToClock(doses[doses.length - 1].timeH + peakMin / 60)}` : "No drinks";
+  }
   const now = nowHours();
   const peakH = peakMin / 60;
   const taken = doses.filter((d) => d.timeH <= now);
@@ -96,8 +102,8 @@ function showOutputs(x, r) {
   $("pkMeter").style.width = `${Math.min(100, (r.bedtimeMg / meterMax) * 100)}%`;
   $("pkMeter").classList.toggle("bad", !ok);
   $("pkLimit").style.left = `${(r.limitMg / meterMax) * 100}%`;
-  $("pkSleepNote").textContent = ok
-    ? `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, under the ${r.limitMg} mg cutoff.`
+  $("pkSleepNote").textContent = !x.doses.length ? `No caffeine at ${hoursToClock(x.bedtimeH)}.`
+    : ok ? `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, under the ${r.limitMg} mg cutoff.`
     : `${Math.round(r.bedtimeMg)} mg left at ${hoursToClock(x.bedtimeH)}, over the ${r.limitMg} mg cutoff. Drink earlier or less.`;
 
   drawChart(x, r);
@@ -114,7 +120,7 @@ function drawChart(x, r) {
     markers: x.doses.map((d) => ({ x: d.timeH, label: `${d.mg} mg` })),
     peaks: x.doses.map((d) => d.timeH + r.peakMin / 60),     // every drink peaks the same time after it
     formatTick: (h) => hoursToClock(h).replace(":00", ""),
-    nowX: nowHours,
+    nowX: viewKey === todayKey ? nowHours : undefined,     // a past day has no "now" on it
     startX: x.doses.length ? x.doses[0].timeH + r.peakMin / 60 : r.t[0],
     onScrub: (i, atNow) => {
       $("pkReadout").textContent = series === "bodyMg" ? `${Math.round(ys[i])} mg` : `${ys[i].toFixed(2)} ${unit}`;
@@ -139,7 +145,7 @@ function drawHistory() {
     day.className = "history-day";
     day.innerHTML = `
       <div class="card-head">
-        <h3>${dayName(key, todayKey)}</h3>
+        <h3><button type="button" class="history-open" data-key="${key}">${dayName(key, todayKey)}</button></h3>
         <span class="chip ${ok ? "ok" : "bad"}">${Math.round(r.bedtimeMg)} mg at bedtime</span>
       </div>
       <p class="muted small">${x.doses.length} ${x.doses.length === 1 ? "drink" : "drinks"}, ${Math.round(totalMg)} mg in all.
@@ -172,48 +178,92 @@ export async function startLayer1() {
   onShared(() => {
     if (shared.settings.bedtime === seenBedtime) return;
     seenBedtime = shared.settings.bedtime;
-    form.elements.bedtime.value = seenBedtime;
+    if (viewKey === todayKey) form.elements.bedtime.value = seenBedtime;
   });
 
   const pyodide = await loadPython();
   const bridge = pyodide.pyimport("layer1_bridge");
   const drinks = toObject(bridge.drinkOptions());
 
-  // Earlier days: recompute each saved day's curve once. Those days are over, so their
-  // inputs (and so their curves) never change. Each uses the body saved with it.
-  pastDays = earlierDays(todayKey).map(([key, x]) => ({
-    key, x,
-    r: toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
-                               x.smoker, x.oralContraceptives, x.bedtimeH)),
-  }));
+  // Earlier days: recompute each saved day's curve. Each uses the body saved with it.
+  // Those days only change if you open one and edit it, so this runs on each day switch,
+  // not on every edit.
+  const loadHistory = () => {
+    pastDays = earlierDays(todayKey).map(([key, x]) => ({
+      key, x,
+      r: toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
+                                 x.smoker, x.oralContraceptives, x.bedtimeH)),
+    }));
+  };
+  loadHistory();
 
   let last = null;
   const update = () => {
     const x = readInputs(drinks);
-    publish("layer1", { doses: x.doses, weightKg: x.weightKg, halfLifeH: x.halfLifeH,
-                        smoker: x.smoker, oralContraceptives: x.oralContraceptives });
+    // Only today's drinks feed the other pages; a past day is just for looking back.
+    if (viewKey === todayKey) {
+      publish("layer1", { doses: x.doses, weightKg: x.weightKg, halfLifeH: x.halfLifeH,
+                          smoker: x.smoker, oralContraceptives: x.oralContraceptives });
+    }
     const r = toObject(bridge.compute(JSON.stringify(x.doses), x.weightKg, x.halfLifeH,
                                       x.smoker, x.oralContraceptives, x.bedtimeH));
     last = { x, r };
-    saveDay(todayKey, x);
+    // Save today always. Save a past day only once it has something in it, so just
+    // looking at an empty day doesn't add it to the log.
+    if (viewKey === todayKey || x.doses.length || loadDay(viewKey)) saveDay(viewKey, x);
     showOutputs(x, r);
   };
   const showPick = initDrinkPicker(form, drinks, update);     // the drink list comes from model/params.py, so it waits for Python
   const rows = $("drinkRows");
-  const addRow = (time, drink) => {
-    const row = drinkRow(time, drink);
+  const addRow = (time, drink, customMg) => {
+    const row = drinkRow(time, drink, customMg);
     rows.append(row);
     showPick(row.querySelector(".drink-pick"));
     return row;
   };
-  // Today's drinks pick up where you left off; a new day starts from START_DRINKS.
-  const saved = loadDay(todayKey);
-  if (saved) {
-    saved.doses.forEach((d) => addRow(toTimeInput(d.timeH), d.label, d.label in drinks ? undefined : d.mg));
-    form.elements.bedtime.value = toTimeInput(saved.bedtimeH);
-  } else {
-    START_DRINKS.forEach((d) => addRow(d.time, d.drink));
-  }
+  // Fill the drink rows and bedtime for the day on screen. A saved day picks up where
+  // you left off; a new today starts from START_DRINKS, an unsaved past day empty.
+  const fillDay = () => {
+    rows.replaceChildren();
+    const saved = loadDay(viewKey);
+    const isToday = viewKey === todayKey;
+    viewBody = !isToday && saved ? saved : null;
+    if (saved) {
+      saved.doses.forEach((d) => addRow(toTimeInput(d.timeH), d.label, d.label in drinks ? undefined : d.mg));
+      form.elements.bedtime.value = toTimeInput(saved.bedtimeH);
+    } else {
+      if (isToday) START_DRINKS.forEach((d) => addRow(d.time, d.drink));
+      form.elements.bedtime.value = shared.settings.bedtime;
+    }
+    const name = dayTitle(viewKey, todayKey);
+    $("pkDayName").textContent = name;
+    $("pkDayDate").textContent = dateName(viewKey);
+    $("pkDrinksTitle").textContent = isToday ? "Your drinks today"
+      : name === "Yesterday" ? "Your drinks yesterday" : `Your drinks on ${name}`;
+    $("pkBedtimeLabel").textContent = isToday ? "Bedtime tonight" : "Bedtime that night";
+    const back = $("pkDayNav").querySelector('[data-dir="-1"]');
+    back.disabled = viewKey <= shiftKey(todayKey, -KEEP_DAYS);   // history.js keeps a week
+    $("pkDayNav").querySelector('[data-dir="1"]').disabled = isToday;
+  };
+  // Switch the page to another day: the chart, drinks and sleep check all follow.
+  const showDay = (key) => {
+    viewKey = key;
+    fillDay();
+    update();
+    loadHistory();      // a past day you just edited shows its new curve below
+    drawHistory();
+  };
+  fillDay();
+  $("pkDayNav").addEventListener("click", (e) => {
+    const arrow = e.target.closest(".day-arrow");
+    if (arrow && !arrow.disabled) showDay(shiftKey(viewKey, Number(arrow.dataset.dir)));
+  });
+  $("pkHistory").addEventListener("click", (e) => {
+    const open = e.target.closest(".history-open");
+    if (!open) return;
+    showDay(open.dataset.key);
+    open.closest(".page").scrollTo({ top: 0, behavior: "smooth" });
+  });
   $("addDrink").addEventListener("click", () => {
     addRow(newDrinkTime(), "drip coffee (8 oz)").querySelector(".drink-pick").focus();
     update();

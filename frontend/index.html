@@ -34,6 +34,12 @@
       </header>
 
       <article class="card">
+        <!-- Which day the whole page shows: today, or one of the last week's (history.js). -->
+        <div class="day-nav pk-day-nav" id="pkDayNav">
+          <button type="button" class="day-arrow" data-dir="-1" aria-label="Previous day"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></button>
+          <div class="day-name" aria-live="polite"><strong id="pkDayName">Today</strong><small id="pkDayDate"></small></div>
+          <button type="button" class="day-arrow" data-dir="1" aria-label="Next day"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg></button>
+        </div>
         <div class="card-head">
           <h2>Caffeine over the day <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPk" aria-label="About this chart"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <div class="toggle" id="pkToggle">
@@ -53,13 +59,13 @@
 
       <form id="layer1Inputs">
         <article class="card">
-          <h2>Your drinks today <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoDrinks" aria-label="About your drinks"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
+          <h2><span id="pkDrinksTitle">Your drinks today</span> <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoDrinks" aria-label="About your drinks"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
           <p class="info-pop" id="infoDrinks" hidden>Tap a drink to change it, or pick "Custom" for a drink that isn't listed. Add a row for every drink you have, and tap × to remove one.</p>
           <div class="inputs">
             <div id="drinkRows"></div>
             <button type="button" class="link-btn add-drink" id="addDrink">+ Add a drink</button>
             <div class="row drink-row">
-              <label class="field">Bedtime tonight<input type="time" name="bedtime" value="23:00"></label>
+              <label class="field"><span id="pkBedtimeLabel">Bedtime tonight</span><input type="time" name="bedtime" value="23:00"></label>
             </div>
           </div>
         </article>
@@ -84,7 +90,7 @@
 
       <article class="card">
         <h2>Previous days <button type="button" class="info-btn" aria-expanded="false" aria-controls="infoPkHistory" aria-label="About previous days"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 7.5v.01" /></svg></button></h2>
-        <p class="info-pop" id="infoPkHistory" hidden>Each day's drinks are saved on this device, and the last week shows here, newest first. Drag along a curve to read any time.</p>
+        <p class="info-pop" id="infoPkHistory" hidden>Each day's drinks are saved on this device, and the last week shows here, newest first. Drag along a curve to read any time, or tap a day to open it above.</p>
         <div id="pkHistory"></div>
       </article>
     </section>

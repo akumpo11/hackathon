@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+html,body{background:transparent;margin:0}*{box-sizing:border-box}
+#decaf-concept{--dc-paper:#f7f3ed;--dc-ink:#2a211b;--dc-muted:#706359;--dc-rule:#ded4c7;--dc-accent:#88532c;color:var(--dc-ink);font:15px/1.5 system-ui,sans-serif}
+#decaf-concept .caption{color:var(--muted-foreground);font:13px/1.5 system-ui,sans-serif;margin:0 0 12px}
+#decaf-concept .surface{background:var(--dc-paper);padding:24px;border-radius:var(--radius,12px)}
+#decaf-concept .brandline{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--dc-rule);padding-bottom:14px}
+#decaf-concept .wordmark{font-size:19px;font-weight:750}
+#decaf-concept .kicker{color:var(--dc-muted);font-size:13px}
+#decaf-concept h2{font-size:30px;letter-spacing:-.7px;line-height:1.15;margin:22px 0 8px}
+#decaf-concept p{margin:0}
+#decaf-concept .event{color:var(--dc-muted)}
+#decaf-concept .schedule{margin:24px 0 20px;display:grid;grid-template-columns:90px 1fr;gap:10px 20px;align-items:baseline}
+#decaf-concept .time{font-weight:650;color:var(--dc-accent);font-variant-numeric:tabular-nums}
+#decaf-concept .dose{font-size:24px;font-weight:650;letter-spacing:-.4px}
+#decaf-concept .sub{font-size:13px;color:var(--dc-muted)}
+#decaf-concept .bed{padding:14px 0;border-top:1px solid var(--dc-rule);border-bottom:1px solid var(--dc-rule)}
+#decaf-concept details{margin-top:16px}#decaf-concept summary{color:var(--dc-accent);font-weight:600}
+#decaf-concept details p{margin-top:12px}
+@media(max-width:400px){#decaf-concept .surface{padding:18px}#decaf-concept .schedule{grid-template-columns:78px 1fr;gap:10px}#decaf-concept h2{font-size:27px}}
+</style></head><body><div id="decaf-concept"><p class="caption">Proposed Plan hierarchy · illustrative layout using the current app’s sample output</p><section class="surface" aria-label="Proposed DeCaf plan"><div class="brandline"><span class="wordmark">DeCaf</span><span class="kicker">Your plan</span></div><h2>For your 9 AM event</h2><p class="event">Mon, Oct 19 · Event 9–11 AM</p><div class="schedule"><span class="time">8:30 AM</span><div><p class="dose">150 mg caffeine</p><p class="sub">About 1.5 cups of drip coffee</p></div><span class="time">9:00 AM</span><div>Your event begins</div></div><div class="bed"><p>Estimated at bedtime: <strong>22 mg</strong></p><p class="sub">Below the model’s 50 mg threshold.</p></div><details><summary>Why this timing?</summary><p>The model predicts an event alertness score of 7.9/10, compared with 6.4/10 without the added dose.</p><p class="sub">A model estimate, not a measurement of how you will feel.</p></details></section></div></body></html>
