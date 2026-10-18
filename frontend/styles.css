@@ -269,26 +269,29 @@ button { cursor: pointer; border: 0; background: none; }
 .btn.ghost { background: var(--canvas); color: var(--ink); }
 .btn.wide { width: 100%; margin-top: 16px; padding: 15px; background: var(--accent); }
 
-/* ---------- Bottom slider (tab bar) ---------- */
+/* ---------- Bottom slider (tab bar): floating, with a thin accent line over the page you're on ---------- */
 .tabbar {
   position: absolute; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom));
   height: 64px; display: grid; grid-template-columns: repeat(6, 1fr);
-  background: var(--ink); border-radius: 999px; padding: 6px; z-index: 5;
+  background: var(--ink); border-radius: 22px; padding: 0 6px; z-index: 5; overflow: hidden;
+  /* Accent pulled toward the bar's text color, so it stays readable on the dark bar and on night's light bar. */
+  --tab-on: color-mix(in srgb, var(--accent) 60%, var(--on-ink));
 }
+/* The pill spans one tab and slides with the pager (app.js); the line it draws is inset from the tab's edges. */
 .tab-pill {
-  position: absolute; top: 6px; bottom: 6px; left: 6px;
-  width: calc((100% - 12px) / 6); border-radius: 999px; background: var(--accent);
-  will-change: transform;
+  position: absolute; top: 0; left: 6px; height: 2px;
+  width: calc((100% - 12px) / 6); will-change: transform;
 }
+.tab-pill::before { content: ""; position: absolute; inset: 0 10px; border-radius: 0 0 2px 2px; background: var(--tab-on); }
 .tab {
-  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  color: color-mix(in srgb, var(--on-ink) 60%, transparent); border-radius: 999px; min-width: 0;
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  color: color-mix(in srgb, var(--on-ink) 55%, transparent); min-width: 0;
   padding: 0 2px;                                                   /* six tabs: "Tolerance" only just fits */
-  font-size: 10px; font-weight: 700; letter-spacing: 0.01em;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
 }
 .tab svg { width: 22px; height: 22px; }
 .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tab.on { color: var(--on-accent); }
+.tab.on { color: var(--tab-on); font-weight: 700; }
 
 /* ---------- Bottom sheet for inputs ---------- */
 .scrim { position: absolute; inset: 0; background: var(--scrim); z-index: 9; }
